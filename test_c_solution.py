@@ -130,8 +130,9 @@ def run_all_tests(tolerance=1e-2):
     return passed == total
 
 def main():
-    # Change to the correct directory
-    os.chdir("d:/VSCode/LunaticProblems/icpc2012-wf-j")
+    # Change to the script's directory (relative path handling)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
     
     # Compile solution
     if not compile_c_solution():

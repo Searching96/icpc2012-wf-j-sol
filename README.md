@@ -53,10 +53,20 @@ g++ -o main main.cpp -std=c++17
 python test_cpp_solution.py
 ```
 
+### Test C Solution
+```bash
+python test_c_solution.py
+```
+
 ### Generate Readable Assembly
 ```bash
 python create_ultimate_readable_asm.py
 ```
+
+### Notes
+- All scripts use relative paths and work from any directory
+- No need to change directories manually
+- Scripts automatically detect their location and work with relative file paths
 
 ## Algorithm Overview
 1. Convert latitude/longitude coordinates to 3D Cartesian coordinates

@@ -364,8 +364,9 @@ calculate_great_circle_distance:
     print("✅ Created assembly_guide.md")
 
 def main():
-    # Change to the correct directory
-    os.chdir("d:/VSCode/LunaticProblems/icpc2012-wf-j")
+    # Change to the script's directory (relative path handling)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
     
     print("🔧 Generating readable assembly files from C++ code...")
     print("This will create several versions with different readability techniques.")
