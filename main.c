@@ -4,7 +4,7 @@
 #include <float.h>
 #include <string.h>
 #define MAXN 25
-#define M_PI 3.14159265358979323846
+#define PI 3.14159265358979323846
 #define MAXV 700 // At most N + 2*(N choose 2) <= 25 + 600 = 625 nodes
 #define INF 1e100
 static const double EARTH_R = 6370.0;
@@ -48,8 +48,8 @@ static void normalize(Vec *v){
 }
 // convert (lon,lat) degrees to unit sphere vector
 static void sph2vec(double lon_deg,double lat_deg, Vec *v){
-    double lon = lon_deg*M_PI/180.0;
-    double lat = lat_deg*M_PI/180.0;
+    double lon = lon_deg*PI/180.0;
+    double lat = lat_deg*PI/180.0;
     double cl = cos(lat), sl = sin(lat);
     v->x = cl * cos(lon);
     v->y = cl * sin(lon);
@@ -161,10 +161,10 @@ int main(){
                 double t1 = phi - delta;
                 double t2 = phi + delta;
                 // normalize into [0,2π)
-                while(t1<0) t1 += 2*M_PI;
-                while(t1>2*M_PI) t1 -= 2*M_PI;
-                while(t2<0) t2 += 2*M_PI;
-                while(t2>2*M_PI) t2 -= 2*M_PI;
+                while(t1<0) t1 += 2*PI;
+                while(t1>2*PI) t1 -= 2*PI;
+                while(t2<0) t2 += 2*PI;
+                while(t2>2*PI) t2 -= 2*PI;
                 // intersect [t1,t2] with [0,θ_ab]
                 // but θ_ab <= π so at most wrap once
                 if(t1 <= t2){

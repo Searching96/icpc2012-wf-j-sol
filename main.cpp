@@ -9,10 +9,10 @@
 
 using namespace std;
 
-const long double R_earth = 6370.0;
-const long double EPS = 1e-9;
+const long double R_EARTH = 6370.0L;
+const long double EPS = 1e-9L;
 const long double INF = numeric_limits<long double>::infinity();
-const long double M_PI = 3.14159265358979323846L;
+const long double PI = 3.14159265358979323846L;
 
 struct Point {
     long double x, y, z;
@@ -37,11 +37,11 @@ Point operator/(const Point& a, long double s) { return {a.x / s, a.y / s, a.z /
 
 // Convert degrees lat/lon to 3D Cartesian coordinates on sphere
 Point lat_lon_to_xyz(long double lat_deg, long double lon_deg) {
-    long double lat_rad = lat_deg * M_PI / 180.0;
-    long double lon_rad = lon_deg * M_PI / 180.0;
-    long double x = R_earth * cos(lat_rad) * cos(lon_rad);
-    long double y = R_earth * cos(lat_rad) * sin(lon_rad);
-    long double z = R_earth * sin(lat_rad);
+    long double lat_rad = lat_deg * PI / 180.0;
+    long double lon_rad = lon_deg * PI / 180.0;
+    long double x = R_EARTH * cos(lat_rad) * cos(lon_rad);
+    long double y = R_EARTH * cos(lat_rad) * sin(lon_rad);
+    long double z = R_EARTH * sin(lat_rad);
     return {x, y, z};
 }
 
@@ -76,7 +76,7 @@ long double dist_xyz(const Point& p1, const Point& p2) {
     long double d = dot(u1, u2);
     d = max((long double)-1.0, min((long double)1.0, d)); // Clamp
     long double angle_rad = acos(d);
-    return angle_rad * R_earth;
+    return angle_rad * R_EARTH;
 }
 
 // Get point on great circle through U and V at angular distance `angle_from_u` from U
@@ -117,7 +117,7 @@ long double get_arc_parameter(const Point& u, const Point& v, const Point& p) {
 vector<Point> get_small_circle_intersections(const Point& center1, const Point& center2, long double R_sphere) {
     Point c1_norm = normalize(center1);
     Point c2_norm = normalize(center2);
-    long double r_ang = R_sphere / R_earth;
+    long double r_ang = R_sphere / R_EARTH;
     long double d_ang = acos(max((long double)-1.0, min((long double)1.0, dot(c1_norm, c2_norm)))); // Angular distance between centers
 
     vector<Point> intersections;
@@ -125,18 +125,18 @@ vector<Point> get_small_circle_intersections(const Point& center1, const Point& 
     if (d_ang > 2 * r_ang + EPS) { // Spheres are too far apart
         return intersections;
     }
-     if (d_ang < EPS) { // Centers are the same
-         return intersections; // Intersection is the circle itself, not useful graph vertices
-     }
+    if (d_ang < EPS) { // Centers are the same
+        return intersections; // Intersection is the circle itself, not useful graph vertices
+    }
 
 
     // Angle beta from the midpoint M of C1-C2 arc to intersection point P along the equidistant great circle
     // cos(r_ang) = cos(d_ang/2) * cos(beta) => cos(beta) = cos(r_ang) / cos(d_ang/2)
     long double cos_beta_arg = cos(r_ang) / cos(d_ang / 2.0);
     if (cos_beta_arg > 1.0 + EPS || cos_beta_arg < -1.0 - EPS) {
-         // This might happen due to precision if d_ang is very close to 2*r_ang (tangent case)
-         // Handle tangent case separately? For simplicity, clamp and continue.
-         cos_beta_arg = max((long double)-1.0, min((long double)1.0, cos_beta_arg));
+        // This might happen due to precision if d_ang is very close to 2*r_ang (tangent case)
+        // Handle tangent case separately? For simplicity, clamp and continue.
+        cos_beta_arg = max((long double)-1.0, min((long double)1.0, cos_beta_arg));
     }
     long double beta = acos(cos_beta_arg);
 
@@ -151,9 +151,9 @@ vector<Point> get_small_circle_intersections(const Point& center1, const Point& 
     Point p1_norm = m_norm * cos(beta) + ortho_m_norm * sin(beta);
     Point p2_norm = m_norm * cos(beta) - ortho_m_norm * sin(beta);
 
-    intersections.push_back({p1_norm.x * R_earth, p1_norm.y * R_earth, p1_norm.z * R_earth});
+    intersections.push_back({p1_norm.x * R_EARTH, p1_norm.y * R_EARTH, p1_norm.z * R_EARTH});
     if (beta > EPS) { // Avoid adding duplicate point if tangent (beta=0)
-         intersections.push_back({p2_norm.x * R_earth, p2_norm.y * R_earth, p2_norm.z * R_earth});
+        intersections.push_back({p2_norm.x * R_EARTH, p2_norm.y * R_EARTH, p2_norm.z * R_EARTH});
     }
 
     return intersections;
@@ -162,15 +162,15 @@ vector<Point> get_small_circle_intersections(const Point& center1, const Point& 
 
 // Get parameters [t_start, t_end] on arc U-V (parameterized 0 to 1 by distance) that are inside R-sphere of center K
 vector<pair<long double, long double>> get_covered_intervals(const Point& u, const Point& v, const Point& k_center, long double R_sphere) {
-    long double r_ang = R_sphere / R_earth;
+    long double r_ang = R_sphere / R_EARTH;
     Point u_norm = normalize(u);
     Point v_norm = normalize(v);
     Point k_norm = normalize(k_center);
     long double angle_uv = acos(max((long double)-1.0, min((long double)1.0, dot(u_norm, v_norm))));
     if (angle_uv < EPS) { // U and V are the same or very close
-         // If U is inside R-sphere of K, the "arc" (point) is covered.
-         if (dist_xyz(u, k_center) <= R_sphere + EPS) return {{0.0, 1.0}};
-         else return {};
+        // If U is inside R-sphere of K, the "arc" (point) is covered.
+        if (dist_xyz(u, k_center) <= R_sphere + EPS) return {{0.0, 1.0}};
+        else return {};
     }
 
     // Great circle through U and V has normal cross(u_norm, v_norm)
@@ -196,26 +196,26 @@ vector<pair<long double, long double>> get_covered_intervals(const Point& u, con
             // cos(r_ang) = cos(d_k_to_plane_ang) * cos(alpha)
             long double cos_alpha_arg = cos(r_ang) / cos(d_k_to_plane_ang);
             if (cos_alpha_arg >= -1.0 - EPS && cos_alpha_arg <= 1.0 + EPS) {
-                 alpha = acos(max((long double)-1.0, min((long double)1.0, cos_alpha_arg)));
+                alpha = acos(max((long double)-1.0, min((long double)1.0, cos_alpha_arg)));
 
-                 // Vector in great circle plane orthogonal to k_proj_norm
-                 Point ortho_k_proj_norm = normalize(cross(gc_normal, k_proj_norm));
+                // Vector in great circle plane orthogonal to k_proj_norm
+                Point ortho_k_proj_norm = normalize(cross(gc_normal, k_proj_norm));
 
-                 // The two intersection points on the great circle
-                 Point p1_norm_gc = k_proj_norm * cos(alpha) + ortho_k_proj_norm * sin(alpha);
-                 Point p2_norm_gc = k_proj_norm * cos(alpha) - ortho_k_proj_norm * sin(alpha);
+                // The two intersection points on the great circle
+                Point p1_norm_gc = k_proj_norm * cos(alpha) + ortho_k_proj_norm * sin(alpha);
+                Point p2_norm_gc = k_proj_norm * cos(alpha) - ortho_k_proj_norm * sin(alpha);
 
-                 Point p1_gc = {p1_norm_gc.x * R_earth, p1_norm_gc.y * R_earth, p1_norm_gc.z * R_earth};
-                 Point p2_gc = {p2_norm_gc.x * R_earth, p2_norm_gc.y * R_earth, p2_norm_gc.z * R_earth};
+                Point p1_gc = {p1_norm_gc.x * R_EARTH, p1_norm_gc.y * R_EARTH, p1_norm_gc.z * R_EARTH};
+                Point p2_gc = {p2_norm_gc.x * R_EARTH, p2_norm_gc.y * R_EARTH, p2_norm_gc.z * R_EARTH};
 
 
-                 // Check if these points lie on the arc U-V and add their parameters
-                 if (is_on_arc(u, v, p1_gc)) {
-                      critical_params.push_back(get_arc_parameter(u, v, p1_gc));
-                 }
-                 if (alpha > EPS && is_on_arc(u, v, p2_gc)) { // Avoid adding duplicate point if tangent
-                      critical_params.push_back(get_arc_parameter(u, v, p2_gc));
-                 }
+                // Check if these points lie on the arc U-V and add their parameters
+                if (is_on_arc(u, v, p1_gc)) {
+                     critical_params.push_back(get_arc_parameter(u, v, p1_gc));
+                }
+                if (alpha > EPS && is_on_arc(u, v, p2_gc)) { // Avoid adding duplicate point if tangent
+                     critical_params.push_back(get_arc_parameter(u, v, p2_gc));
+                }
             } else {
                 // No intersection between the great circle and the small circle boundary.
                 // The arc is either entirely inside or entirely outside the R-sphere of K.
@@ -232,15 +232,15 @@ vector<pair<long double, long double>> get_covered_intervals(const Point& u, con
             }
         }
     } else {
-         // No intersection between great circle and small circle boundary.
-         // Arc is either entirely inside or entirely outside. Check midpoint.
-         long double mid_t_angle = angle_uv / 2.0;
-         Point p_mid = point_at_angle_on_great_circle(u, v, mid_t_angle);
-         if (dist_xyz(p_mid, k_center) <= R_sphere + EPS) {
-             return {{0.0, 1.0}};
-         } else {
-             return {};
-         }
+        // No intersection between great circle and small circle boundary.
+        // Arc is either entirely inside or entirely outside. Check midpoint.
+        long double mid_t_angle = angle_uv / 2.0;
+        Point p_mid = point_at_angle_on_great_circle(u, v, mid_t_angle);
+        if (dist_xyz(p_mid, k_center) <= R_sphere + EPS) {
+            return {{0.0, 1.0}};
+        } else {
+            return {};
+        }
     }
 
 
@@ -254,13 +254,13 @@ vector<pair<long double, long double>> get_covered_intervals(const Point& u, con
         if (t_end - t_start < EPS) continue;
 
         long double t_mid = (t_start + t_end) / 2.0;
-         // Get the point on the arc at t_mid parameter (based on distance parameter)
-         Point p_mid = point_at_angle_on_great_circle(u, v, t_mid * angle_uv);
+        // Get the point on the arc at t_mid parameter (based on distance parameter)
+        Point p_mid = point_at_angle_on_great_circle(u, v, t_mid * angle_uv);
 
-         // Check if the midpoint is inside the R-sphere of K
-         if (dist_xyz(p_mid, k_center) <= R_sphere + EPS) {
-              intervals.push_back({t_start, t_end});
-         }
+        // Check if the midpoint is inside the R-sphere of K
+        if (dist_xyz(p_mid, k_center) <= R_sphere + EPS) {
+            intervals.push_back({t_start, t_end});
+        }
     }
 
     return intervals;
@@ -301,12 +301,12 @@ bool is_arc_safe(const Point& u, const Point& v, const vector<Point>& airports, 
     // Check if the interval [0, 1] is fully covered
     if (merged.empty()) return false;
 
-     long double current_t = 0.0;
-     for(const auto& interval : merged) {
-         if (interval.first > current_t + EPS) return false; // Gap
-         current_t = max(current_t, interval.second);
-     }
-     if (current_t < 1.0 - EPS) return false; // Does not reach the end
+    long double current_t = 0.0;
+    for(const auto& interval : merged) {
+        if (interval.first > current_t + EPS) return false; // Gap
+        current_t = max(current_t, interval.second);
+    }
+    if (current_t < 1.0 - EPS) return false; // Does not reach the end
 
     return true;
 }
@@ -368,7 +368,7 @@ int main() {
                 bool safe = false;
                 if (d_ij < EPS) { // Same point
                     safe = true;
-                } else if (abs(d_ij - R_earth * M_PI) < EPS) { // Antipodal points
+                } else if (abs(d_ij - R_EARTH * PI) < EPS) { // Antipodal points
                     // Check if antipodal arc is covered - this needs separate logic or is impossible?
                     // Union of spheres condition. If the whole sphere is covered, yes.
                     // Check if midpoint of ANY airport-antipodal airport arc is within R of ANY airport?
@@ -426,7 +426,7 @@ int main() {
             for (int k = 0; k < N; ++k) {
                 for (int i = 0; i < N; ++i) {
                     for (int j = 0; j < N; ++j) {
-                         if (current_adj_refuel[i][k] != INF && current_adj_refuel[k][j] != INF) {
+                        if (current_adj_refuel[i][k] != INF && current_adj_refuel[k][j] != INF) {
                              current_adj_refuel[i][j] = min(current_adj_refuel[i][j], current_adj_refuel[i][k] + current_adj_refuel[k][j]);
                         }
                     }
