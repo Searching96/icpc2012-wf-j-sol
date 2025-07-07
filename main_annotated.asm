@@ -948,20 +948,210 @@ L970:
 
 ; INTERSECTION CALCULATION LOOPS: for (int i = 0; i < N; ++i) for (int j = i + 1; j < N; ++j)
 L1234:
-	; C++ EQUIVALENT: get_small_circle_intersections(airports_xyz[i], airports_xyz[j], R);
-	; This implements the nested loop to find all R-sphere intersection points
-	movl	-168(%ebp), %edi  ; Load sizeof(Point)
-	addl	$1, %eax          ; Increment i
-	; ... (complex intersection calculations continue)
+	; NESTED LOOP: Find all R-sphere intersection points between airport pairs
+	; C++ EQUIVALENT: for (int i = 0; i < N; i++) for (int j = i+1; j < N; j++) {
+	;                   vector<Point> intersections = get_small_circle_intersections(airports_xyz[i], airports_xyz[j], R);
+	;                   for (auto& p : intersections) auxiliary_vertices.insert(p);
+	;                 }
 	
-	; The algorithm continues with:
-	; 1. Building auxiliary graph with safe arcs
-	; 2. Floyd-Warshall shortest path computation
-	; 3. Query processing for different fuel capacities
-	; 4. Output generation
+	movl	-168(%ebp), %edi  ; Load current offset for airports_xyz[i] (size * i)
+	addl	$1, %eax          ; Increment inner loop counter (j)
+	cmpl	%ebx, %eax        ; Compare j with N
+	movl	%eax, -164(%ebp)  ; Store j back to memory
+	movl	%eax, -156(%ebp)  ; Store j in another temporary
+	leal	-36(%edi), %esi   ; Calculate offset for airports_xyz[j] (edi - 36)
+	movl	%esi, -160(%ebp)  ; Store j offset
+	jge	L976              ; If j >= N, exit inner loop
 	
-	; Jump back to main input loop
-	jmp	L1101             ; Continue with next test case
+	.p2align 4,,10        ; Align for performance
+L977:
+	; CALL: get_small_circle_intersections(airports_xyz[i], airports_xyz[j], R)
+	; This computes intersection points of two R-spheres centered at airports i and j
+	fldt	-136(%ebp)        ; Load long double R (fuel range parameter)
+	movl	-100(%ebp), %eax  ; Load base address of airports_xyz array
+	leal	(%eax,%edi), %edx ; Calculate &airports_xyz[i] = base + i*sizeof(Point)
+	addl	-160(%ebp), %eax  ; Calculate &airports_xyz[j] = base + j*sizeof(Point)
+	movl	%edx, 8(%esp)     ; Push &airports_xyz[i] as arg2
+	movl	%eax, 4(%esp)     ; Push &airports_xyz[j] as arg1
+	leal	-56(%ebp), %eax   ; Load address for return vector<Point>
+	movl	%eax, (%esp)      ; Push return vector address as arg0
+	fstpt	12(%esp)          ; Push long double R as arg3
+	call	__Z30get_small_circle_intersectionsRK5PointS1_e
+	
+	; PROCESS RETURNED INTERSECTIONS: Insert each intersection point into auxiliary_vertices set
+	movl	-56(%ebp), %ebx   ; Load vector.begin() pointer
+	movl	-52(%ebp), %esi   ; Load vector.end() pointer
+	cmpl	%esi, %ebx        ; Compare begin vs end
+	je	L973              ; If empty vector, skip insertion loop
+	
+	.p2align 4,,10        ; Align for performance
+L974:
+	; INSERT INTO SET: auxiliary_vertices.insert(*it)
+	; This uses std::set<Point>::insert() to add each intersection point
+	leal	-88(%ebp), %ecx   ; Load address of auxiliary_vertices set
+	movl	%ebx, (%esp)      ; Push current Point* as argument
+	addl	$36, %ebx         ; Advance to next Point (sizeof(Point) = 36)
+	call	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE16_M_insert_uniqueIRKS0_EESt4pairISt17_Rb_tree_iteratorIS0_EbEOT_
+	subl	$4, %esp          ; Adjust stack (calling convention)
+	cmpl	%ebx, %esi        ; Check if we've processed all intersections
+	jne	L974              ; Continue if more intersections to process
+	
+	movl	-56(%ebp), %esi   ; Reload vector begin pointer
+L973:
+	; CLEANUP: Delete temporary vector storage
+	testl	%esi, %esi        ; Check if vector data needs cleanup
+	je	L975              ; Skip if no cleanup needed
+	movl	%esi, (%esp)      ; Push vector data pointer
+	call	__ZdlPv           ; Call delete[] to free vector memory
+	
+L975:
+	; INNER LOOP INCREMENT: j++
+	addl	$1, -156(%ebp)    ; Increment j
+	movl	-152(%ebp), %ebx  ; Reload N
+	addl	$36, %edi         ; Advance to next airport i offset
+	movl	-156(%ebp), %eax  ; Reload j
+	cmpl	%eax, %ebx        ; Compare N with j
+	jg	L977              ; Continue inner loop if j < N
+	
+L976:
+	; OUTER LOOP INCREMENT: i++
+	movl	-164(%ebp), %eax  ; Reload i
+	addl	$36, -168(%ebp)   ; Advance outer loop offset
+	cmpl	%ebx, %eax        ; Compare i with N
+	jl	L1234             ; Continue outer loop if i < N
+	
+L971:
+	; GRAPH CONSTRUCTION PHASE
+	; After collecting all intersection points, build the auxiliary graph
+	; C++ EQUIVALENT: Build adjacency matrix for shortest path computation
+	
+	; STEP 1: Convert set<Point> to vector<Point> for indexed access
+	movl	-76(%ebp), %edi   ; Load auxiliary_vertices.begin()
+	leal	-84(%ebp), %eax   ; Load auxiliary_vertices.end() address
+	cmpl	%eax, %edi        ; Compare begin vs end
+	je	L1110             ; If empty set, skip graph building
+	
+	; COUNT VERTICES: Count total vertices (airports + intersection points)
+	movl	%edi, %eax        ; Start with begin iterator
+	xorl	%ebx, %ebx        ; Clear counter
+L979:
+	; ITERATE THROUGH SET: Count all vertices in auxiliary_vertices
+	leal	-84(%ebp), %esi   ; Load end iterator address
+	movl	%eax, (%esp)      ; Push current iterator
+	addl	$1, %ebx          ; Increment vertex count
+	call	__ZSt18_Rb_tree_incrementPKSt18_Rb_tree_node_base ; Advance iterator
+	cmpl	%esi, %eax        ; Check if reached end
+	jne	L979              ; Continue if not at end
+	
+	; ALLOCATE VERTEX ARRAY: Create array to store all vertices
+	cmpl	$119304647, %ebx  ; Check for overflow (max vertices)
+	ja	L983              ; Jump to error handler if too many vertices
+	leal	(%ebx,%ebx,8), %eax ; Calculate size = vertices * 9 * 4 (36 bytes per Point)
+	sall	$2, %eax          ; Multiply by 4 (sizeof(long double))
+	movl	%eax, (%esp)      ; Push size argument
+	call	__Znwj            ; Allocate memory: new Point[vertex_count]
+	movl	-152(%ebp), %ebx  ; Reload N (airport count)
+	movl	%eax, -180(%ebp)  ; Store vertex array pointer
+	movl	%eax, %esi        ; Copy for iteration
+	movl	%edi, %eax        ; Reload begin iterator
+	
+L981:
+	; COPY VERTICES: Copy each Point from set to array
+	; Each Point has 9 long double members (3 x 3 matrix representation)
+	movl	16(%eax), %edx    ; Load Point.x
+	leal	-84(%ebp), %edi   ; Load end iterator address
+	addl	$36, %esi         ; Advance to next array position
+	movl	%edx, -36(%esi)   ; Store Point.x
+	movl	20(%eax), %edx    ; Load Point.y
+	movl	%edx, -32(%esi)   ; Store Point.y
+	movl	24(%eax), %edx    ; Load Point.z
+	movl	%edx, -28(%esi)   ; Store Point.z
+	movl	28(%eax), %edx    ; Load next member
+	movl	%edx, -24(%esi)   ; Store next member
+	movl	32(%eax), %edx    ; Continue copying all 9 members
+	movl	%edx, -20(%esi)   ; ...
+	movl	36(%eax), %edx    ; ...
+	movl	%edx, -16(%esi)   ; ...
+	movl	40(%eax), %edx    ; ...
+	movl	%edx, -12(%esi)   ; ...
+	movl	44(%eax), %edx    ; ...
+	movl	%edx, -8(%esi)    ; ...
+	movl	48(%eax), %edx    ; ...
+	movl	%edx, -4(%esi)    ; Store last member
+	movl	%eax, (%esp)      ; Push current iterator
+	call	__ZSt18_Rb_tree_incrementPKSt18_Rb_tree_node_base ; Advance iterator
+	cmpl	%edi, %eax        ; Check if reached end
+	jne	L981              ; Continue if not at end
+	
+L978:
+	; INITIALIZE ADJACENCY MATRIX: Create 2D array for shortest path computation
+	leal	-52(%ebp), %eax   ; Load address for adjacency matrix
+	testl	%ebx, %ebx        ; Check if vertex count is non-zero
+	movl	$0, -52(%ebp)     ; Initialize matrix[0][0] = 0
+	movl	$0, -48(%ebp)     ; Initialize matrix[0][1] = 0
+	movl	$0, -36(%ebp)     ; Initialize matrix[1][0] = 0
+	movl	%eax, -44(%ebp)   ; Store matrix base address
+	movl	%eax, -40(%ebp)   ; Store matrix base address (backup)
+	je	L1111             ; Skip if no vertices
+	
+	; ALLOCATE ADJACENCY MATRIX: Create V x V matrix for distances
+	cmpl	$1073741823, %ebx ; Check for overflow (max matrix size)
+	ja	L983              ; Jump to error handler if too large
+	leal	0(,%ebx,4), %eax  ; Calculate matrix size = V * V * sizeof(long double)
+	movl	%eax, (%esp)      ; Push size argument
+	call	__Znwj            ; Allocate memory: new long double[V*V]
+	movl	%eax, -176(%ebp)  ; Store matrix pointer
+	xorl	%eax, %eax        ; Clear counter
+	
+L984:
+	; INITIALIZE MATRIX TO INFINITY: Set all distances to infinity initially
+	movl	-176(%ebp), %edi  ; Load matrix pointer
+	movl	$0, (%edi,%eax,4) ; Initialize matrix[i][j] = INF (represented as 0 for now)
+	addl	$1, %eax          ; Increment counter
+	cmpl	%ebx, %eax        ; Check if all elements initialized
+	jne	L984              ; Continue if not done
+	
+L982:
+	; GRAPH EDGE CONSTRUCTION: Build edges between vertices within fuel range
+	; This implements nested loops to check all vertex pairs for connectivity
+	movl	-180(%ebp), %eax  ; Load vertex array pointer
+	movl	%esi, %ebx        ; Load vertex array end
+	xorl	%edi, %edi        ; Clear outer loop counter
+	subl	%eax, %ebx        ; Calculate array size
+	movl	%eax, %esi        ; Copy array pointer
+	sarl	$2, %ebx          ; Convert to element count
+	imull	$954437177, %ebx, %ebx ; Calculate actual vertex count
+	testl	%ebx, %ebx        ; Check if any vertices
+	je	L1235             ; Skip if no vertices
+	
+L1160:
+	; ADJACENCY MATRIX CONSTRUCTION: Check connectivity between vertex pairs
+	; For each pair of vertices, determine if they can be connected within fuel range
+	movl	-48(%ebp), %edx   ; Load current vertex data
+	testl	%edx, %edx        ; Check if vertex exists
+	je	L1113             ; Skip if null vertex
+	
+	; DISTANCE CALCULATION: Compute great circle distance between vertices
+	fldt	(%esi)            ; Load vertex coordinate
+	leal	-52(%ebp), %ecx   ; Load result address
+	fldt	LC5               ; Load constant (probably pi or conversion factor)
+	jmp	L992              ; Jump to distance calculation
+	
+L1237:
+	; CONTINUE ADJACENCY MATRIX FILLING
+	movl	%edx, %ecx        ; Move vertex pointer
+	movl	8(%edx), %edx     ; Load next vertex
+	testl	%edx, %edx        ; Check if valid
+	je	L1247             ; Skip if null
+	
+L992:
+	; FLOATING POINT DISTANCE COMPARISON: Check if distance <= fuel_range
+	fldt	16(%edx)          ; Load vertex coordinate
+	fld	%st(0)            ; Duplicate on FPU stack
+	fsub	%st(3), %st       ; Subtract coordinates (distance calculation)
+	fabs                   ; Take absolute value
+	fucomp	%st(2)           ; Compare with fuel range
+	fnstsw	%ax             ; Store FPU status word
 
 L1146: ; Exit point
 	; Function epilogue
