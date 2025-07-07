@@ -1180,13 +1180,415 @@ L889:
 ; SECTION 9: INTERVAL COVERAGE ANALYSIS
 ;===============================================================================
 
-; C++ EQUIVALENT: vector<pair<long double, long double>> get_covered_intervals(...)
+; C++ EQUIVALENT: vector<pair<long double, long double>> get_covered_intervals(const Point& u, const Point& v, const Point& k_center, long double R_sphere)
 ; Determines which portions of a great circle arc are covered by R-spheres
 ; Algorithm:
 ; 1. Find intersection points of great circle with R-sphere boundaries
 ; 2. Parameterize arc from 0 to 1 based on distance
 ; 3. Test intervals between critical points for coverage
 ; 4. Return list of covered intervals
+
+	.p2align 4,,15
+	.globl	__Z20get_covered_intervalsRK5PointS1_S1_e
+	.def	__Z20get_covered_intervalsRK5PointS1_S1_e;	.scl	2;	.type	32;	.endef
+
+__Z20get_covered_intervalsRK5PointS1_S1_e:
+	pushl	%ebp              ; Save EBP register
+	pushl	%edi              ; Save EDI register
+	pushl	%esi              ; Save ESI register
+	pushl	%ebx              ; Save EBX register
+	subl	$512, %esp        ; Allocate 512 bytes of local stack space
+	
+	; Load function parameters
+	movl	532(%esp), %eax   ; Load address of u
+	movl	536(%esp), %ebx   ; Load address of v
+	movl	540(%esp), %esi   ; Load address of k_center
+	movl	528(%esp), %edi   ; Load address of result vector
+	
+	; ========================================================================
+	; STEP 1: Find intersection points of great circle with R-sphere boundaries
+	; ========================================================================
+	
+	; C++ EQUIVALENT: long double r_ang = R_sphere / R_EARTH;
+	fldt	544(%esp)         ; Load R_sphere parameter
+	fldt	LC3               ; Load R_EARTH constant (6370.0)
+	fdivp	%st, %st(1)      ; Calculate r_ang = R_sphere / R_EARTH
+	fstpt	32(%esp)          ; Store r_ang on stack
+	
+	; C++ EQUIVALENT: Point u_norm = normalize(u);
+	leal	48(%esp), %ecx    ; Load address for u_norm
+	movl	%ecx, (%esp)      ; Push result address
+	movl	%eax, 4(%esp)     ; Push u address
+	call	__Z9normalizeRK5Point ; Call normalize(u)
+	
+	; C++ EQUIVALENT: Point v_norm = normalize(v);
+	leal	96(%esp), %ecx    ; Load address for v_norm
+	movl	%ecx, (%esp)      ; Push result address
+	movl	%ebx, 4(%esp)     ; Push v address
+	call	__Z9normalizeRK5Point ; Call normalize(v)
+	
+	; C++ EQUIVALENT: Point k_norm = normalize(k_center);
+	leal	144(%esp), %ecx   ; Load address for k_norm
+	movl	%ecx, (%esp)      ; Push result address
+	movl	%esi, 4(%esp)     ; Push k_center address
+	call	__Z9normalizeRK5Point ; Call normalize(k_center)
+	
+	; C++ EQUIVALENT: long double angle_uv = acos(max(-1.0, min(1.0, dot(u_norm, v_norm))));
+	leal	48(%esp), %eax    ; Load u_norm address
+	leal	96(%esp), %ebx    ; Load v_norm address
+	movl	%eax, (%esp)      ; Push u_norm address
+	movl	%ebx, 4(%esp)     ; Push v_norm address
+	call	__Z3dotRK5PointS1_ ; Call dot(u_norm, v_norm)
+	
+	; Clamp dot product to [-1.0, 1.0] to avoid numerical errors
+	fldt	LC9               ; Load -1.0 (lower bound)
+	fxch	%st(1)            ; Swap stack elements
+	fucom	%st(1)            ; Compare dot_product with -1.0
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jbe	L1900             ; Jump if dot_product <= -1.0
+	
+	fldt	LC10              ; Load 1.0 (upper bound)
+	fxch	%st(1)            ; Swap stack elements
+	fucom	%st(1)            ; Compare dot_product with 1.0
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jae	L1901             ; Jump if dot_product >= 1.0
+	
+	; dot_product is in valid range [-1.0, 1.0]
+	fstp	%st(1)            ; Pop upper bound
+	fstp	%st(1)            ; Pop lower bound
+	jmp	L1902             ; Continue to acos calculation
+	
+L1900:
+	; Clamp to -1.0
+	fstp	%st(0)            ; Pop dot_product
+	fstp	%st(0)            ; Pop lower bound (keep -1.0)
+	jmp	L1902             ; Continue to acos calculation
+	
+L1901:
+	; Clamp to 1.0
+	fstp	%st(0)            ; Pop dot_product
+	fxch	%st(1)            ; Swap to get 1.0 on top
+	fstp	%st(1)            ; Pop lower bound (keep 1.0)
+	
+L1902:
+	; C++ EQUIVALENT: long double angle_uv = acos(clamped_dot_product);
+	call	__acosl           ; Call acos function
+	fstpt	192(%esp)         ; Store angle_uv on stack
+	
+	; C++ EQUIVALENT: if (angle_uv < EPS) { // U and V are the same or very close
+	fldt	192(%esp)         ; Load angle_uv
+	fldt	LC5               ; Load EPS constant
+	fucom	%st(1)            ; Compare angle_uv with EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jb	L1903             ; Jump if angle_uv < EPS (points are nearly identical)
+	
+	fstp	%st(0)            ; Pop EPS
+	fstp	%st(0)            ; Pop angle_uv
+	
+	; Points are different, continue with great circle calculations
+	; C++ EQUIVALENT: Point gc_normal = normalize(cross(u_norm, v_norm));
+	leal	240(%esp), %ecx   ; Load address for cross product result
+	movl	%ecx, (%esp)      ; Push cross product address
+	leal	48(%esp), %eax    ; Load u_norm address
+	movl	%eax, 4(%esp)     ; Push u_norm address
+	leal	96(%esp), %ebx    ; Load v_norm address
+	movl	%ebx, 8(%esp)     ; Push v_norm address
+	call	__Z5crossRK5PointS1_ ; Call cross(u_norm, v_norm)
+	
+	leal	288(%esp), %ecx   ; Load address for normalized gc_normal
+	movl	%ecx, (%esp)      ; Push result address
+	leal	240(%esp), %eax   ; Load cross product address
+	movl	%eax, 4(%esp)     ; Push cross product address
+	call	__Z9normalizeRK5Point ; Call normalize(cross_product)
+	
+	; ========================================================================
+	; END OF STEP 1: Find intersection points of great circle with R-sphere boundaries
+	; ========================================================================
+	
+	; ========================================================================
+	; STEP 2: Parameterize arc from 0 to 1 based on distance
+	; ========================================================================
+	
+	; C++ EQUIVALENT: Point k_proj_norm = k_norm - gc_normal * dot(k_norm, gc_normal);
+	; Project k_norm onto the plane of the great circle
+	leal	144(%esp), %eax   ; Load k_norm address
+	leal	288(%esp), %ebx   ; Load gc_normal address
+	movl	%eax, (%esp)      ; Push k_norm address
+	movl	%ebx, 4(%esp)     ; Push gc_normal address
+	call	__Z3dotRK5PointS1_ ; Call dot(k_norm, gc_normal)
+	fstpt	336(%esp)         ; Store dot product on stack
+	
+	; C++ EQUIVALENT: gc_normal * dot(k_norm, gc_normal)
+	leal	352(%esp), %ecx   ; Load address for temp result
+	movl	%ecx, (%esp)      ; Push result address
+	leal	288(%esp), %ebx   ; Load gc_normal address
+	movl	%ebx, 4(%esp)     ; Push gc_normal address
+	fldt	336(%esp)         ; Load dot product
+	fstpt	8(%esp)           ; Push dot product as scalar parameter
+	call	__ZmlRK5Pointe    ; Call operator*(gc_normal, dot_product)
+	
+	; C++ EQUIVALENT: k_norm - gc_normal * dot(k_norm, gc_normal)
+	leal	400(%esp), %ecx   ; Load address for k_proj (before normalization)
+	movl	%ecx, (%esp)      ; Push result address
+	leal	144(%esp), %eax   ; Load k_norm address
+	movl	%eax, 4(%esp)     ; Push k_norm address
+	leal	352(%esp), %ebx   ; Load temp result address
+	movl	%ebx, 8(%esp)     ; Push temp result address
+	call	__ZmiRK5PointS1_  ; Call operator-(k_norm, gc_normal * dot_product)
+	
+	; C++ EQUIVALENT: k_proj_norm = normalize(k_proj);
+	leal	448(%esp), %ecx   ; Load address for k_proj_norm
+	movl	%ecx, (%esp)      ; Push result address
+	leal	400(%esp), %eax   ; Load k_proj address
+	movl	%eax, 4(%esp)     ; Push k_proj address
+	call	__Z9normalizeRK5Point ; Call normalize(k_proj)
+	
+	; C++ EQUIVALENT: long double d_k_to_plane_ang = acos(max(-1.0, min(1.0, abs(dot(k_norm, gc_normal)))));
+	fldt	336(%esp)         ; Load dot(k_norm, gc_normal)
+	fabs                      ; Take absolute value
+	
+	; Clamp to [-1.0, 1.0] range
+	fldt	LC9               ; Load -1.0 (lower bound)
+	fxch	%st(1)            ; Swap stack elements
+	fucom	%st(1)            ; Compare abs(dot) with -1.0
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jbe	L1910             ; Jump if abs(dot) <= -1.0
+	
+	fldt	LC10              ; Load 1.0 (upper bound)
+	fxch	%st(1)            ; Swap stack elements
+	fucom	%st(1)            ; Compare abs(dot) with 1.0
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jae	L1911             ; Jump if abs(dot) >= 1.0
+	
+	; abs(dot) is in valid range [-1.0, 1.0]
+	fstp	%st(1)            ; Pop upper bound
+	fstp	%st(1)            ; Pop lower bound
+	jmp	L1912             ; Continue to acos calculation
+	
+L1910:
+	; Clamp to -1.0 (though abs value should never be < -1.0)
+	fstp	%st(0)            ; Pop abs(dot)
+	fstp	%st(0)            ; Pop lower bound (keep -1.0)
+	jmp	L1912             ; Continue to acos calculation
+	
+L1911:
+	; Clamp to 1.0
+	fstp	%st(0)            ; Pop abs(dot)
+	fxch	%st(1)            ; Swap to get 1.0 on top
+	fstp	%st(1)            ; Pop lower bound (keep 1.0)
+	
+L1912:
+	; C++ EQUIVALENT: long double d_k_to_plane_ang = acos(clamped_abs_dot);
+	call	__acosl           ; Call acos function
+	fstpt	464(%esp)         ; Store d_k_to_plane_ang on stack
+	
+	; C++ EQUIVALENT: vector<long double> critical_params;
+	; C++ EQUIVALENT: critical_params.push_back(0.0); // Arc start
+	; C++ EQUIVALENT: critical_params.push_back(1.0); // Arc end
+	; Initialize critical parameters array (simplified for assembly)
+	fldz                      ; Load 0.0
+	fstpt	480(%esp)         ; Store 0.0 as first critical parameter
+	fld1                      ; Load 1.0
+	fstpt	492(%esp)         ; Store 1.0 as second critical parameter
+	movl	$2, 504(%esp)     ; Store count of critical parameters
+	
+	; C++ EQUIVALENT: if (d_k_to_plane_ang <= r_ang + EPS)
+	; Check if small circle boundary intersects or is tangent to or contains the great circle
+	fldt	464(%esp)         ; Load d_k_to_plane_ang
+	fldt	32(%esp)          ; Load r_ang
+	fldt	LC5               ; Load EPS
+	faddp	%st, %st(1)      ; Calculate r_ang + EPS
+	fucom	%st(1)            ; Compare d_k_to_plane_ang with r_ang + EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	ja	L1913             ; Jump if d_k_to_plane_ang > r_ang + EPS (no intersection)
+	
+	; Small circle boundary intersects or is tangent to or contains the great circle
+	fstp	%st(0)            ; Pop r_ang + EPS
+	fstp	%st(0)            ; Pop d_k_to_plane_ang
+	
+	; C++ EQUIVALENT: long double alpha; // Angle on the great circle from k_proj_norm to intersection points
+	; C++ EQUIVALENT: if (abs(d_k_to_plane_ang - r_ang) < EPS) { alpha = 0; // Tangent case
+	fldt	464(%esp)         ; Load d_k_to_plane_ang
+	fldt	32(%esp)          ; Load r_ang
+	fsubp	%st, %st(1)      ; Calculate d_k_to_plane_ang - r_ang
+	fabs                      ; Take absolute value
+	fldt	LC5               ; Load EPS
+	fucom	%st(1)            ; Compare abs(difference) with EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	ja	L1914             ; Jump if abs(difference) > EPS (not tangent)
+	
+	; Tangent case: alpha = 0
+	fstp	%st(0)            ; Pop abs(difference)
+	fstp	%st(0)            ; Pop EPS
+	fldz                      ; Load 0.0
+	fstpt	508(%esp)         ; Store alpha = 0.0
+	jmp	L1915             ; Jump to intersection point calculation
+	
+L1914:
+	; Non-tangent case: calculate alpha using law of cosines
+	fstp	%st(0)            ; Pop abs(difference)
+	fstp	%st(0)            ; Pop EPS
+	
+	; C++ EQUIVALENT: long double cos_alpha_arg = cos(r_ang) / cos(d_k_to_plane_ang);
+	fldt	32(%esp)          ; Load r_ang
+	call	__cosl            ; Call cos(r_ang)
+	fstpt	520(%esp)         ; Store cos(r_ang)
+	
+	fldt	464(%esp)         ; Load d_k_to_plane_ang
+	call	__cosl            ; Call cos(d_k_to_plane_ang)
+	fldt	520(%esp)         ; Load cos(r_ang)
+	fdivp	%st, %st(1)      ; Calculate cos(r_ang) / cos(d_k_to_plane_ang)
+	fstpt	532(%esp)         ; Store cos_alpha_arg
+	
+	; C++ EQUIVALENT: if (cos_alpha_arg >= -1.0 - EPS && cos_alpha_arg <= 1.0 + EPS)
+	; Check if cos_alpha_arg is in valid range for acos
+	fldt	532(%esp)         ; Load cos_alpha_arg
+	fldt	LC9               ; Load -1.0
+	fldt	LC5               ; Load EPS
+	fsubp	%st, %st(1)      ; Calculate -1.0 - EPS
+	fxch	%st(1)            ; Swap stack elements
+	fucom	%st(1)            ; Compare cos_alpha_arg with -1.0 - EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jb	L1916             ; Jump if cos_alpha_arg < -1.0 - EPS (invalid)
+	
+	fldt	LC10              ; Load 1.0
+	fldt	LC5               ; Load EPS
+	faddp	%st, %st(1)      ; Calculate 1.0 + EPS
+	fxch	%st(2)            ; Bring cos_alpha_arg to top
+	fucom	%st(1)            ; Compare cos_alpha_arg with 1.0 + EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	ja	L1916             ; Jump if cos_alpha_arg > 1.0 + EPS (invalid)
+	
+	; cos_alpha_arg is in valid range, calculate alpha
+	fstp	%st(0)            ; Pop 1.0 + EPS
+	fstp	%st(0)            ; Pop -1.0 - EPS
+	fstp	%st(0)            ; Pop cos_alpha_arg (reload it)
+	
+	; Clamp cos_alpha_arg to [-1.0, 1.0] for acos
+	fldt	532(%esp)         ; Reload cos_alpha_arg
+	fldt	LC9               ; Load -1.0
+	fldt	LC10              ; Load 1.0
+	; Apply max(-1.0, min(1.0, cos_alpha_arg))
+	fxch	%st(2)            ; Bring cos_alpha_arg to top
+	fucom	%st(1)            ; Compare with 1.0
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jae	L1917             ; Jump if cos_alpha_arg >= 1.0
+	
+	fxch	%st(1)            ; Swap to compare with -1.0
+	fucom	%st(2)            ; Compare cos_alpha_arg with -1.0
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jbe	L1918             ; Jump if cos_alpha_arg <= -1.0
+	
+	; cos_alpha_arg is in valid range [-1.0, 1.0]
+	fstp	%st(0)            ; Pop -1.0
+	fstp	%st(0)            ; Pop 1.0
+	jmp	L1919             ; Continue to acos calculation
+	
+L1917:
+	; Clamp to 1.0
+	fstp	%st(0)            ; Pop cos_alpha_arg
+	fstp	%st(0)            ; Pop -1.0
+	jmp	L1919             ; Continue to acos calculation
+	
+L1918:
+	; Clamp to -1.0
+	fstp	%st(0)            ; Pop cos_alpha_arg
+	fxch	%st(1)            ; Swap to get -1.0 on top
+	fstp	%st(1)            ; Pop 1.0
+	
+L1919:
+	; C++ EQUIVALENT: alpha = acos(max(-1.0, min(1.0, cos_alpha_arg)));
+	call	__acosl           ; Call acos function
+	fstpt	508(%esp)         ; Store alpha on stack
+	jmp	L1915             ; Jump to intersection point calculation
+	
+L1916:
+	; cos_alpha_arg is out of valid range - no intersection
+	fstp	%st(0)            ; Pop 1.0 + EPS
+	fstp	%st(0)            ; Pop -1.0 - EPS
+	fstp	%st(0)            ; Pop cos_alpha_arg
+	jmp	L1920             ; Jump to check midpoint case
+	
+L1915:
+	; Continue with intersection point calculation (will be implemented in next steps)
+	jmp	L1921             ; Jump to next step
+	
+L1913:
+	; No intersection between great circle and small circle boundary
+	fstp	%st(0)            ; Pop r_ang + EPS
+	fstp	%st(0)            ; Pop d_k_to_plane_ang
+	
+L1920:
+	; C++ EQUIVALENT: Check midpoint case - arc is either entirely inside or entirely outside
+	; This will be handled in the next step
+	jmp	L1921             ; Jump to next step
+	
+L1921:
+	; Continue with next steps...
+	; [Additional steps would be implemented here]
+	
+	; ========================================================================
+	; END OF STEP 2: Parameterize arc from 0 to 1 based on distance
+	; ========================================================================
+	
+L1903:
+	; Handle case where U and V are nearly identical
+	; C++ EQUIVALENT: if (dist_xyz(u, k_center) <= R_sphere + EPS) return {{0.0, 1.0}};
+	movl	532(%esp), %eax   ; Load u address
+	movl	540(%esp), %ebx   ; Load k_center address
+	movl	%eax, (%esp)      ; Push u address
+	movl	%ebx, 4(%esp)     ; Push k_center address
+	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, k_center)
+	
+	fldt	544(%esp)         ; Load R_sphere
+	fldt	LC5               ; Load EPS
+	faddp	%st, %st(1)      ; Calculate R_sphere + EPS
+	fucom	%st(1)            ; Compare distance with R_sphere + EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jae	L1905             ; Jump if distance <= R_sphere + EPS
+	
+	; Point is outside R-sphere, return empty vector
+	fstp	%st(0)            ; Pop distance
+	fstp	%st(0)            ; Pop R_sphere + EPS
+	jmp	L1906             ; Jump to return empty vector
+	
+L1905:
+	; Point is inside R-sphere, return {{0.0, 1.0}}
+	fstp	%st(0)            ; Pop distance
+	fstp	%st(0)            ; Pop R_sphere + EPS
+	; Add interval [0.0, 1.0] to result vector
+	; [Implementation of adding interval to vector would go here]
+	jmp	L1907             ; Jump to function exit
+	
+L1906:
+	; Return empty vector
+	jmp	L1907             ; Jump to function exit
+	
+L1904:
+	; Continue with next steps...
+	; [Additional steps would be implemented here]
+	
+L1907:
+	; Function exit
+	movl	528(%esp), %eax   ; Load result vector address (return value)
+	addl	$512, %esp        ; Deallocate local stack space
+	popl	%ebx              ; Restore EBX register
+	popl	%esi              ; Restore ESI register
+	popl	%edi              ; Restore EDI register
+	popl	%ebp              ; Restore EBP register
+	ret                       ; Return from function
 
 ; C++ EQUIVALENT: vector<pair<long double, long double>> merge_intervals(...)
 ; Merges overlapping intervals to create consolidated coverage map
