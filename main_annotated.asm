@@ -896,6 +896,10 @@ __Z30get_small_circle_intersectionsRK5PointS1_e:
 	movl	496(%esp), %ebx   ; Load address of result vector
 	leal	224(%esp), %esi   ; Load address for normalized center2 (c2_norm)
 	
+	; ========================================================================
+	; STEP 1: Computing angular distance between sphere centers
+	; ========================================================================
+	
 	; C++ EQUIVALENT: Point c1_norm = normalize(center1);
 	movl	%edi, (%esp)      ; Push result address
 	movl	%eax, 4(%esp)     ; Push center1 address  
@@ -906,6 +910,54 @@ __Z30get_small_circle_intersectionsRK5PointS1_e:
 	movl	%esi, (%esp)      ; Push result address
 	movl	%eax, 4(%esp)     ; Push center2 address
 	call	__Z9normalizeRK5Point ; Call normalize(center2)
+	
+	; C++ EQUIVALENT: long double dot_product = dot(c1_norm, c2_norm);
+	movl	%edi, (%esp)      ; Push c1_norm address
+	movl	%esi, 4(%esp)     ; Push c2_norm address
+	call	__Z3dotRK5PointS1_ ; Call dot(c1_norm, c2_norm)
+	fstpt	32(%esp)          ; Store dot_product on stack
+	
+	; C++ EQUIVALENT: Clamp dot_product to [-1.0, 1.0] to avoid numerical errors
+	fldt	32(%esp)          ; Load dot_product
+	fldt	LC9               ; Load -1.0 (lower bound)
+	fxch	%st(1)            ; Swap stack elements
+	fucom	%st(1)            ; Compare dot_product with -1.0
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jbe	L885              ; Jump if dot_product <= -1.0
+	
+	fldt	LC10              ; Load 1.0 (upper bound)
+	fxch	%st(1)            ; Swap stack elements
+	fucom	%st(1)            ; Compare dot_product with 1.0
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jae	L886              ; Jump if dot_product >= 1.0
+	
+	; dot_product is in valid range [-1.0, 1.0]
+	fstp	%st(1)            ; Pop upper bound
+	fstp	%st(1)            ; Pop lower bound
+	jmp	L887              ; Continue to acos calculation
+	
+L885:
+	; Clamp to -1.0
+	fstp	%st(0)            ; Pop dot_product
+	fstp	%st(0)            ; Pop lower bound (keep -1.0)
+	jmp	L887              ; Continue to acos calculation
+	
+L886:
+	; Clamp to 1.0
+	fstp	%st(0)            ; Pop dot_product
+	fxch	%st(1)            ; Swap to get 1.0 on top
+	fstp	%st(1)            ; Pop lower bound (keep 1.0)
+	
+L887:
+	; C++ EQUIVALENT: long double angular_distance = acos(clamped_dot_product);
+	call	__acosl           ; Call acos function
+	fstpt	48(%esp)          ; Store angular_distance on stack
+	
+	; ========================================================================
+	; END OF STEP 1: Computing angular distance between sphere centers
+	; ========================================================================
 
 ;===============================================================================
 ; SECTION 9: INTERVAL COVERAGE ANALYSIS
