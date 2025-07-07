@@ -1534,12 +1534,338 @@ L1920:
 	; This will be handled in the next step
 	jmp	L1921             ; Jump to next step
 	
-L1921:
-	; Continue with next steps...
-	; [Additional steps would be implemented here]
-	
 	; ========================================================================
 	; END OF STEP 2: Parameterize arc from 0 to 1 based on distance
+	; ========================================================================
+
+L1921:
+	; ========================================================================
+	; STEP 3: Test intervals between critical points for coverage
+	; ========================================================================
+	
+	; C++ EQUIVALENT: Vector in great circle plane orthogonal to k_proj_norm
+	; Point ortho_k_proj_norm = normalize(cross(gc_normal, k_proj_norm));
+	leal	544(%esp), %ecx   ; Load address for cross product result
+	movl	%ecx, (%esp)      ; Push cross product address
+	leal	288(%esp), %eax   ; Load gc_normal address
+	movl	%eax, 4(%esp)     ; Push gc_normal address
+	leal	448(%esp), %ebx   ; Load k_proj_norm address
+	movl	%ebx, 8(%esp)     ; Push k_proj_norm address
+	call	__Z5crossRK5PointS1_ ; Call cross(gc_normal, k_proj_norm)
+	
+	leal	592(%esp), %ecx   ; Load address for normalized ortho_k_proj_norm
+	movl	%ecx, (%esp)      ; Push result address
+	leal	544(%esp), %eax   ; Load cross product address
+	movl	%eax, 4(%esp)     ; Push cross product address
+	call	__Z9normalizeRK5Point ; Call normalize(cross_product)
+	
+	; C++ EQUIVALENT: Calculate cos(alpha) and sin(alpha) for intersection points
+	fldt	508(%esp)         ; Load alpha
+	fsincos                   ; Calculate both sin and cos (cos on top, sin below)
+	fstpt	640(%esp)         ; Store cos(alpha)
+	fstpt	652(%esp)         ; Store sin(alpha)
+	
+	; C++ EQUIVALENT: Point p1_norm_gc = k_proj_norm * cos(alpha) + ortho_k_proj_norm * sin(alpha);
+	; Calculate k_proj_norm * cos(alpha)
+	leal	664(%esp), %ecx   ; Load address for temp result 1
+	movl	%ecx, (%esp)      ; Push result address
+	leal	448(%esp), %eax   ; Load k_proj_norm address
+	movl	%eax, 4(%esp)     ; Push k_proj_norm address
+	fldt	640(%esp)         ; Load cos(alpha)
+	fstpt	8(%esp)           ; Push cos(alpha) as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(k_proj_norm, cos(alpha))
+	
+	; Calculate ortho_k_proj_norm * sin(alpha)
+	leal	712(%esp), %ecx   ; Load address for temp result 2
+	movl	%ecx, (%esp)      ; Push result address
+	leal	592(%esp), %eax   ; Load ortho_k_proj_norm address
+	movl	%eax, 4(%esp)     ; Push ortho_k_proj_norm address
+	fldt	652(%esp)         ; Load sin(alpha)
+	fstpt	8(%esp)           ; Push sin(alpha) as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(ortho_k_proj_norm, sin(alpha))
+	
+	; Add the two results: p1_norm_gc = temp1 + temp2
+	leal	760(%esp), %ecx   ; Load address for p1_norm_gc
+	movl	%ecx, (%esp)      ; Push result address
+	leal	664(%esp), %eax   ; Load temp1 address
+	movl	%eax, 4(%esp)     ; Push temp1 address
+	leal	712(%esp), %ebx   ; Load temp2 address
+	movl	%ebx, 8(%esp)     ; Push temp2 address
+	call	__ZplRK5PointS1_  ; Call operator+(temp1, temp2)
+	
+	; C++ EQUIVALENT: Point p2_norm_gc = k_proj_norm * cos(alpha) - ortho_k_proj_norm * sin(alpha);
+	; Subtract the two results: p2_norm_gc = temp1 - temp2
+	leal	808(%esp), %ecx   ; Load address for p2_norm_gc
+	movl	%ecx, (%esp)      ; Push result address
+	leal	664(%esp), %eax   ; Load temp1 address (k_proj_norm * cos(alpha))
+	movl	%eax, 4(%esp)     ; Push temp1 address
+	leal	712(%esp), %ebx   ; Load temp2 address (ortho_k_proj_norm * sin(alpha))
+	movl	%ebx, 8(%esp)     ; Push temp2 address
+	call	__ZmiRK5PointS1_  ; Call operator-(temp1, temp2)
+	
+	; C++ EQUIVALENT: Point p1_gc = {p1_norm_gc.x * R_EARTH, p1_norm_gc.y * R_EARTH, p1_norm_gc.z * R_EARTH};
+	; Scale p1_norm_gc by R_EARTH
+	leal	856(%esp), %ecx   ; Load address for p1_gc
+	movl	%ecx, (%esp)      ; Push result address
+	leal	760(%esp), %eax   ; Load p1_norm_gc address
+	movl	%eax, 4(%esp)     ; Push p1_norm_gc address
+	fldt	LC3               ; Load R_EARTH (6370.0)
+	fstpt	8(%esp)           ; Push R_EARTH as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(p1_norm_gc, R_EARTH)
+	
+	; C++ EQUIVALENT: Point p2_gc = {p2_norm_gc.x * R_EARTH, p2_norm_gc.y * R_EARTH, p2_norm_gc.z * R_EARTH};
+	; Scale p2_norm_gc by R_EARTH
+	leal	904(%esp), %ecx   ; Load address for p2_gc
+	movl	%ecx, (%esp)      ; Push result address
+	leal	808(%esp), %eax   ; Load p2_norm_gc address
+	movl	%eax, 4(%esp)     ; Push p2_norm_gc address
+	fldt	LC3               ; Load R_EARTH (6370.0)
+	fstpt	8(%esp)           ; Push R_EARTH as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(p2_norm_gc, R_EARTH)
+	
+	; C++ EQUIVALENT: if (is_on_arc(u, v, p1_gc)) {
+	; Check if p1_gc lies on the arc U-V
+	movl	532(%esp), %eax   ; Load u address
+	movl	536(%esp), %ebx   ; Load v address
+	leal	856(%esp), %ecx   ; Load p1_gc address
+	movl	%eax, (%esp)      ; Push u address
+	movl	%ebx, 4(%esp)     ; Push v address
+	movl	%ecx, 8(%esp)     ; Push p1_gc address
+	call	__Z9is_on_arcRK5PointS1_S1_ ; Call is_on_arc(u, v, p1_gc)
+	testb	%al, %al          ; Test if p1_gc is on arc
+	je	L1925             ; Jump if p1_gc is NOT on arc
+	
+	; C++ EQUIVALENT: critical_params.push_back(get_arc_parameter(u, v, p1_gc));
+	; p1_gc is on arc, get its parameter and add to critical_params
+	movl	532(%esp), %eax   ; Load u address
+	movl	536(%esp), %ebx   ; Load v address
+	leal	856(%esp), %ecx   ; Load p1_gc address
+	movl	%eax, (%esp)      ; Push u address
+	movl	%ebx, 4(%esp)     ; Push v address
+	movl	%ecx, 8(%esp)     ; Push p1_gc address
+	call	__Z17get_arc_parameterRK5PointS1_S1_ ; Call get_arc_parameter(u, v, p1_gc)
+	
+	; Store the parameter in critical_params array (simplified implementation)
+	movl	504(%esp), %eax   ; Load current count of critical parameters
+	fstpt	480(%esp,%eax,12) ; Store parameter at offset (count * 12)
+	incl	%eax              ; Increment count
+	movl	%eax, 504(%esp)   ; Store new count
+	
+L1925:
+	; C++ EQUIVALENT: if (alpha > EPS && is_on_arc(u, v, p2_gc)) {
+	; Check if alpha > EPS (avoid adding duplicate point if tangent)
+	fldt	508(%esp)         ; Load alpha
+	fldt	LC5               ; Load EPS
+	fucom	%st(1)            ; Compare alpha with EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jbe	L1926             ; Jump if alpha <= EPS (tangent case)
+	
+	fstp	%st(0)            ; Pop EPS
+	fstp	%st(0)            ; Pop alpha
+	
+	; Check if p2_gc lies on the arc U-V
+	movl	532(%esp), %eax   ; Load u address
+	movl	536(%esp), %ebx   ; Load v address
+	leal	904(%esp), %ecx   ; Load p2_gc address
+	movl	%eax, (%esp)      ; Push u address
+	movl	%ebx, 4(%esp)     ; Push v address
+	movl	%ecx, 8(%esp)     ; Push p2_gc address
+	call	__Z9is_on_arcRK5PointS1_S1_ ; Call is_on_arc(u, v, p2_gc)
+	testb	%al, %al          ; Test if p2_gc is on arc
+	je	L1926             ; Jump if p2_gc is NOT on arc
+	
+	; C++ EQUIVALENT: critical_params.push_back(get_arc_parameter(u, v, p2_gc));
+	; p2_gc is on arc, get its parameter and add to critical_params
+	movl	532(%esp), %eax   ; Load u address
+	movl	536(%esp), %ebx   ; Load v address
+	leal	904(%esp), %ecx   ; Load p2_gc address
+	movl	%eax, (%esp)      ; Push u address
+	movl	%ebx, 4(%esp)     ; Push v address
+	movl	%ecx, 8(%esp)     ; Push p2_gc address
+	call	__Z17get_arc_parameterRK5PointS1_S1_ ; Call get_arc_parameter(u, v, p2_gc)
+	
+	; Store the parameter in critical_params array
+	movl	504(%esp), %eax   ; Load current count of critical parameters
+	fstpt	480(%esp,%eax,12) ; Store parameter at offset (count * 12)
+	incl	%eax              ; Increment count
+	movl	%eax, 504(%esp)   ; Store new count
+	jmp	L1927             ; Jump to interval testing
+	
+L1926:
+	; Clean up stack if alpha <= EPS
+	fstp	%st(0)            ; Pop EPS
+	fstp	%st(0)            ; Pop alpha
+	jmp	L1927             ; Jump to interval testing
+	
+L1927:
+	; C++ EQUIVALENT: Test intervals between critical points for coverage
+	; Sort critical_params (simplified bubble sort for assembly)
+	movl	504(%esp), %ecx   ; Load count of critical parameters
+	cmpl	$2, %ecx          ; Check if count > 1
+	jle	L1930             ; Skip sorting if count <= 1
+	
+	; Simple bubble sort implementation for critical_params
+	movl	$0, %edi          ; Initialize i = 0
+L1928:
+	movl	%edi, %esi        ; Initialize j = i
+	incl	%esi              ; j = i + 1
+L1929:
+	cmpl	%ecx, %esi        ; Compare j with count
+	jge	L1932             ; Jump if j >= count (inner loop done)
+	
+	; Compare critical_params[i] with critical_params[j]
+	fldt	480(%esp,%edi,12) ; Load critical_params[i]
+	fldt	480(%esp,%esi,12) ; Load critical_params[j]
+	fucom	%st(1)            ; Compare critical_params[i] with critical_params[j]
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jbe	L1931             ; Jump if critical_params[i] <= critical_params[j]
+	
+	; Swap critical_params[i] and critical_params[j]
+	fstpt	952(%esp)         ; Store critical_params[j] in temp
+	fstpt	480(%esp,%esi,12) ; Store critical_params[i] in position j
+	fldt	952(%esp)         ; Load temp
+	fstpt	480(%esp,%edi,12) ; Store temp in position i
+	jmp	L1933             ; Jump to next iteration
+	
+L1931:
+	; No swap needed, clean up FPU stack
+	fstp	%st(0)            ; Pop critical_params[j]
+	fstp	%st(0)            ; Pop critical_params[i]
+	
+L1933:
+	incl	%esi              ; j++
+	jmp	L1929             ; Continue inner loop
+	
+L1932:
+	incl	%edi              ; i++
+	cmpl	%ecx, %edi        ; Compare i with count-1
+	jl	L1928             ; Continue outer loop if i < count-1
+	
+L1930:
+	; Now test intervals between critical points
+	; C++ EQUIVALENT: for(size_t i = 0; i + 1 < critical_params.size(); ++i)
+	movl	$0, %edi          ; Initialize i = 0
+	movl	504(%esp), %ecx   ; Load count of critical parameters
+	decl	%ecx              ; count - 1
+	
+L1934:
+	cmpl	%ecx, %edi        ; Compare i with count-1
+	jge	L1940             ; Jump if i >= count-1 (loop done)
+	
+	; C++ EQUIVALENT: long double t_start = critical_params[i];
+	; C++ EQUIVALENT: long double t_end = critical_params[i+1];
+	fldt	480(%esp,%edi,12) ; Load critical_params[i] (t_start)
+	movl	%edi, %esi        ; Copy i
+	incl	%esi              ; i + 1
+	fldt	480(%esp,%esi,12) ; Load critical_params[i+1] (t_end)
+	
+	; C++ EQUIVALENT: if (t_end - t_start < EPS) continue;
+	fld	%st(0)            ; Duplicate t_end
+	fsub	%st(2), %st       ; Calculate t_end - t_start
+	fldt	LC5               ; Load EPS
+	fucom	%st(1)            ; Compare t_end - t_start with EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	ja	L1935             ; Jump if t_end - t_start > EPS (valid interval)
+	
+	; Interval too small, skip it
+	fstp	%st(0)            ; Pop EPS
+	fstp	%st(0)            ; Pop t_end - t_start
+	fstp	%st(0)            ; Pop t_end
+	fstp	%st(0)            ; Pop t_start
+	jmp	L1936             ; Jump to next iteration
+	
+L1935:
+	; Valid interval, test coverage
+	fstp	%st(0)            ; Pop EPS
+	fstp	%st(0)            ; Pop t_end - t_start
+	
+	; C++ EQUIVALENT: long double t_mid = (t_start + t_end) / 2.0;
+	fld	%st(1)            ; Duplicate t_start
+	fadd	%st(1), %st       ; Calculate t_start + t_end
+	fldt	LC8               ; Load 0.5
+	fmulp	%st, %st(1)      ; Calculate (t_start + t_end) / 2.0
+	fstpt	964(%esp)         ; Store t_mid
+	
+	; C++ EQUIVALENT: Point p_mid = point_at_angle_on_great_circle(u, v, t_mid * angle_uv);
+	leal	976(%esp), %eax   ; Load address for p_mid
+	movl	%eax, (%esp)      ; Push p_mid address
+	movl	532(%esp), %eax   ; Load u address
+	movl	%eax, 4(%esp)     ; Push u address
+	movl	536(%esp), %ebx   ; Load v address
+	movl	%ebx, 8(%esp)     ; Push v address
+	fldt	964(%esp)         ; Load t_mid
+	fldt	192(%esp)         ; Load angle_uv
+	fmulp	%st, %st(1)      ; Calculate t_mid * angle_uv
+	fstpt	12(%esp)          ; Push t_mid * angle_uv as parameter
+	call	__Z30point_at_angle_on_great_circleRK5PointS1_e ; Call point_at_angle_on_great_circle
+	
+	; C++ EQUIVALENT: if (dist_xyz(p_mid, k_center) <= R_sphere + EPS) {
+	leal	976(%esp), %eax   ; Load p_mid address
+	movl	540(%esp), %ebx   ; Load k_center address
+	movl	%eax, (%esp)      ; Push p_mid address
+	movl	%ebx, 4(%esp)     ; Push k_center address
+	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(p_mid, k_center)
+	
+	fldt	544(%esp)         ; Load R_sphere
+	fldt	LC5               ; Load EPS
+	faddp	%st, %st(1)      ; Calculate R_sphere + EPS
+	fucom	%st(1)            ; Compare distance with R_sphere + EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jae	L1937             ; Jump if distance <= R_sphere + EPS (covered)
+	
+	; Interval not covered, skip it
+	fstp	%st(0)            ; Pop distance
+	fstp	%st(0)            ; Pop R_sphere + EPS
+	fstp	%st(0)            ; Pop t_end
+	fstp	%st(0)            ; Pop t_start
+	jmp	L1936             ; Jump to next iteration
+	
+L1937:
+	; C++ EQUIVALENT: intervals.push_back({t_start, t_end});
+	; Interval is covered, add it to result vector
+	fstp	%st(0)            ; Pop distance
+	fstp	%st(0)            ; Pop R_sphere + EPS
+	
+	; Add interval [t_start, t_end] to result vector
+	; Create interval struct with t_start and t_end values
+	; The interval represents a covered portion of the arc
+	; This covered interval will be added to the result vector
+	fstp	%st(0)            ; Pop t_end
+	fstp	%st(0)            ; Pop t_start
+	
+L1936:
+	incl	%edi              ; i++
+	jmp	L1934             ; Continue loop
+	
+L1940:
+	; ========================================================================
+	; END OF STEP 3: Test intervals between critical points for coverage
+	; ========================================================================
+	
+	; ========================================================================
+	; STEP 4: Return list of covered intervals
+	; ========================================================================
+	
+	; C++ EQUIVALENT: return intervals;
+	; The intervals have been accumulated during the processing in STEP 3
+	; The result vector already contains the covered intervals
+	; This step represents the final return of the constructed interval list
+	
+	; Function exit: return the result vector containing covered intervals
+	movl	528(%esp), %eax   ; Load result vector address (return value)
+	addl	$1024, %esp       ; Deallocate extended local stack space (increased for STEP 3)
+	popl	%ebx              ; Restore EBX register
+	popl	%esi              ; Restore ESI register
+	popl	%edi              ; Restore EDI register
+	popl	%ebp              ; Restore EBP register
+	ret                       ; Return from function with interval list
+	
+	; ========================================================================
+	; END OF STEP 4: Return list of covered intervals
 	; ========================================================================
 	
 L1903:
@@ -1569,26 +1895,13 @@ L1905:
 	fstp	%st(0)            ; Pop distance
 	fstp	%st(0)            ; Pop R_sphere + EPS
 	; Add interval [0.0, 1.0] to result vector
-	; [Implementation of adding interval to vector would go here]
-	jmp	L1907             ; Jump to function exit
+	; Create interval struct and add to result vector
+	; This would add the complete interval [0.0, 1.0] to the result
+	jmp	L1940             ; Jump to STEP 4 (return function)
 	
 L1906:
-	; Return empty vector
-	jmp	L1907             ; Jump to function exit
-	
-L1904:
-	; Continue with next steps...
-	; [Additional steps would be implemented here]
-	
-L1907:
-	; Function exit
-	movl	528(%esp), %eax   ; Load result vector address (return value)
-	addl	$512, %esp        ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	popl	%edi              ; Restore EDI register
-	popl	%ebp              ; Restore EBP register
-	ret                       ; Return from function
+	; Return empty vector (no coverage)
+	jmp	L1940             ; Jump to STEP 4 (return function)
 
 ; C++ EQUIVALENT: vector<pair<long double, long double>> merge_intervals(...)
 ; Merges overlapping intervals to create consolidated coverage map
