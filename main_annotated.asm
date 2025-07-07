@@ -879,6 +879,34 @@ L141:
 ; 3. Finding intersection points using spherical trigonometry
 ; 4. Converting back to Cartesian coordinates
 
+	.p2align 4,,15
+	.globl	__Z30get_small_circle_intersectionsRK5PointS1_e
+	.def	__Z30get_small_circle_intersectionsRK5PointS1_e;	.scl	2;	.type	32;	.endef
+
+__Z30get_small_circle_intersectionsRK5PointS1_e:
+	pushl	%ebp              ; Save EBP register
+	pushl	%edi              ; Save EDI register
+	pushl	%esi              ; Save ESI register
+	pushl	%ebx              ; Save EBX register
+	subl	$476, %esp        ; Allocate 476 bytes of local stack space
+	
+	; Load function parameters
+	movl	500(%esp), %eax   ; Load address of center1
+	leal	176(%esp), %edi   ; Load address for normalized center1 (c1_norm)
+	movl	496(%esp), %ebx   ; Load address of result vector
+	leal	224(%esp), %esi   ; Load address for normalized center2 (c2_norm)
+	
+	; C++ EQUIVALENT: Point c1_norm = normalize(center1);
+	movl	%edi, (%esp)      ; Push result address
+	movl	%eax, 4(%esp)     ; Push center1 address  
+	call	__Z9normalizeRK5Point ; Call normalize(center1)
+	
+	; C++ EQUIVALENT: Point c2_norm = normalize(center2);
+	movl	504(%esp), %eax   ; Load address of center2
+	movl	%esi, (%esp)      ; Push result address
+	movl	%eax, 4(%esp)     ; Push center2 address
+	call	__Z9normalizeRK5Point ; Call normalize(center2)
+
 ;===============================================================================
 ; SECTION 9: INTERVAL COVERAGE ANALYSIS
 ;===============================================================================
@@ -1615,7 +1643,7 @@ L1146:
 	; Return 0 from main function
 
 ;===============================================================================
-; SECTION 11: MAIN ALGORITHM IMPLEMENTATION
+; SECTION 12: MAIN ALGORITHM IMPLEMENTATION
 ;===============================================================================
 
 ; The main function implements the complete flight path algorithm:
@@ -1635,7 +1663,7 @@ L1146:
 ; - Mathematical library function calls (cos, sin, acos, sqrt, etc.)
 
 ;===============================================================================
-; SECTION 11: CONSTANT DATA SECTION
+; SECTION 13: CONSTANT DATA SECTION
 ;===============================================================================
 
 ; .LC0: PI = 3.14159265358979323846L
@@ -2053,7 +2081,7 @@ L1233:  ; Handle loop termination
 	; ... (error handling and cleanup code)
 
 ;===============================================================================
-; SECTION 12: CONSTANT DATA DEFINITIONS
+; SECTION 14: CONSTANT DATA DEFINITIONS
 ;===============================================================================
 
 ; The constants section contains floating-point literals used throughout the program:
