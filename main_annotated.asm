@@ -958,6 +958,65 @@ L887:
 	; ========================================================================
 	; END OF STEP 1: Computing angular distance between sphere centers
 	; ========================================================================
+	
+	; ========================================================================
+	; STEP 2: Checking if spheres intersect (distance constraints)
+	; ========================================================================
+	
+	; C++ EQUIVALENT: long double R_rad = R_sphere / EARTH_RADIUS;
+	fldt	508(%esp)         ; Load R_sphere parameter
+	fldt	LC3               ; Load EARTH_RADIUS (6370.0)
+	fdivp	%st, %st(1)      ; Divide: R_sphere / EARTH_RADIUS
+	fstpt	64(%esp)          ; Store R_rad on stack
+	
+	; C++ EQUIVALENT: if (angular_distance > 2.0 * R_rad) return empty_vector;
+	; Check if circles are too far apart to intersect
+	fldt	48(%esp)          ; Load angular_distance
+	fldt	64(%esp)          ; Load R_rad
+	fadd	%st(0), %st       ; Calculate 2.0 * R_rad
+	fxch	%st(1)            ; Swap stack elements
+	fucom	%st(1)            ; Compare angular_distance with 2.0 * R_rad
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	ja	L888              ; Jump if angular_distance > 2.0 * R_rad (no intersection)
+	
+	; C++ EQUIVALENT: if (angular_distance < abs(R_rad - R_rad)) return empty_vector;
+	; Since both radii are R_rad, abs(R_rad - R_rad) = 0
+	; So we check if angular_distance < 0, which is impossible for acos result
+	fstp	%st(0)            ; Pop 2.0 * R_rad
+	fstp	%st(0)            ; Pop angular_distance
+	
+	; C++ EQUIVALENT: if (angular_distance < EPS) -> circles are nearly identical
+	fldt	48(%esp)          ; Reload angular_distance
+	fldt	LC5               ; Load EPS constant
+	fucom	%st(1)            ; Compare angular_distance with EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jb	L888              ; Jump if angular_distance < EPS (circles are identical)
+	
+	fstp	%st(0)            ; Pop EPS
+	fstp	%st(0)            ; Pop angular_distance
+	
+	; If we reach here, circles intersect - continue to step 3
+	jmp	L889              ; Jump to step 3 (intersection point calculation)
+	
+L888:
+	; NO INTERSECTION: Return empty vector
+	; C++ EQUIVALENT: return vector<Point>(); // empty vector
+	; Vector is already initialized empty, so just return
+	movl	496(%esp), %eax   ; Load result vector address (return value)
+	addl	$476, %esp        ; Deallocate local stack space
+	popl	%ebx              ; Restore EBX register
+	popl	%esi              ; Restore ESI register
+	popl	%edi              ; Restore EDI register
+	popl	%ebp              ; Restore EBP register
+	ret                       ; Return from function
+	
+L889:
+	; INTERSECTION EXISTS: Continue to step 3
+	; ========================================================================
+	; END OF STEP 2: Checking if spheres intersect (distance constraints)
+	; ========================================================================
 
 ;===============================================================================
 ; SECTION 9: INTERVAL COVERAGE ANALYSIS
