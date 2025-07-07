@@ -627,20 +627,106 @@ __Z30point_at_angle_on_great_circleRK5PointS1_e:
 	fxch	%st(3)            ; Exchange stack elements
 	
 L38:   ; Store result and clean up
-	fstpt	112(%esp)         ; Store component
-	fstpt	96(%esp)          ; Store component
-	fstpt	80(%esp)          ; Store component
-	; ... (additional complex calculations for orthogonal basis and final point)
+	; When points are nearly identical, return u (which is already on FPU stack)
+	; u is already normalized and on the stack, just store it as result
+	fstpt	(%ebx)            ; Store result.x = u_norm.x
+	fldt	32(%esp)          ; Load u_norm.x again
+	fstpt	12(%ebx)          ; Store result.y = u_norm.y (using stored u_norm.y)
+	fldt	16(%esp)          ; Load u_norm.y
+	fstpt	12(%ebx)          ; Store result.y = u_norm.y
+	fldt	48(%esp)          ; Load u_norm.z
+	fstpt	24(%ebx)          ; Store result.z = u_norm.z
 	
 	; Function epilogue
 	addl	$340, %esp        ; Deallocate local stack space
 	popl	%ebx              ; Restore EBX register
 	popl	%esi              ; Restore ESI register
 	ret
-	
+
 L51:   ; Handle case where points are different
-	; ... (complex calculations for creating orthogonal basis and computing final point)
-	jmp		L38               ; Jump to result storage
+	; C++ EQUIVALENT: P = u_norm * cos(angle_from_u) + v_ortho_norm * sin(angle_from_u)
+	; where v_ortho_norm = normalize(v_norm - u_norm * dot(u_norm, v_norm))
+	
+	; Clean up stack from previous calculations
+	fstp	%st(0)            ; Pop remaining values
+	fstp	%st(0)
+	fstp	%st(0)
+	
+	; Step 1: Calculate v_ortho = v_norm - u_norm * dot(u_norm, v_norm)
+	fldt	240(%esp)         ; Load dot product (dot(u_norm, v_norm))
+	
+	; v_ortho.x = v_norm.x - u_norm.x * dot
+	fldt	192(%esp)         ; Load v_norm.x
+	fldt	32(%esp)          ; Load u_norm.x
+	fmul	%st(2), %st       ; u_norm.x * dot
+	fsubrp	%st, %st(1)      ; v_norm.x - (u_norm.x * dot)
+	fstpt	256(%esp)         ; Store v_ortho.x
+	
+	; v_ortho.y = v_norm.y - u_norm.y * dot
+	fldt	204(%esp)         ; Load v_norm.y
+	fldt	16(%esp)          ; Load u_norm.y
+	fmul	%st(2), %st       ; u_norm.y * dot
+	fsubrp	%st, %st(1)      ; v_norm.y - (u_norm.y * dot)
+	fstpt	268(%esp)         ; Store v_ortho.y
+	
+	; v_ortho.z = v_norm.z - u_norm.z * dot
+	fldt	216(%esp)         ; Load v_norm.z
+	fldt	48(%esp)          ; Load u_norm.z
+	fmulp	%st, %st(1)      ; u_norm.z * dot
+	fsubrp	%st, %st(1)      ; v_norm.z - (u_norm.z * dot)
+	fstpt	280(%esp)         ; Store v_ortho.z
+	
+	; Step 2: Normalize v_ortho to get v_ortho_norm
+	leal	292(%esp), %eax   ; Address for v_ortho_norm result
+	movl	%eax, (%esp)      ; Push result address
+	leal	256(%esp), %eax   ; Address of v_ortho
+	movl	%eax, 4(%esp)     ; Push v_ortho address
+	call	__Z9normalizeRK5Point ; Call normalize(v_ortho)
+	
+	; Step 3: Load angle_from_u parameter and calculate cos and sin
+	fldt	364(%esp)         ; Load angle_from_u parameter
+	fld	%st(0)            ; Duplicate angle
+	fcos                      ; Calculate cos(angle_from_u)
+	fstpt	328(%esp)         ; Store cos(angle_from_u) at safe location
+	fsin                      ; Calculate sin(angle_from_u)
+	fstpt	340(%esp)         ; Store sin(angle_from_u) at safe location
+	
+	; Step 4: Calculate result = u_norm * cos(angle_from_u) + v_ortho_norm * sin(angle_from_u)
+	; result.x = u_norm.x * cos + v_ortho_norm.x * sin
+	fldt	32(%esp)          ; Load u_norm.x
+	fldt	328(%esp)         ; Load cos(angle_from_u)
+	fmulp	%st, %st(1)      ; u_norm.x * cos
+	fldt	292(%esp)         ; Load v_ortho_norm.x
+	fldt	340(%esp)         ; Load sin(angle_from_u)
+	fmulp	%st, %st(1)      ; v_ortho_norm.x * sin
+	faddp	%st, %st(1)      ; Add both terms
+	fstpt	(%ebx)            ; Store result.x
+	
+	; result.y = u_norm.y * cos + v_ortho_norm.y * sin
+	fldt	16(%esp)          ; Load u_norm.y
+	fldt	328(%esp)         ; Load cos(angle_from_u)
+	fmulp	%st, %st(1)      ; u_norm.y * cos
+	fldt	304(%esp)         ; Load v_ortho_norm.y  
+	fldt	340(%esp)         ; Load sin(angle_from_u)
+	fmulp	%st, %st(1)      ; v_ortho_norm.y * sin
+	faddp	%st, %st(1)      ; Add both terms
+	fstpt	12(%ebx)          ; Store result.y
+	
+	; result.z = u_norm.z * cos + v_ortho_norm.z * sin
+	fldt	48(%esp)          ; Load u_norm.z
+	fldt	328(%esp)         ; Load cos(angle_from_u)
+	fmulp	%st, %st(1)      ; u_norm.z * cos
+	fldt	316(%esp)         ; Load v_ortho_norm.z
+	fldt	340(%esp)         ; Load sin(angle_from_u)
+	fmulp	%st, %st(1)      ; v_ortho_norm.z * sin
+	faddp	%st, %st(1)      ; Add both terms
+	fstpt	24(%ebx)          ; Store result.z
+	
+	; Function epilogue
+	addl	$340, %esp        ; Deallocate local stack space
+	popl	%ebx              ; Restore EBX register
+	popl	%esi              ; Restore ESI register
+	ret
 
 ;===============================================================================
 ; SECTION 6: ARC ANALYSIS AND SAFETY CHECKING
@@ -1521,7 +1607,283 @@ L1916:
 	jmp		L1920             ; Jump to check midpoint case
 	
 L1915:
-	; Continue with intersection point calculation (will be implemented in next steps)
+	; Calculate intersection points on the great circle
+	; C++ EQUIVALENT: Point ortho_k_proj_norm = normalize(cross(gc_normal, k_proj_norm));
+	; Calculate orthogonal vector in great circle plane
+	; ortho_k_proj_norm = cross(gc_normal, k_proj_norm)
+	; gc_normal is at 16(%esp), k_proj_norm is at 112(%esp)
+	
+	; cross(gc_normal, k_proj_norm) = (gc_normal.y * k_proj_norm.z - gc_normal.z * k_proj_norm.y,
+	;                                  gc_normal.z * k_proj_norm.x - gc_normal.x * k_proj_norm.z,
+	;                                  gc_normal.x * k_proj_norm.y - gc_normal.y * k_proj_norm.x)
+	
+	; Calculate x component: gc_normal.y * k_proj_norm.z - gc_normal.z * k_proj_norm.y
+	fldt	28(%esp)          ; Load gc_normal.y
+	fldt	124(%esp)         ; Load k_proj_norm.z
+	fmulp	%st, %st(1)      ; gc_normal.y * k_proj_norm.z
+	fldt	40(%esp)          ; Load gc_normal.z
+	fldt	120(%esp)         ; Load k_proj_norm.y
+	fmulp	%st, %st(1)      ; gc_normal.z * k_proj_norm.y
+	fsubp	%st, %st(1)      ; Subtract to get x component
+	fstpt	544(%esp)         ; Store ortho_k_proj_norm.x
+	
+	; Calculate y component: gc_normal.z * k_proj_norm.x - gc_normal.x * k_proj_norm.z
+	fldt	40(%esp)          ; Load gc_normal.z
+	fldt	112(%esp)         ; Load k_proj_norm.x
+	fmulp	%st, %st(1)      ; gc_normal.z * k_proj_norm.x
+	fldt	16(%esp)          ; Load gc_normal.x
+	fldt	124(%esp)         ; Load k_proj_norm.z
+	fmulp	%st, %st(1)      ; gc_normal.x * k_proj_norm.z
+	fsubp	%st, %st(1)      ; Subtract to get y component
+	fstpt	556(%esp)         ; Store ortho_k_proj_norm.y
+	
+	; Calculate z component: gc_normal.x * k_proj_norm.y - gc_normal.y * k_proj_norm.x
+	fldt	16(%esp)          ; Load gc_normal.x
+	fldt	120(%esp)         ; Load k_proj_norm.y
+	fmulp	%st, %st(1)      ; gc_normal.x * k_proj_norm.y
+	fldt	28(%esp)          ; Load gc_normal.y
+	fldt	112(%esp)         ; Load k_proj_norm.x
+	fmulp	%st, %st(1)      ; gc_normal.y * k_proj_norm.x
+	fsubp	%st, %st(1)      ; Subtract to get z component
+	fstpt	568(%esp)         ; Store ortho_k_proj_norm.z
+	
+	; Normalize ortho_k_proj_norm
+	; Calculate magnitude: sqrt(x^2 + y^2 + z^2)
+	fldt	544(%esp)         ; Load ortho_k_proj_norm.x
+	fldt	544(%esp)         ; Load ortho_k_proj_norm.x again
+	fmulp	%st, %st(1)      ; x^2
+	fldt	556(%esp)         ; Load ortho_k_proj_norm.y
+	fldt	556(%esp)         ; Load ortho_k_proj_norm.y again
+	fmulp	%st, %st(1)      ; y^2
+	faddp	%st, %st(1)      ; x^2 + y^2
+	fldt	568(%esp)         ; Load ortho_k_proj_norm.z
+	fldt	568(%esp)         ; Load ortho_k_proj_norm.z again
+	fmulp	%st, %st(1)      ; z^2
+	faddp	%st, %st(1)      ; x^2 + y^2 + z^2
+	fsqrt                     ; sqrt(x^2 + y^2 + z^2)
+	fstpt	580(%esp)         ; Store magnitude
+	
+	; Check if magnitude is too small
+	fldt	580(%esp)         ; Load magnitude
+	fldt	LC5               ; Load EPS
+	fucom	%st(1)            ; Compare magnitude with EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jae		L1922             ; Jump if magnitude >= EPS (safe to normalize)
+	
+	; Magnitude too small, use a default orthogonal vector
+	fstp	%st(0)            ; Pop EPS
+	fstp	%st(0)            ; Pop magnitude
+	fld1                      ; Load 1.0
+	fstpt	544(%esp)         ; Store ortho_k_proj_norm.x = 1.0
+	fldz                      ; Load 0.0
+	fstpt	556(%esp)         ; Store ortho_k_proj_norm.y = 0.0
+	fldz                      ; Load 0.0
+	fstpt	568(%esp)         ; Store ortho_k_proj_norm.z = 0.0
+	jmp		L1923             ; Jump to intersection point calculation
+	
+L1922:
+	; Normalize by dividing by magnitude
+	fstp	%st(0)            ; Pop EPS
+	fldt	544(%esp)         ; Load ortho_k_proj_norm.x
+	fldt	580(%esp)         ; Load magnitude
+	fdivp	%st, %st(1)      ; x / magnitude
+	fstpt	544(%esp)         ; Store normalized x
+	
+	fldt	556(%esp)         ; Load ortho_k_proj_norm.y
+	fldt	580(%esp)         ; Load magnitude
+	fdivp	%st, %st(1)      ; y / magnitude
+	fstpt	556(%esp)         ; Store normalized y
+	
+	fldt	568(%esp)         ; Load ortho_k_proj_norm.z
+	fldt	580(%esp)         ; Load magnitude
+	fdivp	%st, %st(1)      ; z / magnitude
+	fstpt	568(%esp)         ; Store normalized z
+	
+L1923:
+	; Calculate intersection points
+	; C++ EQUIVALENT: Point p1_norm_gc = k_proj_norm * cos(alpha) + ortho_k_proj_norm * sin(alpha);
+	; C++ EQUIVALENT: Point p2_norm_gc = k_proj_norm * cos(alpha) - ortho_k_proj_norm * sin(alpha);
+	
+	; Calculate cos(alpha) and sin(alpha)
+	fldt	508(%esp)         ; Load alpha
+	fsincos                   ; Calculate sin(alpha) (ST(0)) and cos(alpha) (ST(1))
+	fstpt	592(%esp)         ; Store cos(alpha)
+	fstpt	604(%esp)         ; Store sin(alpha)
+	
+	; Calculate p1_norm_gc = k_proj_norm * cos(alpha) + ortho_k_proj_norm * sin(alpha)
+	; p1_norm_gc.x = k_proj_norm.x * cos(alpha) + ortho_k_proj_norm.x * sin(alpha)
+	fldt	112(%esp)         ; Load k_proj_norm.x
+	fldt	592(%esp)         ; Load cos(alpha)
+	fmulp	%st, %st(1)      ; k_proj_norm.x * cos(alpha)
+	fldt	544(%esp)         ; Load ortho_k_proj_norm.x
+	fldt	604(%esp)         ; Load sin(alpha)
+	fmulp	%st, %st(1)      ; ortho_k_proj_norm.x * sin(alpha)
+	faddp	%st, %st(1)      ; Add to get p1_norm_gc.x
+	fstpt	616(%esp)         ; Store p1_norm_gc.x
+	
+	; p1_norm_gc.y = k_proj_norm.y * cos(alpha) + ortho_k_proj_norm.y * sin(alpha)
+	fldt	120(%esp)         ; Load k_proj_norm.y
+	fldt	592(%esp)         ; Load cos(alpha)
+	fmulp	%st, %st(1)      ; k_proj_norm.y * cos(alpha)
+	fldt	556(%esp)         ; Load ortho_k_proj_norm.y
+	fldt	604(%esp)         ; Load sin(alpha)
+	fmulp	%st, %st(1)      ; ortho_k_proj_norm.y * sin(alpha)
+	faddp	%st, %st(1)      ; Add to get p1_norm_gc.y
+	fstpt	628(%esp)         ; Store p1_norm_gc.y
+	
+	; p1_norm_gc.z = k_proj_norm.z * cos(alpha) + ortho_k_proj_norm.z * sin(alpha)
+	fldt	124(%esp)         ; Load k_proj_norm.z
+	fldt	592(%esp)         ; Load cos(alpha)
+	fmulp	%st, %st(1)      ; k_proj_norm.z * cos(alpha)
+	fldt	568(%esp)         ; Load ortho_k_proj_norm.z
+	fldt	604(%esp)         ; Load sin(alpha)
+	fmulp	%st, %st(1)      ; ortho_k_proj_norm.z * sin(alpha)
+	faddp	%st, %st(1)      ; Add to get p1_norm_gc.z
+	fstpt	640(%esp)         ; Store p1_norm_gc.z
+	
+	; Calculate p2_norm_gc = k_proj_norm * cos(alpha) - ortho_k_proj_norm * sin(alpha)
+	; p2_norm_gc.x = k_proj_norm.x * cos(alpha) - ortho_k_proj_norm.x * sin(alpha)
+	fldt	112(%esp)         ; Load k_proj_norm.x
+	fldt	592(%esp)         ; Load cos(alpha)
+	fmulp	%st, %st(1)      ; k_proj_norm.x * cos(alpha)
+	fldt	544(%esp)         ; Load ortho_k_proj_norm.x
+	fldt	604(%esp)         ; Load sin(alpha)
+	fmulp	%st, %st(1)      ; ortho_k_proj_norm.x * sin(alpha)
+	fsubp	%st, %st(1)      ; Subtract to get p2_norm_gc.x
+	fstpt	652(%esp)         ; Store p2_norm_gc.x
+	
+	; p2_norm_gc.y = k_proj_norm.y * cos(alpha) - ortho_k_proj_norm.y * sin(alpha)
+	fldt	120(%esp)         ; Load k_proj_norm.y
+	fldt	592(%esp)         ; Load cos(alpha)
+	fmulp	%st, %st(1)      ; k_proj_norm.y * cos(alpha)
+	fldt	556(%esp)         ; Load ortho_k_proj_norm.y
+	fldt	604(%esp)         ; Load sin(alpha)
+	fmulp	%st, %st(1)      ; ortho_k_proj_norm.y * sin(alpha)
+	fsubp	%st, %st(1)      ; Subtract to get p2_norm_gc.y
+	fstpt	664(%esp)         ; Store p2_norm_gc.y
+	
+	; p2_norm_gc.z = k_proj_norm.z * cos(alpha) - ortho_k_proj_norm.z * sin(alpha)
+	fldt	124(%esp)         ; Load k_proj_norm.z
+	fldt	592(%esp)         ; Load cos(alpha)
+	fmulp	%st, %st(1)      ; k_proj_norm.z * cos(alpha)
+	fldt	568(%esp)         ; Load ortho_k_proj_norm.z
+	fldt	604(%esp)         ; Load sin(alpha)
+	fmulp	%st, %st(1)      ; ortho_k_proj_norm.z * sin(alpha)
+	fsubp	%st, %st(1)      ; Subtract to get p2_norm_gc.z
+	fstpt	676(%esp)         ; Store p2_norm_gc.z
+	
+	; STEP 4c: Scale intersection points to earth radius
+	; C++ EQUIVALENT: Point p1_gc = {p1_norm_gc.x * R_EARTH, p1_norm_gc.y * R_EARTH, p1_norm_gc.z * R_EARTH};
+	; C++ EQUIVALENT: Point p2_gc = {p2_norm_gc.x * R_EARTH, p2_norm_gc.y * R_EARTH, p2_norm_gc.z * R_EARTH};
+	
+	; Calculate p1_gc
+	fldt	616(%esp)         ; Load p1_norm_gc.x
+	fldt	LC1               ; Load R_EARTH
+	fmulp	%st, %st(1)      ; p1_norm_gc.x * R_EARTH
+	fstpt	688(%esp)         ; Store p1_gc.x
+	
+	fldt	628(%esp)         ; Load p1_norm_gc.y
+	fldt	LC1               ; Load R_EARTH
+	fmulp	%st, %st(1)      ; p1_norm_gc.y * R_EARTH
+	fstpt	700(%esp)         ; Store p1_gc.y
+	
+	fldt	640(%esp)         ; Load p1_norm_gc.z
+	fldt	LC1               ; Load R_EARTH
+	fmulp	%st, %st(1)      ; p1_norm_gc.z * R_EARTH
+	fstpt	712(%esp)         ; Store p1_gc.z
+	
+	; Calculate p2_gc
+	fldt	652(%esp)         ; Load p2_norm_gc.x
+	fldt	LC1               ; Load R_EARTH
+	fmulp	%st, %st(1)      ; p2_norm_gc.x * R_EARTH
+	fstpt	724(%esp)         ; Store p2_gc.x
+	
+	fldt	664(%esp)         ; Load p2_norm_gc.y
+	fldt	LC1               ; Load R_EARTH
+	fmulp	%st, %st(1)      ; p2_norm_gc.y * R_EARTH
+	fstpt	736(%esp)         ; Store p2_gc.y
+	
+	fldt	676(%esp)         ; Load p2_norm_gc.z
+	fldt	LC1               ; Load R_EARTH
+	fmulp	%st, %st(1)      ; p2_norm_gc.z * R_EARTH
+	fstpt	748(%esp)         ; Store p2_gc.z
+	
+	; STEP 4d: Check if intersection points lie on the arc and add their parameters
+	; C++ EQUIVALENT: if (is_on_arc(u, v, p1_gc)) { critical_params.push_back(get_arc_parameter(u, v, p1_gc)); }
+	
+	; Call is_on_arc(u, v, p1_gc)
+	; Parameters: u (at 136(%esp)), v (at 148(%esp)), p1_gc (at 688(%esp))
+	leal	136(%esp), %eax   ; Address of u
+	pushl	%eax              ; Push u parameter
+	leal	152(%esp), %eax   ; Address of v (adjusted for push)
+	pushl	%eax              ; Push v parameter
+	leal	696(%esp), %eax   ; Address of p1_gc (adjusted for pushes)
+	pushl	%eax              ; Push p1_gc parameter
+	call	is_on_arc         ; Call is_on_arc function
+	addl	$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
+	
+	; Check return value (in EAX)
+	testl	%eax, %eax        ; Test if is_on_arc returned true
+	jz		L1924             ; Jump if false (p1_gc is not on arc)
+	
+	; p1_gc is on arc, get its parameter
+	leal	136(%esp), %eax   ; Address of u
+	pushl	%eax              ; Push u parameter
+	leal	152(%esp), %eax   ; Address of v (adjusted for push)
+	pushl	%eax              ; Push v parameter
+	leal	696(%esp), %eax   ; Address of p1_gc (adjusted for pushes)
+	pushl	%eax              ; Push p1_gc parameter
+	call	get_arc_parameter ; Call get_arc_parameter function
+	addl	$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
+	
+	; Add parameter to critical_params array
+	movl	504(%esp), %eax   ; Load current count of critical parameters
+	fstpt	760(%esp,%eax,12) ; Store parameter in array (12 bytes per long double)
+	incl	%eax              ; Increment count
+	movl	%eax, 504(%esp)   ; Store updated count
+	
+L1924:
+	; C++ EQUIVALENT: if (alpha > EPS && is_on_arc(u, v, p2_gc)) { critical_params.push_back(get_arc_parameter(u, v, p2_gc)); }
+	; Check if alpha > EPS (avoid adding duplicate point if tangent)
+	fldt	508(%esp)         ; Load alpha
+	fldt	LC5               ; Load EPS
+	fucom	%st(1)            ; Compare alpha with EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	fstp	%st(0)            ; Pop EPS
+	fstp	%st(0)            ; Pop alpha
+	jbe		L1921             ; Jump if alpha <= EPS (tangent case, skip p2)
+	
+	; Call is_on_arc(u, v, p2_gc)
+	leal	136(%esp), %eax   ; Address of u
+	pushl	%eax              ; Push u parameter
+	leal	152(%esp), %eax   ; Address of v (adjusted for push)
+	pushl	%eax              ; Push v parameter
+	leal	732(%esp), %eax   ; Address of p2_gc (adjusted for pushes)
+	pushl	%eax              ; Push p2_gc parameter
+	call	is_on_arc         ; Call is_on_arc function
+	addl	$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
+	
+	; Check return value (in EAX)
+	testl	%eax, %eax        ; Test if is_on_arc returned true
+	jz		L1921             ; Jump if false (p2_gc is not on arc)
+	
+	; p2_gc is on arc, get its parameter
+	leal	136(%esp), %eax   ; Address of u
+	pushl	%eax              ; Push u parameter
+	leal	152(%esp), %eax   ; Address of v (adjusted for push)
+	pushl	%eax              ; Push v parameter
+	leal	732(%esp), %eax   ; Address of p2_gc (adjusted for pushes)
+	pushl	%eax              ; Push p2_gc parameter
+	call	get_arc_parameter ; Call get_arc_parameter function
+	addl	$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
+	
+	; Add parameter to critical_params array
+	movl	504(%esp), %eax   ; Load current count of critical parameters
+	fstpt	760(%esp,%eax,12) ; Store parameter in array (12 bytes per long double)
+	incl	%eax              ; Increment count
+	movl	%eax, 504(%esp)   ; Store updated count
 	jmp		L1921             ; Jump to next step
 	
 L1913:
