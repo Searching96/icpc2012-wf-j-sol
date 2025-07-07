@@ -2820,34 +2820,342 @@ L1054:
 	movl	$0, -200(%ebp)    ; Initialize query counter
 	
 L1093:
-	; QUERY INPUT: Read source, destination, and additional_fuel
+	; ========================================================================
+	; QUERY PROCESSING: Process each individual query
+	; ========================================================================
+	; C++ EQUIVALENT: for (int q = 0; q < Q; ++q) {
+	;                   int s, t; long double c;
+	;                   cin >> s >> t >> c; --s; --t;
+	;                   // Build refueling graph and find shortest path
+	;                 }
+	
+	; QUERY INPUT: Read source, destination, and fuel capacity
 	leal	-144(%ebp), %eax  ; Load address of source variable
 	movl	$__ZSt3cin, %ecx  ; Load cin object
-	leal	-140(%ebp), %edi  ; Load address of destination variable
 	movl	%eax, (%esp)      ; Push source address
 	call	__ZNSirsERi       ; Call cin >> source
-	subl	$4, %esp          ; Adjust stack
+	addl	$4, %esp          ; Adjust stack
+	leal	-140(%ebp), %edi  ; Load address of destination variable
 	movl	%eax, %ecx        ; Move result to ECX
 	movl	%edi, (%esp)      ; Push destination address
 	call	__ZNSirsERi       ; Call cin >> destination
-	subl	$4, %esp          ; Adjust stack
+	addl	$4, %esp          ; Adjust stack
+	leal	-210(%ebp), %edi  ; Load address of fuel_capacity variable
 	movl	%eax, %ecx        ; Move result to ECX
-	leal	-120(%ebp), %edi  ; Load address of additional_fuel variable
-	movl	%edi, (%esp)      ; Push additional_fuel address
-	call	__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> additional_fuel
+	movl	%edi, (%esp)      ; Push fuel_capacity address
+	call	__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> fuel_capacity
+	addl	$4, %esp          ; Adjust stack
 	
 	; CONVERT TO 0-BASED INDEXING
-	movl	-152(%ebp), %ebx  ; Load N (number of airports)
-	subl	$4, %esp          ; Adjust stack
 	subl	$1, -144(%ebp)    ; source = source - 1 (0-based)
 	subl	$1, -140(%ebp)    ; destination = destination - 1 (0-based)
+	
+	; ========================================================================
+	; BUILD REFUELING GRAPH: Create airport-to-airport graph with fuel constraints
+	; ========================================================================
+	; C++ EQUIVALENT: vector<vector<long double>> current_adj_refuel(N, vector<long double>(N, INF));
+	;                 for(int i = 0; i < N; ++i) current_adj_refuel[i][i] = 0;
+	movl	-152(%ebp), %ebx  ; Load N (number of airports)
 	testl	%ebx, %ebx        ; Check if N > 0
 	je	L1245             ; Jump if no airports
 	
-	; ALLOCATE TEMPORARY DISTANCE MATRIX: For modified Floyd-Warshall with additional fuel
-	cmpl	$357913941, %ebx  ; Check for overflow
+	; ALLOCATE REFUELING MATRIX: Create N x N matrix for airport distances
+	cmpl	$46340, %ebx      ; Check for overflow
 	ja	L983              ; Jump to error if too large
-	leal	(%ebx,%ebx,2), %edi ; Calculate 3 * N
+	movl	%ebx, %eax        ; Copy N
+	imull	%ebx, %eax        ; Calculate N * N
+	leal	(%eax,%eax,2), %eax ; Calculate N * N * 3 (for long double)
+	sall	$2, %eax          ; Calculate N * N * 12 (sizeof(long double))
+	movl	%eax, (%esp)      ; Push size argument
+	call	__Znwj            ; Allocate memory: new long double[N*N]
+	movl	%eax, -214(%ebp)  ; Store current_adj_refuel matrix pointer
+	
+	; INITIALIZE REFUELING MATRIX: Set all distances to INF and diagonal to 0
+	fldt	LC7               ; Load INF constant
+	movl	%ebx, %ecx        ; Copy N for loop counter
+	movl	%eax, %edi        ; Copy matrix pointer
+	
+L1094_init_refuel:
+	; Initialize row with INF
+	movl	%ebx, %edx        ; Inner loop counter
+L1095_init_refuel_row:
+	fstpt	(%edi)            ; Store INF
+	fldt	(%edi)            ; Reload for next iteration
+	addl	$12, %edi         ; Move to next matrix element
+	subl	$1, %edx          ; Decrement inner counter
+	jne	L1095_init_refuel_row ; Continue inner loop
+	subl	$1, %ecx          ; Decrement outer counter
+	jne	L1094_init_refuel ; Continue outer loop
+	fstp	%st(0)            ; Pop INF from FPU stack
+	
+	; Set diagonal elements to 0: current_adj_refuel[i][i] = 0
+	movl	-214(%ebp), %edi  ; Load matrix pointer
+	xorl	%ecx, %ecx        ; Clear i counter
+	fldz                      ; Load 0.0
+	
+L1096_set_refuel_diagonal:
+	; Calculate offset for current_adj_refuel[i][i] = base + (i * N + i) * 12
+	movl	%ecx, %eax        ; Copy i
+	imull	%ebx, %eax        ; Calculate i * N
+	addl	%ecx, %eax        ; Calculate i * N + i
+	leal	(%eax,%eax,2), %eax ; Calculate (i * N + i) * 3
+	fstpt	(%edi,%eax,4)     ; Store 0.0 at current_adj_refuel[i][i]
+	fldt	(%edi,%eax,4)     ; Reload for next iteration
+	addl	$1, %ecx          ; Increment i
+	cmpl	%ecx, %ebx        ; Check if i < N
+	jne	L1096_set_refuel_diagonal ; Continue diagonal loop
+	fstp	%st(0)            ; Pop 0.0 from FPU stack
+	
+	; ========================================================================
+	; FILL REFUELING MATRIX: Check if airports can reach each other with current fuel capacity
+	; ========================================================================
+	; C++ EQUIVALENT: for(int i = 0; i < N; ++i) {
+	;                   for(int j = 0; j < N; ++j) {
+	;                     if (i == j) continue;
+	;                     int u_idx = airport_to_vertex_idx[i];
+	;                     int v_idx = airport_to_vertex_idx[j];
+	;                     if (adj_aux[u_idx][v_idx] <= c + EPS) {
+	;                       current_adj_refuel[i][j] = adj_aux[u_idx][v_idx];
+	;                     }
+	;                   }
+	;                 }
+	xorl	%ecx, %ecx        ; Clear i counter
+	fldt	LC5               ; Load EPS constant
+	
+L1097_refuel_outer:
+	; OUTER LOOP: for (int i = 0; i < N; ++i)
+	xorl	%esi, %esi        ; Clear j counter
+	
+L1098_refuel_inner:
+	; INNER LOOP: for (int j = 0; j < N; ++j)
+	cmpl	%esi, %ecx        ; Check if i == j (diagonal)
+	je	L1101_next_refuel_j ; Skip diagonal elements
+	
+	; Get vertex indices for airports i and j
+	movl	-192(%ebp), %edi  ; Load airport_to_vertex_idx array
+	movl	(%edi,%ecx,4), %eax ; Load u_idx = airport_to_vertex_idx[i]
+	movl	(%edi,%esi,4), %edx ; Load v_idx = airport_to_vertex_idx[j]
+	
+	; Calculate &adj_aux[u_idx][v_idx]
+	movl	-196(%ebp), %edi  ; Load adj_aux matrix
+	movl	-184(%ebp), %ebx  ; Load V (vertex count)
+	imull	%ebx, %eax        ; Calculate u_idx * V
+	addl	%edx, %eax        ; Calculate u_idx * V + v_idx
+	leal	(%eax,%eax,2), %eax ; Calculate (u_idx * V + v_idx) * 3
+	fldt	(%edi,%eax,4)     ; Load adj_aux[u_idx][v_idx]
+	
+	; Check if adj_aux[u_idx][v_idx] <= fuel_capacity + EPS
+	fldt	-210(%ebp)        ; Load fuel_capacity
+	fadd	%st(2), %st       ; Add fuel_capacity + EPS
+	fucom	%st(1)            ; Compare with adj_aux[u_idx][v_idx]
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jb	L1100_skip_refuel ; Skip if adj_aux[u_idx][v_idx] > fuel_capacity + EPS
+	
+	; REACHABLE: Set current_adj_refuel[i][j] = adj_aux[u_idx][v_idx]
+	fstp	%st(0)            ; Pop fuel_capacity + EPS
+	movl	-214(%ebp), %edi  ; Load current_adj_refuel matrix
+	movl	-152(%ebp), %ebx  ; Load N
+	movl	%ecx, %eax        ; Copy i
+	imull	%ebx, %eax        ; Calculate i * N
+	addl	%esi, %eax        ; Calculate i * N + j
+	leal	(%eax,%eax,2), %eax ; Calculate (i * N + j) * 3
+	fstpt	(%edi,%eax,4)     ; Store distance at current_adj_refuel[i][j]
+	jmp	L1101_next_refuel_j ; Jump to next iteration
+	
+L1100_skip_refuel:
+	fstp	%st(0)            ; Pop fuel_capacity + EPS
+	fstp	%st(0)            ; Pop adj_aux[u_idx][v_idx]
+	
+L1101_next_refuel_j:
+	; INNER LOOP INCREMENT: j++
+	addl	$1, %esi          ; Increment j
+	movl	-152(%ebp), %ebx  ; Reload N
+	cmpl	%esi, %ebx        ; Check if j < N
+	jne	L1098_refuel_inner ; Continue if j < N
+	
+	; OUTER LOOP INCREMENT: i++
+	addl	$1, %ecx          ; Increment i
+	cmpl	%ecx, %ebx        ; Check if i < N
+	jne	L1097_refuel_outer ; Continue if i < N
+	
+	fstp	%st(0)            ; Pop EPS from FPU stack
+	
+	; ========================================================================
+	; FLOYD-WARSHALL ON REFUELING GRAPH: Find shortest paths between airports
+	; ========================================================================
+	; C++ EQUIVALENT: for (int k = 0; k < N; ++k) {
+	;                   for (int i = 0; i < N; ++i) {
+	;                     for (int j = 0; j < N; ++j) {
+	;                       if (current_adj_refuel[i][k] != INF && current_adj_refuel[k][j] != INF) {
+	;                         current_adj_refuel[i][j] = min(current_adj_refuel[i][j], 
+	;                                                        current_adj_refuel[i][k] + current_adj_refuel[k][j]);
+	;                       }
+	;                     }
+	;                   }
+	;                 }
+	xorl	%ecx, %ecx        ; Clear k counter
+	fldt	LC7               ; Load INF for comparisons
+	
+L1102_refuel_floyd_k:
+	; FLOYD-WARSHALL OUTER LOOP: for (k = 0; k < N; k++)
+	xorl	%esi, %esi        ; Clear i counter
+	
+L1103_refuel_floyd_i:
+	; FLOYD-WARSHALL MIDDLE LOOP: for (i = 0; i < N; i++)
+	xorl	%edi, %edi        ; Clear j counter
+	
+L1104_refuel_floyd_j:
+	; FLOYD-WARSHALL INNER LOOP: for (j = 0; j < N; j++)
+	movl	-214(%ebp), %edx  ; Load current_adj_refuel matrix pointer
+	movl	-152(%ebp), %ebx  ; Load N
+	
+	; Calculate &current_adj_refuel[i][k]
+	movl	%esi, %eax        ; Copy i
+	imull	%ebx, %eax        ; Calculate i * N
+	addl	%ecx, %eax        ; Calculate i * N + k
+	leal	(%eax,%eax,2), %eax ; Calculate (i * N + k) * 3
+	fldt	(%edx,%eax,4)     ; Load current_adj_refuel[i][k]
+	
+	; Check if current_adj_refuel[i][k] != INF
+	fucom	%st(1)            ; Compare with INF
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jae	L1107_skip_refuel_update ; Skip if current_adj_refuel[i][k] >= INF
+	
+	; Calculate &current_adj_refuel[k][j]
+	movl	%ecx, %eax        ; Copy k
+	imull	%ebx, %eax        ; Calculate k * N
+	addl	%edi, %eax        ; Calculate k * N + j
+	leal	(%eax,%eax,2), %eax ; Calculate (k * N + j) * 3
+	fldt	(%edx,%eax,4)     ; Load current_adj_refuel[k][j]
+	
+	; Check if current_adj_refuel[k][j] != INF
+	fucom	%st(2)            ; Compare with INF
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jae	L1108_skip_refuel_update2 ; Skip if current_adj_refuel[k][j] >= INF
+	
+	; Calculate current_adj_refuel[i][k] + current_adj_refuel[k][j]
+	faddp	%st, %st(1)       ; Add: current_adj_refuel[i][k] + current_adj_refuel[k][j]
+	
+	; Calculate &current_adj_refuel[i][j]
+	movl	%esi, %eax        ; Copy i
+	imull	%ebx, %eax        ; Calculate i * N
+	addl	%edi, %eax        ; Calculate i * N + j
+	leal	(%eax,%eax,2), %eax ; Calculate (i * N + j) * 3
+	fldt	(%edx,%eax,4)     ; Load current_adj_refuel[i][j]
+	
+	; Compare and update: current_adj_refuel[i][j] = min(current_adj_refuel[i][j], new_distance)
+	fucom	%st(1)            ; Compare old vs new distance
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jbe	L1109_keep_refuel_old ; Keep old if old <= new
+	
+	; Update with new shorter distance
+	fstp	%st(0)            ; Pop old distance
+	fstpt	(%edx,%eax,4)     ; Store new distance
+	jmp	L1106_next_refuel_floyd_j ; Jump to next iteration
+	
+L1109_keep_refuel_old:
+	fstp	%st(1)            ; Pop new distance, keep old
+	fstp	%st(0)            ; Pop old distance
+	jmp	L1106_next_refuel_floyd_j ; Jump to next iteration
+	
+L1108_skip_refuel_update2:
+	fstp	%st(0)            ; Pop current_adj_refuel[k][j]
+L1107_skip_refuel_update:
+	fstp	%st(0)            ; Pop current_adj_refuel[i][k]
+	
+L1106_next_refuel_floyd_j:
+	; FLOYD-WARSHALL INNER LOOP INCREMENT: j++
+	addl	$1, %edi          ; Increment j
+	cmpl	%edi, %ebx        ; Check if j < N
+	jne	L1104_refuel_floyd_j ; Continue if j < N
+	
+	; FLOYD-WARSHALL MIDDLE LOOP INCREMENT: i++
+	addl	$1, %esi          ; Increment i
+	cmpl	%esi, %ebx        ; Check if i < N
+	jne	L1103_refuel_floyd_i ; Continue if i < N
+	
+	; FLOYD-WARSHALL OUTER LOOP INCREMENT: k++
+	addl	$1, %ecx          ; Increment k
+	cmpl	%ecx, %ebx        ; Check if k < N
+	jne	L1102_refuel_floyd_k ; Continue if k < N
+	
+	; ========================================================================
+	; OUTPUT RESULT: Print shortest distance or "impossible"
+	; ========================================================================
+	; C++ EQUIVALENT: if (current_adj_refuel[s][t] == INF) {
+	;                   cout << "impossible" << endl;
+	;                 } else {
+	;                   cout << current_adj_refuel[s][t] << endl;
+	;                 }
+	
+	; Get shortest distance from source to destination
+	movl	-144(%ebp), %eax  ; Load source index (0-based)
+	movl	-140(%ebp), %esi  ; Load destination index (0-based)
+	movl	-214(%ebp), %edi  ; Load current_adj_refuel matrix
+	imull	%ebx, %eax        ; Calculate source * N
+	addl	%esi, %eax        ; Calculate source * N + destination
+	leal	(%eax,%eax,2), %eax ; Calculate (source * N + destination) * 3
+	fldt	(%edi,%eax,4)     ; Load current_adj_refuel[source][destination]
+	
+	; Compare with INF to check if path exists
+	fucom	%st(1)            ; Compare distance with INF
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jae	L1246             ; Jump if distance >= INF (no path)
+	
+	; PATH EXISTS: Output the distance
+	fstp	%st(1)            ; Pop INF, keep distance
+	movl	$__ZSt4cout, %ecx ; Load cout object
+	fstpt	(%esp)            ; Push distance as parameter
+	call	__ZNSolsEe        ; Call cout << distance
+	addl	$12, %esp         ; Adjust stack for long double
+	jmp	L1247             ; Jump to newline output
+	
+L1246:
+	; NO PATH: Output "impossible"
+	fstp	%st(0)            ; Pop distance
+	fstp	%st(0)            ; Pop INF
+	movl	$10, 8(%esp)      ; String length for "impossible"
+	movl	$LC18, 4(%esp)    ; Push "impossible" string
+	movl	$__ZSt4cout, (%esp) ; Push cout object
+	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "impossible"
+	
+L1247:
+	; OUTPUT NEWLINE: Add newline after result
+	movl	$__ZSt4cout, %eax ; Load cout object
+	movl	-12(%eax), %edx   ; Get vtable offset
+	movl	__ZSt4cout+124(%edx), %ebx ; Load ctype facet
+	testl	%ebx, %ebx        ; Check if valid
+	je	L1036             ; Jump to error if null
+	cmpb	$0, 28(%ebx)      ; Check if initialized
+	je	L1081             ; Jump to initialization if needed
+	movsbl	39(%ebx), %eax   ; Load newline character
+	
+L1082:
+	movl	$__ZSt4cout, %ecx ; Load cout object
+	movl	%eax, (%esp)      ; Push newline
+	call	__ZNSo3putEc      ; Print newline
+	addl	$4, %esp          ; Adjust stack
+	movl	%eax, %ecx        ; Load cout result
+	call	__ZNSo5flushEv    ; Flush output
+	
+	; CLEANUP QUERY MATRIX: Free current_adj_refuel matrix
+	movl	-214(%ebp), %eax  ; Load current_adj_refuel matrix
+	testl	%eax, %eax        ; Check if valid
+	je	L1088             ; Skip if null
+	movl	%eax, (%esp)      ; Push matrix pointer
+	call	__ZdlPv           ; Delete matrix
+	
+L1088:
+	; NEXT QUERY: Increment query counter and continue
+	addl	$1, -200(%ebp)    ; Increment query counter
+	movl	-200(%ebp), %eax  ; Load query counter
+	cmpl	%eax, -148(%ebp)  ; Compare with total queries
+	jg	L1093             ; Continue if more queries
 	leal	0(,%edi,4), %eax  ; Calculate 3 * N * 4 bytes
 	movl	%eax, (%esp)      ; Push size
 	movl	%eax, -156(%ebp)  ; Store size
@@ -3174,30 +3482,131 @@ L1088:
 	jg	L1093             ; Continue if more queries
 	
 L1092:
-	; CLEANUP GLOBAL STRUCTURES: Free all allocated memory
-	movl	-168(%ebp), %eax  ; Load main matrix
-	cmpl	%eax, -184(%ebp)  ; Compare pointers
-	je	L1056             ; Skip if no cleanup needed
-	movl	%eax, %ebx        ; Load matrix start
+	; ========================================================================
+	; END OF CURRENT TEST CASE: Cleanup and proceed to next test case
+	; ========================================================================
 	
-L1097:
-	; CLEANUP MAIN MATRIX ROWS
-	movl	(%ebx), %eax      ; Load row pointer
+	; CLEANUP GLOBAL STRUCTURES: Free all allocated memory for this test case
+	; Clean up adj_aux matrix
+	movl	-196(%ebp), %eax  ; Load adj_aux matrix
 	testl	%eax, %eax        ; Check if valid
-	je	L1096             ; Skip if null
-	movl	%eax, (%esp)      ; Push row pointer
-	call	__ZdlPv           ; Delete row
+	je	L1095_skip_adj_aux ; Skip if null
+	movl	%eax, (%esp)      ; Push matrix pointer
+	call	__ZdlPv           ; Delete adj_aux matrix
 	
-L1096:
-	addl	$12, %ebx         ; Move to next row
-	cmpl	%ebx, -184(%ebp)  ; Check if done
-	jne	L1097             ; Continue if more rows
-	
-L1056:
-	; CLEANUP MAIN STRUCTURES: Free remaining global structures
-	movl	-168(%ebp), %eax  ; Load main matrix
+L1095_skip_adj_aux:
+	; Clean up vertex array
+	movl	-180(%ebp), %eax  ; Load vertices array
 	testl	%eax, %eax        ; Check if valid
-	je	L1095             ; Skip if null
+	je	L1095_skip_vertices ; Skip if null
+	movl	%eax, (%esp)      ; Push array pointer
+	call	__ZdlPv           ; Delete vertices array
+	
+L1095_skip_vertices:
+	; Clean up airport_to_vertex_idx array
+	movl	-192(%ebp), %eax  ; Load airport_to_vertex_idx array
+	testl	%eax, %eax        ; Check if valid
+	je	L1095_skip_airport_idx ; Skip if null
+	movl	%eax, (%esp)      ; Push array pointer
+	call	__ZdlPv           ; Delete airport_to_vertex_idx array
+	
+L1095_skip_airport_idx:
+	; Clean up airports_xyz vector
+	movl	-100(%ebp), %eax  ; Load airports_xyz.begin()
+	testl	%eax, %eax        ; Check if valid
+	je	L1095_skip_airports ; Skip if null
+	movl	%eax, (%esp)      ; Push array pointer
+	call	__ZdlPv           ; Delete airports_xyz array
+	
+L1095_skip_airports:
+	; Clean up vertex_map (red-black tree)
+	leal	-120(%ebp), %ecx  ; Load vertex_map address
+	movl	-120(%ebp), %eax  ; Load root node
+	testl	%eax, %eax        ; Check if tree has nodes
+	je	L1095_skip_vertex_map ; Skip if empty
+	movl	%eax, (%esp)      ; Push root node
+	call	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E ; Delete tree
+	
+L1095_skip_vertex_map:
+	; Clean up unique_vertices_set (red-black tree)
+	leal	-84(%ebp), %ecx   ; Load unique_vertices_set address
+	movl	-84(%ebp), %eax   ; Load root node
+	testl	%eax, %eax        ; Check if tree has nodes
+	je	L1095_cleanup_done ; Skip if empty
+	movl	%eax, (%esp)      ; Push root node
+	call	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E ; Delete tree
+	
+L1095_cleanup_done:
+	; CONTINUE MAIN LOOP: Jump back to read next test case
+	jmp	L1101             ; Jump back to main input loop (while (cin >> N >> R))
+	
+L1110:
+	; ERROR HANDLING: Empty vertex set - should not happen in valid input
+	; Output error message and continue to next test case
+	movl	$5, 8(%esp)       ; String length for "error"
+	movl	$LC19, 4(%esp)    ; Push "error" string (assuming it exists)
+	movl	$__ZSt4cout, (%esp) ; Push cout object
+	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "error"
+	jmp	L1092             ; Jump to cleanup
+	
+L1245:
+	; ERROR HANDLING: No airports in input
+	; Output error for each query and continue
+	movl	-148(%ebp), %ebx  ; Load Q (number of queries)
+	testl	%ebx, %ebx        ; Check if Q > 0
+	jle	L1092             ; Skip if no queries
+	
+L1245_error_loop:
+	; Output "impossible" for each query when no airports
+	movl	$10, 8(%esp)      ; String length for "impossible"
+	movl	$LC18, 4(%esp)    ; Push "impossible" string
+	movl	$__ZSt4cout, (%esp) ; Push cout object
+	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "impossible"
+	
+	; Add newline
+	movl	$__ZSt4cout, %eax ; Load cout object
+	movl	$10, (%esp)       ; Push newline character
+	movl	%eax, %ecx        ; Load cout object
+	call	__ZNSo3putEc      ; Print newline
+	addl	$4, %esp          ; Adjust stack
+	
+	subl	$1, %ebx          ; Decrement query counter
+	jne	L1245_error_loop  ; Continue if more queries
+	jmp	L1092             ; Jump to cleanup
+	
+L983:
+	; ERROR HANDLING: Memory allocation overflow
+	; This should call std::bad_alloc exception or terminate
+	call	__ZSt17__throw_bad_allocv ; Throw bad_alloc exception
+	
+L1036:
+L1053:
+L1081:
+	; ERROR HANDLING: I/O stream errors
+	; Handle various I/O error conditions
+	movl	$__ZSt4cout, %ecx ; Load cout object
+	call	__ZNSo5flushEv    ; Attempt to flush
+	jmp	L1092             ; Continue to cleanup
+	
+L1146:
+	; ========================================================================
+	; MAIN PROGRAM EXIT: End of all test cases
+	; ========================================================================
+	; C++ EQUIVALENT: End of while (cin >> N >> R) loop - no more input
+	
+	; FINAL CLEANUP: Clean up any remaining global resources
+	; Most cleanup should already be done per test case
+	
+	; PROGRAM EXIT: Return from main function
+	movl	$0, %eax          ; Set return value = 0 (success)
+	leal	-16(%ebp), %esp   ; Restore stack pointer
+	popl	%ecx              ; Restore parameter pointer
+	popl	%ebx              ; Restore callee-saved registers
+	popl	%esi
+	popl	%edi
+	popl	%ebp              ; Restore base pointer
+	leal	-4(%ecx), %esp    ; Restore original stack
+	ret                       ; Return from main
 	movl	-168(%ebp), %eax  ; Load matrix pointer
 	movl	%eax, (%esp)      ; Push matrix pointer
 	call	__ZdlPv           ; Delete matrix
@@ -3445,52 +3854,65 @@ L1234:
 	; NESTED LOOP: Find all R-sphere intersection points between airport pairs
 	; C++ EQUIVALENT: for (int i = 0; i < N; i++) for (int j = i+1; j < N; j++) {
 	;                   vector<Point> intersections = get_small_circle_intersections(airports_xyz[i], airports_xyz[j], R);
-	;                   for (auto& p : intersections) auxiliary_vertices.insert(p);
+	;                   for (auto& p : intersections) unique_vertices_set.insert(p);
 	;                 }
 	
-	movl	-168(%ebp), %edi  ; Load current offset for airports_xyz[i] (size * i)
-	addl	$1, %eax          ; Increment inner loop counter (j)
+	; OUTER LOOP: for (int i = 0; i < N; ++i)
+	movl	-164(%ebp), %eax  ; Load current i
+	movl	-168(%ebp), %edi  ; Load i * sizeof(Point) offset
+	cmpl	%ebx, %eax        ; Compare i with N
+	jge	L971              ; Jump if i >= N (exit outer loop)
+	
+	; INNER LOOP SETUP: for (int j = i + 1; j < N; ++j)
+	addl	$1, %eax          ; j = i + 1
+	movl	%eax, -156(%ebp)  ; Store j
 	cmpl	%ebx, %eax        ; Compare j with N
-	movl	%eax, -164(%ebp)  ; Store j back to memory
-	movl	%eax, -156(%ebp)  ; Store j in another temporary
-	leal	-36(%edi), %esi   ; Calculate offset for airports_xyz[j] (edi - 36)
-	movl	%esi, -160(%ebp)  ; Store j offset
-	jge	L976              ; If j >= N, exit inner loop
+	jge	L976              ; Jump if j >= N (exit inner loop)
 	
 	.p2align 4,,10        ; Align for performance
 L977:
 	; CALL: get_small_circle_intersections(airports_xyz[i], airports_xyz[j], R)
 	; This computes intersection points of two R-spheres centered at airports i and j
-	fldt	-136(%ebp)        ; Load long double R (fuel range parameter)
 	movl	-100(%ebp), %eax  ; Load base address of airports_xyz array
-	leal	(%eax,%edi), %edx ; Calculate &airports_xyz[i] = base + i*sizeof(Point)
-	addl	-160(%ebp), %eax  ; Calculate &airports_xyz[j] = base + j*sizeof(Point)
-	movl	%edx, 8(%esp)     ; Push &airports_xyz[i] as arg2
-	movl	%eax, 4(%esp)     ; Push &airports_xyz[j] as arg1
+	movl	-164(%ebp), %edx  ; Load i
+	movl	-156(%ebp), %ecx  ; Load j
+	
+	; Calculate &airports_xyz[i] = base + i * sizeof(Point)
+	leal	(%eax,%edx,4), %esi ; ESI = base + i*4
+	leal	(%esi,%edx,8), %esi ; ESI = base + i*4 + i*8 = base + i*36
+	
+	; Calculate &airports_xyz[j] = base + j * sizeof(Point)  
+	leal	(%eax,%ecx,4), %edi ; EDI = base + j*4
+	leal	(%edi,%ecx,8), %edi ; EDI = base + j*4 + j*8 = base + j*36
+	
+	; Prepare function call arguments
+	fldt	-136(%ebp)        ; Load long double R (fuel range parameter)
+	fstpt	12(%esp)          ; Push long double R as arg3
+	movl	%edi, 8(%esp)     ; Push &airports_xyz[j] as arg2
+	movl	%esi, 4(%esp)     ; Push &airports_xyz[i] as arg1
 	leal	-56(%ebp), %eax   ; Load address for return vector<Point>
 	movl	%eax, (%esp)      ; Push return vector address as arg0
-	fstpt	12(%esp)          ; Push long double R as arg3
 	call	__Z30get_small_circle_intersectionsRK5PointS1_e
 	
-	; PROCESS RETURNED INTERSECTIONS: Insert each intersection point into auxiliary_vertices set
-	movl	-56(%ebp), %ebx   ; Load vector.begin() pointer
-	movl	-52(%ebp), %esi   ; Load vector.end() pointer
-	cmpl	%esi, %ebx        ; Compare begin vs end
+	; PROCESS RETURNED INTERSECTIONS: Insert each intersection point into unique_vertices_set
+	movl	-56(%ebp), %esi   ; Load vector.begin() pointer
+	movl	-52(%ebp), %edi   ; Load vector.end() pointer
+	cmpl	%edi, %esi        ; Compare begin vs end
 	je	L973              ; If empty vector, skip insertion loop
 	
 	.p2align 4,,10        ; Align for performance
 L974:
-	; INSERT INTO SET: auxiliary_vertices.insert(*it)
+	; INSERT INTO SET: unique_vertices_set.insert(*it)
 	; This uses std::set<Point>::insert() to add each intersection point
-	leal	-88(%ebp), %ecx   ; Load address of auxiliary_vertices set
-	movl	%ebx, (%esp)      ; Push current Point* as argument
-	addl	$36, %ebx         ; Advance to next Point (sizeof(Point) = 36)
+	leal	-84(%ebp), %ecx   ; Load address of unique_vertices_set
+	movl	%esi, (%esp)      ; Push current Point* as argument
+	addl	$36, %esi         ; Advance to next Point (sizeof(Point) = 36)
 	call	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE16_M_insert_uniqueIRKS0_EESt4pairISt17_Rb_tree_iteratorIS0_EbEOT_
-	subl	$4, %esp          ; Adjust stack (calling convention)
-	cmpl	%ebx, %esi        ; Check if we've processed all intersections
+	addl	$4, %esp          ; Adjust stack (calling convention)
+	cmpl	%esi, %edi        ; Check if we've processed all intersections
 	jne	L974              ; Continue if more intersections to process
 	
-	movl	-56(%ebp), %esi   ; Reload vector begin pointer
+	movl	-56(%ebp), %esi   ; Reload vector begin pointer for cleanup
 L973:
 	; CLEANUP: Delete temporary vector storage
 	testl	%esi, %esi        ; Check if vector data needs cleanup
@@ -3502,102 +3924,372 @@ L975:
 	; INNER LOOP INCREMENT: j++
 	addl	$1, -156(%ebp)    ; Increment j
 	movl	-152(%ebp), %ebx  ; Reload N
-	addl	$36, %edi         ; Advance to next airport i offset
 	movl	-156(%ebp), %eax  ; Reload j
 	cmpl	%eax, %ebx        ; Compare N with j
 	jg	L977              ; Continue inner loop if j < N
 	
 L976:
 	; OUTER LOOP INCREMENT: i++
-	movl	-164(%ebp), %eax  ; Reload i
-	addl	$36, -168(%ebp)   ; Advance outer loop offset
-	cmpl	%ebx, %eax        ; Compare i with N
-	jl	L1234             ; Continue outer loop if i < N
+	addl	$1, -164(%ebp)    ; Increment i
+	addl	$36, -168(%ebp)   ; Advance outer loop offset (i * sizeof(Point))
+	jmp	L1234             ; Jump back to outer loop start
 	
 L971:
-	; GRAPH CONSTRUCTION PHASE
-	; After collecting all intersection points, build the auxiliary graph
-	; C++ EQUIVALENT: Build adjacency matrix for shortest path computation
+	; ========================================================================
+	; GRAPH CONSTRUCTION PHASE: Build auxiliary graph with arc safety checking
+	; ========================================================================
 	
 	; STEP 1: Convert set<Point> to vector<Point> for indexed access
-	movl	-76(%ebp), %edi   ; Load auxiliary_vertices.begin()
-	leal	-84(%ebp), %eax   ; Load auxiliary_vertices.end() address
-	cmpl	%eax, %edi        ; Compare begin vs end
+	; C++ EQUIVALENT: vector<Point> vertices(unique_vertices_set.begin(), unique_vertices_set.end());
+	leal	-84(%ebp), %esi   ; Load unique_vertices_set address
+	movl	-68(%ebp), %ebx   ; Load set.size()
+	testl	%ebx, %ebx        ; Check if set is empty
 	je	L1110             ; If empty set, skip graph building
-	
-	; COUNT VERTICES: Count total vertices (airports + intersection points)
-	movl	%edi, %eax        ; Start with begin iterator
-	xorl	%ebx, %ebx        ; Clear counter
-L979:
-	; ITERATE THROUGH SET: Count all vertices in auxiliary_vertices
-	leal	-84(%ebp), %esi   ; Load end iterator address
-	movl	%eax, (%esp)      ; Push current iterator
-	addl	$1, %ebx          ; Increment vertex count
-	call	__ZSt18_Rb_tree_incrementPKSt18_Rb_tree_node_base ; Advance iterator
-	cmpl	%esi, %eax        ; Check if reached end
-	jne	L979              ; Continue if not at end
 	
 	; ALLOCATE VERTEX ARRAY: Create array to store all vertices
 	cmpl	$119304647, %ebx  ; Check for overflow (max vertices)
 	ja	L983              ; Jump to error handler if too many vertices
-	leal	(%ebx,%ebx,8), %eax ; Calculate size = vertices * 9 * 4 (36 bytes per Point)
-	sall	$2, %eax          ; Multiply by 4 (sizeof(long double))
+	leal	(%ebx,%ebx,8), %eax ; Calculate size = vertices * 9 
+	sall	$2, %eax          ; Multiply by 4 to get vertices * 36 bytes (sizeof(Point))
 	movl	%eax, (%esp)      ; Push size argument
 	call	__Znwj            ; Allocate memory: new Point[vertex_count]
-	movl	-152(%ebp), %ebx  ; Reload N (airport count)
 	movl	%eax, -180(%ebp)  ; Store vertex array pointer
-	movl	%eax, %esi        ; Copy for iteration
-	movl	%edi, %eax        ; Reload begin iterator
+	movl	%ebx, -184(%ebp)  ; Store vertex count (V)
+	
+	; COPY VERTICES: Copy each Point from set to array
+	movl	-76(%ebp), %edi   ; Load set.begin() iterator
+	movl	%eax, %esi        ; Copy vertex array pointer for iteration
+	xorl	%ecx, %ecx        ; Clear vertex index counter
 	
 L981:
-	; COPY VERTICES: Copy each Point from set to array
-	; Each Point has 9 long double members (3 x 3 matrix representation)
-	movl	16(%eax), %edx    ; Load Point.x
-	leal	-84(%ebp), %edi   ; Load end iterator address
-	addl	$36, %esi         ; Advance to next array position
-	movl	%edx, -36(%esi)   ; Store Point.x
-	movl	20(%eax), %edx    ; Load Point.y
-	movl	%edx, -32(%esi)   ; Store Point.y
-	movl	24(%eax), %edx    ; Load Point.z
-	movl	%edx, -28(%esi)   ; Store Point.z
-	movl	28(%eax), %edx    ; Load next member
-	movl	%edx, -24(%esi)   ; Store next member
-	movl	32(%eax), %edx    ; Continue copying all 9 members
-	movl	%edx, -20(%esi)   ; ...
-	movl	36(%eax), %edx    ; ...
-	movl	%edx, -16(%esi)   ; ...
-	movl	40(%eax), %edx    ; ...
-	movl	%edx, -12(%esi)   ; ...
-	movl	44(%eax), %edx    ; ...
-	movl	%edx, -8(%esi)    ; ...
-	movl	48(%eax), %edx    ; ...
-	movl	%edx, -4(%esi)    ; Store last member
-	movl	%eax, (%esp)      ; Push current iterator
-	call	__ZSt18_Rb_tree_incrementPKSt18_Rb_tree_node_base ; Advance iterator
-	cmpl	%edi, %eax        ; Check if reached end
-	jne	L981              ; Continue if not at end
+	; Copy Point data from set node to array
+	movl	16(%edi), %eax    ; Load Point.x from set node
+	movl	20(%edi), %edx    ; Load Point.y from set node
+	movl	%eax, (%esi)      ; Store Point.x in array
+	movl	%edx, 4(%esi)     ; Store Point.y in array
+	movl	24(%edi), %eax    ; Load Point.z from set node
+	movl	%eax, 8(%esi)     ; Store Point.z in array
 	
-L978:
-	; INITIALIZE ADJACENCY MATRIX: Create 2D array for shortest path computation
-	leal	-52(%ebp), %eax   ; Load address for adjacency matrix
-	testl	%ebx, %ebx        ; Check if vertex count is non-zero
-	movl	$0, -52(%ebp)     ; Initialize matrix[0][0] = 0
-	movl	$0, -48(%ebp)     ; Initialize matrix[0][1] = 0
-	movl	$0, -36(%ebp)     ; Initialize matrix[1][0] = 0
-	movl	%eax, -44(%ebp)   ; Store matrix base address
-	movl	%eax, -40(%ebp)   ; Store matrix base address (backup)
-	je	L1111             ; Skip if no vertices
+	; Copy remaining Point data (extended precision coordinates)
+	movl	28(%edi), %eax    ; Continue copying all Point members
+	movl	32(%edi), %edx    ; ...
+	movl	%eax, 12(%esi)    ; ...
+	movl	%edx, 16(%esi)    ; ...
+	movl	36(%edi), %eax    ; ...
+	movl	40(%edi), %edx    ; ...
+	movl	%eax, 20(%esi)    ; ...
+	movl	%edx, 24(%esi)    ; ...
+	movl	44(%edi), %eax    ; ...
+	movl	48(%edi), %edx    ; ...
+	movl	%eax, 28(%esi)    ; ...
+	movl	%edx, 32(%esi)    ; Store last Point member
 	
-	; ALLOCATE ADJACENCY MATRIX: Create V x V matrix for distances
-	cmpl	$1073741823, %ebx ; Check for overflow (max matrix size)
-	ja	L983              ; Jump to error handler if too large
-	leal	0(,%ebx,4), %eax  ; Calculate matrix size = V * V * sizeof(long double)
-	movl	%eax, (%esp)      ; Push size argument
-	call	__Znwj            ; Allocate memory: new long double[V*V]
-	movl	%eax, -176(%ebp)  ; Store matrix pointer
-	xorl	%eax, %eax        ; Clear counter
+	; Advance to next vertex
+	addl	$36, %esi         ; Move to next Point in array
+	addl	$1, %ecx          ; Increment vertex counter
+	movl	%edi, (%esp)      ; Push current iterator
+	call	__ZSt18_Rb_tree_incrementPKSt18_Rb_tree_node_base ; Advance set iterator
+	movl	%eax, %edi        ; Update iterator
+	cmpl	%ecx, %ebx        ; Check if copied all vertices
+	jne	L981              ; Continue if more vertices to copy
+	
+	; STEP 2: Create vertex-to-index mapping
+	; C++ EQUIVALENT: map<Point, int, Point::Compare> vertex_map;
+	;                 for (int i = 0; i < vertices.size(); ++i) vertex_map[vertices[i]] = i;
+	leal	-120(%ebp), %esi  ; Load address for vertex_map
+	movl	$0, -120(%ebp)    ; Initialize vertex_map.root = nullptr
+	movl	$0, -116(%ebp)    ; Initialize vertex_map.header
+	movl	$0, -104(%ebp)    ; Initialize vertex_map.size = 0
+	movl	%esi, -112(%ebp)  ; Store vertex_map address
+	movl	%esi, -108(%ebp)  ; Store vertex_map address (backup)
+	
+	; Fill vertex map with index mappings
+	movl	-180(%ebp), %edi  ; Load vertex array
+	xorl	%ecx, %ecx        ; Clear index counter
+	
+L982:
+	; Insert vertex -> index mapping
+	movl	%ecx, -188(%ebp)  ; Store current index
+	movl	%edi, (%esp)      ; Push vertex address as key
+	movl	%esi, %ecx        ; Load vertex_map address
+	call	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE16_M_insert_uniqueIRKS3_EESt4pairISt17_Rb_tree_iteratorIS3_EbEOT_
+	; Set the mapped value to current index
+	movl	-188(%ebp), %edx  ; Reload current index
+	movl	%edx, 40(%eax)    ; Store index in map value
+	addl	$36, %edi         ; Move to next vertex
+	addl	$1, %ecx          ; Increment index
+	cmpl	%ecx, %ebx        ; Check if processed all vertices
+	jne	L982              ; Continue if more vertices
+	
+	; STEP 3: Create airport-to-vertex index mapping
+	; C++ EQUIVALENT: vector<int> airport_to_vertex_idx(N);
+	;                 for (int i = 0; i < N; ++i) airport_to_vertex_idx[i] = vertex_map[airports_xyz[i]];
+	movl	-152(%ebp), %eax  ; Load N (airport count)
+	testl	%eax, %eax        ; Check if N > 0
+	je	L984              ; Skip if no airports
+	sall	$2, %eax          ; Calculate N * sizeof(int)
+	movl	%eax, (%esp)      ; Push size
+	call	__Znwj            ; Allocate array: new int[N]
+	movl	%eax, -192(%ebp)  ; Store airport_to_vertex_idx array
+	
+	; Fill airport-to-vertex mapping
+	movl	-100(%ebp), %edi  ; Load airports_xyz array
+	xorl	%ecx, %ecx        ; Clear airport index
+	
+L983_airport_loop:
+	; Find vertex index for current airport
+	movl	%edi, (%esp)      ; Push airport Point as key
+	leal	-120(%ebp), %edx  ; Load vertex_map address
+	movl	%edx, %ecx        ; Load vertex_map address
+	call	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE4findERKS0_
+	; Extract index from map result
+	movl	40(%eax), %edx    ; Load vertex index from map
+	movl	-192(%ebp), %esi  ; Load airport_to_vertex_idx array
+	movl	%ecx, %eax        ; Copy airport index
+	movl	%edx, (%esi,%eax,4) ; Store: airport_to_vertex_idx[i] = vertex_index
+	addl	$36, %edi         ; Move to next airport
+	addl	$1, %ecx          ; Increment airport index
+	cmpl	%ecx, -152(%ebp)  ; Check if processed all airports
+	jne	L983_airport_loop ; Continue if more airports
 	
 L984:
+	; ========================================================================
+	; STEP 4: Build auxiliary graph with safe arcs
+	; ========================================================================
+	; C++ EQUIVALENT: int V = vertices.size();
+	;                 vector<vector<long double>> adj_aux(V, vector<long double>(V, INF));
+	movl	-184(%ebp), %ebx  ; Load V (vertex count)
+	testl	%ebx, %ebx        ; Check if V > 0
+	je	L1110             ; Skip if no vertices
+	
+	; ALLOCATE ADJACENCY MATRIX: Create V x V matrix for distances
+	cmpl	$46340, %ebx      ; Check for overflow (sqrt of max int / 12)
+	ja	L983              ; Jump to error handler if too large
+	movl	%ebx, %eax        ; Copy V
+	imull	%ebx, %eax        ; Calculate V * V
+	leal	(%eax,%eax,2), %eax ; Calculate V * V * 3 (for long double)
+	sall	$2, %eax          ; Calculate V * V * 12 (sizeof(long double))
+	movl	%eax, (%esp)      ; Push size argument
+	call	__Znwj            ; Allocate memory: new long double[V*V]
+	movl	%eax, -196(%ebp)  ; Store adj_aux matrix pointer
+	
+	; INITIALIZE MATRIX: Set all distances to INF and diagonal to 0
+	fldt	LC7               ; Load INF constant
+	movl	%ebx, %ecx        ; Copy V for loop counter
+	movl	%eax, %edi        ; Copy matrix pointer
+	
+L985_init_matrix:
+	; Initialize row with INF
+	movl	%ebx, %edx        ; Inner loop counter
+L986_init_row:
+	fstpt	(%edi)            ; Store INF
+	fldt	(%edi)            ; Reload for next iteration
+	addl	$12, %edi         ; Move to next matrix element
+	subl	$1, %edx          ; Decrement inner counter
+	jne	L986_init_row     ; Continue inner loop
+	subl	$1, %ecx          ; Decrement outer counter
+	jne	L985_init_matrix  ; Continue outer loop
+	fstp	%st(0)            ; Pop INF from FPU stack
+	
+	; Set diagonal elements to 0: adj_aux[i][i] = 0
+	movl	-196(%ebp), %edi  ; Load matrix pointer
+	xorl	%ecx, %ecx        ; Clear i counter
+	fldz                      ; Load 0.0
+	
+L987_set_diagonal:
+	; Calculate offset for adj_aux[i][i] = base + (i * V + i) * 12
+	movl	%ecx, %eax        ; Copy i
+	imull	%ebx, %eax        ; Calculate i * V
+	addl	%ecx, %eax        ; Calculate i * V + i
+	leal	(%eax,%eax,2), %eax ; Calculate (i * V + i) * 3
+	fstpt	(%edi,%eax,4)     ; Store 0.0 at adj_aux[i][i]
+	fldt	(%edi,%eax,4)     ; Reload for next iteration
+	addl	$1, %ecx          ; Increment i
+	cmpl	%ecx, %ebx        ; Check if i < V
+	jne	L987_set_diagonal ; Continue diagonal loop
+	fstp	%st(0)            ; Pop 0.0 from FPU stack
+	
+	; BUILD ADJACENCY MATRIX: Check arc safety between all vertex pairs
+	; C++ EQUIVALENT: for (int i = 0; i < V; ++i) {
+	;                   for (int j = i + 1; j < V; ++j) {
+	;                     long double d_ij = dist_xyz(vertices[i], vertices[j]);
+	;                     bool safe = is_arc_safe(vertices[i], vertices[j], airports_xyz, R);
+	;                     if (safe) { adj_aux[i][j] = adj_aux[j][i] = d_ij; }
+	;                   }
+	;                 }
+	xorl	%ecx, %ecx        ; Clear i counter
+	
+L988_outer_loop:
+	; OUTER LOOP: for (int i = 0; i < V; ++i)
+	movl	%ecx, %eax        ; Copy i
+	addl	$1, %eax          ; j = i + 1
+	cmpl	%eax, %ebx        ; Check if j < V
+	jle	L992_next_i       ; Skip if j >= V
+	
+L989_inner_loop:
+	; INNER LOOP: for (int j = i + 1; j < V; ++j)
+	; Calculate vertices[i] and vertices[j] addresses
+	movl	-180(%ebp), %esi  ; Load vertices array
+	leal	(%esi,%ecx,4), %edi ; Calculate base + i*4
+	leal	(%edi,%ecx,8), %edi ; Calculate vertices[i] = base + i*36
+	leal	(%esi,%eax,4), %edx ; Calculate base + j*4
+	leal	(%edx,%eax,8), %edx ; Calculate vertices[j] = base + j*36
+	
+	; Call dist_xyz(vertices[i], vertices[j])
+	movl	%edx, 4(%esp)     ; Push vertices[j]
+	movl	%edi, (%esp)      ; Push vertices[i]
+	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz
+	fstpt	-200(%ebp)        ; Store distance d_ij
+	
+	; Call is_arc_safe(vertices[i], vertices[j], airports_xyz, R)
+	fldt	-136(%ebp)        ; Load R
+	fstpt	12(%esp)          ; Push R
+	movl	-100(%ebp), %esi  ; Load airports_xyz
+	movl	%esi, 8(%esp)     ; Push airports_xyz
+	movl	%edx, 4(%esp)     ; Push vertices[j]
+	movl	%edi, (%esp)      ; Push vertices[i]
+	call	__Z11is_arc_safeRK5PointS1_St6vectorIS_SaIS_EEe ; Call is_arc_safe
+	addl	$16, %esp         ; Clean up stack
+	
+	; Check if arc is safe
+	testb	%al, %al          ; Test return value
+	je	L991_next_j       ; Skip if not safe
+	
+	; ARC IS SAFE: Set adj_aux[i][j] = adj_aux[j][i] = d_ij
+	movl	-196(%ebp), %edi  ; Load matrix pointer
+	
+	; Calculate offset for adj_aux[i][j] = (i * V + j) * 12
+	movl	%ecx, %esi        ; Copy i
+	imull	%ebx, %esi        ; Calculate i * V
+	addl	%eax, %esi        ; Calculate i * V + j
+	leal	(%esi,%esi,2), %esi ; Calculate (i * V + j) * 3
+	fldt	-200(%ebp)        ; Load d_ij
+	fstpt	(%edi,%esi,4)     ; Store d_ij at adj_aux[i][j]
+	
+	; Calculate offset for adj_aux[j][i] = (j * V + i) * 12
+	movl	%eax, %esi        ; Copy j
+	imull	%ebx, %esi        ; Calculate j * V
+	addl	%ecx, %esi        ; Calculate j * V + i
+	leal	(%esi,%esi,2), %esi ; Calculate (j * V + i) * 3
+	fldt	-200(%ebp)        ; Load d_ij
+	fstpt	(%edi,%esi,4)     ; Store d_ij at adj_aux[j][i]
+	
+L991_next_j:
+	; INNER LOOP INCREMENT: j++
+	addl	$1, %eax          ; Increment j
+	cmpl	%eax, %ebx        ; Check if j < V
+	jg	L989_inner_loop   ; Continue if j < V
+	
+L992_next_i:
+	; OUTER LOOP INCREMENT: i++
+	addl	$1, %ecx          ; Increment i
+	cmpl	%ecx, %ebx        ; Check if i < V
+	jne	L988_outer_loop   ; Continue if i < V
+	
+	; ========================================================================
+	; STEP 5: Floyd-Warshall on auxiliary graph
+	; ========================================================================
+	; C++ EQUIVALENT: for (int k = 0; k < V; ++k) {
+	;                   for (int i = 0; i < V; ++i) {
+	;                     for (int j = 0; j < V; ++j) {
+	;                       if (adj_aux[i][k] != INF && adj_aux[k][j] != INF) {
+	;                         adj_aux[i][j] = min(adj_aux[i][j], adj_aux[i][k] + adj_aux[k][j]);
+	;                       }
+	;                     }
+	;                   }
+	;                 }
+	xorl	%ecx, %ecx        ; Clear k counter
+	fldt	LC7               ; Load INF for comparisons
+	
+L993_floyd_k:
+	; FLOYD-WARSHALL OUTER LOOP: for (k = 0; k < V; k++)
+	xorl	%esi, %esi        ; Clear i counter
+	
+L994_floyd_i:
+	; FLOYD-WARSHALL MIDDLE LOOP: for (i = 0; i < V; i++)
+	xorl	%edi, %edi        ; Clear j counter
+	
+L995_floyd_j:
+	; FLOYD-WARSHALL INNER LOOP: for (j = 0; j < V; j++)
+	movl	-196(%ebp), %edx  ; Load matrix pointer
+	
+	; Calculate &adj_aux[i][k]
+	movl	%esi, %eax        ; Copy i
+	imull	%ebx, %eax        ; Calculate i * V
+	addl	%ecx, %eax        ; Calculate i * V + k
+	leal	(%eax,%eax,2), %eax ; Calculate (i * V + k) * 3
+	fldt	(%edx,%eax,4)     ; Load adj_aux[i][k]
+	
+	; Check if adj_aux[i][k] != INF
+	fucom	%st(1)            ; Compare with INF
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jae	L997_skip_update  ; Skip if adj_aux[i][k] >= INF
+	
+	; Calculate &adj_aux[k][j]
+	movl	%ecx, %eax        ; Copy k
+	imull	%ebx, %eax        ; Calculate k * V
+	addl	%edi, %eax        ; Calculate k * V + j
+	leal	(%eax,%eax,2), %eax ; Calculate (k * V + j) * 3
+	fldt	(%edx,%eax,4)     ; Load adj_aux[k][j]
+	
+	; Check if adj_aux[k][j] != INF
+	fucom	%st(2)            ; Compare with INF
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jae	L998_skip_update2 ; Skip if adj_aux[k][j] >= INF
+	
+	; Calculate adj_aux[i][k] + adj_aux[k][j]
+	faddp	%st, %st(1)       ; Add: adj_aux[i][k] + adj_aux[k][j]
+	
+	; Calculate &adj_aux[i][j]
+	movl	%esi, %eax        ; Copy i
+	imull	%ebx, %eax        ; Calculate i * V
+	addl	%edi, %eax        ; Calculate i * V + j
+	leal	(%eax,%eax,2), %eax ; Calculate (i * V + j) * 3
+	fldt	(%edx,%eax,4)     ; Load adj_aux[i][j]
+	
+	; Compare and update: adj_aux[i][j] = min(adj_aux[i][j], adj_aux[i][k] + adj_aux[k][j])
+	fucom	%st(1)            ; Compare old vs new distance
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jbe	L999_keep_old     ; Keep old if old <= new
+	
+	; Update with new shorter distance
+	fstp	%st(0)            ; Pop old distance
+	fstpt	(%edx,%eax,4)     ; Store new distance
+	jmp	L996_next_j       ; Jump to next iteration
+	
+L999_keep_old:
+	fstp	%st(1)            ; Pop new distance, keep old
+	fstp	%st(0)            ; Pop old distance
+	jmp	L996_next_j       ; Jump to next iteration
+	
+L998_skip_update2:
+	fstp	%st(0)            ; Pop adj_aux[k][j]
+L997_skip_update:
+	fstp	%st(0)            ; Pop adj_aux[i][k]
+	
+L996_next_j:
+	; FLOYD-WARSHALL INNER LOOP INCREMENT: j++
+	addl	$1, %edi          ; Increment j
+	cmpl	%edi, %ebx        ; Check if j < V
+	jne	L995_floyd_j      ; Continue if j < V
+	
+	; FLOYD-WARSHALL MIDDLE LOOP INCREMENT: i++
+	addl	$1, %esi          ; Increment i
+	cmpl	%esi, %ebx        ; Check if i < V
+	jne	L994_floyd_i      ; Continue if i < V
+	
+	; FLOYD-WARSHALL OUTER LOOP INCREMENT: k++
+	addl	$1, %ecx          ; Increment k
+	cmpl	%ecx, %ebx        ; Check if k < V
+	jne	L993_floyd_k      ; Continue if k < V
+	
+	fstp	%st(0)            ; Pop INF from FPU stack
+	
+	; PROCEED TO QUERY PROCESSING
+	jmp	L1033             ; Jump to query processing section
 	; INITIALIZE MATRIX TO INFINITY: Set all distances to infinity initially
 	movl	-176(%ebp), %edi  ; Load matrix pointer
 	movl	$0, (%edi,%eax,4) ; Initialize matrix[i][j] = INF (represented as 0 for now)
