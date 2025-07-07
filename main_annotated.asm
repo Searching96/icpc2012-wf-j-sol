@@ -1000,6 +1000,10 @@ L887:
 	; If we reach here, circles intersect - continue to step 3
 	jmp	L889              ; Jump to step 3 (intersection point calculation)
 	
+	; ========================================================================
+	; END OF STEP 2: Checking if spheres intersect (distance constraints)
+	; ========================================================================
+	
 L888:
 	; NO INTERSECTION: Return empty vector
 	; C++ EQUIVALENT: return vector<Point>(); // empty vector
@@ -1013,10 +1017,164 @@ L888:
 	ret                       ; Return from function
 	
 L889:
-	; INTERSECTION EXISTS: Continue to step 3
 	; ========================================================================
-	; END OF STEP 2: Checking if spheres intersect (distance constraints)
+	; STEP 3: Finding intersection points using spherical trigonometry
 	; ========================================================================
+	
+	; Calculate the angle from center1 to the midpoint between intersections
+	; Using law of cosines: cos(angle_to_midpoint) = cos(R_rad) / cos(angular_distance/2)
+	fldt	48(%esp)          ; Load angular_distance
+	fldt	LC8               ; Load 0.5
+	fmulp	%st, %st(1)      ; Calculate angular_distance / 2
+	call	__cosl            ; Call cos(angular_distance / 2)
+	fstpt	80(%esp)          ; Store cos(angular_distance / 2)
+	
+	fldt	64(%esp)          ; Load R_rad
+	call	__cosl            ; Call cos(R_rad)
+	fldt	80(%esp)          ; Load cos(angular_distance / 2)
+	fdivp	%st, %st(1)      ; Divide: cos(R_rad) / cos(angular_distance / 2)
+	call	__acosl           ; Call acos to get angle_to_midpoint
+	fstpt	96(%esp)          ; Store angle_to_midpoint
+	
+	; Calculate perpendicular distance from great circle to intersection points
+	; Using sin(angle_offset) = sin(R_rad) / sin(angular_distance/2)
+	fldt	64(%esp)          ; Load R_rad
+	call	__sinl            ; Call sin(R_rad)
+	fldt	48(%esp)          ; Load angular_distance
+	fldt	LC8               ; Load 0.5
+	fmulp	%st, %st(1)      ; Calculate angular_distance / 2
+	call	__sinl            ; Call sin(angular_distance / 2)
+	fdivp	%st, %st(1)      ; Divide: sin(R_rad) / sin(angular_distance / 2)
+	call	__asinl           ; Call asin to get angle_offset
+	fstpt	112(%esp)         ; Store angle_offset
+	
+	; Calculate the midpoint on the great circle between c1_norm and c2_norm
+	; midpoint = point_at_angle_on_great_circle(c1_norm, c2_norm, angle_to_midpoint)
+	leal	128(%esp), %eax   ; Load address for midpoint result
+	movl	%eax, (%esp)      ; Push midpoint address
+	movl	%edi, 4(%esp)     ; Push c1_norm address
+	movl	%esi, 8(%esp)     ; Push c2_norm address
+	fldt	96(%esp)          ; Load angle_to_midpoint
+	fstpt	12(%esp)          ; Push angle_to_midpoint as parameter
+	call	__Z33point_at_angle_on_great_circleRK5PointS1_e ; Call point_at_angle_on_great_circle
+	
+	; Calculate perpendicular vector to the great circle plane
+	; perpendicular = normalize(cross(c1_norm, c2_norm))
+	leal	272(%esp), %eax   ; Load address for cross product result
+	movl	%eax, (%esp)      ; Push cross product address
+	movl	%edi, 4(%esp)     ; Push c1_norm address
+	movl	%esi, 8(%esp)     ; Push c2_norm address
+	call	__Z5crossRK5PointS1_ ; Call cross(c1_norm, c2_norm)
+	
+	leal	320(%esp), %eax   ; Load address for normalized perpendicular
+	movl	%eax, (%esp)      ; Push result address
+	leal	272(%esp), %edi   ; Load cross product address
+	movl	%edi, 4(%esp)     ; Push cross product address
+	call	__Z9normalizeRK5Point ; Call normalize(cross_product)
+	
+	; Calculate cos(angle_offset) and sin(angle_offset) for intersection points
+	fldt	112(%esp)         ; Load angle_offset
+	fsincos                   ; Calculate both sin and cos (cos on top, sin below)
+	fstpt	336(%esp)         ; Store cos(angle_offset)
+	fstpt	352(%esp)         ; Store sin(angle_offset)
+	
+	; Calculate intersection1 = cos(angle_offset) * midpoint + sin(angle_offset) * perpendicular
+	leal	368(%esp), %ebx   ; Load address for intersection1
+	movl	%ebx, (%esp)      ; Push intersection1 address
+	leal	128(%esp), %eax   ; Load midpoint address
+	movl	%eax, 4(%esp)     ; Push midpoint address
+	fldt	336(%esp)         ; Load cos(angle_offset)
+	fstpt	8(%esp)           ; Push cos(angle_offset) as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(midpoint, cos(angle_offset))
+	
+	leal	416(%esp), %eax   ; Load address for temp result
+	movl	%eax, (%esp)      ; Push temp result address
+	leal	320(%esp), %edi   ; Load perpendicular address
+	movl	%edi, 4(%esp)     ; Push perpendicular address
+	fldt	352(%esp)         ; Load sin(angle_offset)
+	fstpt	8(%esp)           ; Push sin(angle_offset) as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(perpendicular, sin(angle_offset))
+	
+	movl	%ebx, (%esp)      ; Push intersection1 address
+	movl	%ebx, 4(%esp)     ; Push first operand (cos * midpoint)
+	leal	416(%esp), %eax   ; Load second operand address
+	movl	%eax, 8(%esp)     ; Push second operand (sin * perpendicular)
+	call	__ZplRK5PointS1_  ; Call operator+(cos*midpoint, sin*perpendicular)
+	
+	; Add intersection1 to result vector
+	movl	496(%esp), %eax   ; Load result vector address
+	movl	%eax, (%esp)      ; Push vector address
+	movl	%ebx, 4(%esp)     ; Push intersection1 address
+	call	__ZNSt6vectorI5PointSaIS0_EE9push_backERKS0_ ; Call vector.push_back(intersection1)
+	
+	; Calculate intersection2 = cos(angle_offset) * midpoint - sin(angle_offset) * perpendicular
+	leal	464(%esp), %ebx   ; Load address for intersection2
+	movl	%ebx, (%esp)      ; Push intersection2 address
+	leal	128(%esp), %eax   ; Load midpoint address
+	movl	%eax, 4(%esp)     ; Push midpoint address
+	fldt	336(%esp)         ; Load cos(angle_offset)
+	fstpt	8(%esp)           ; Push cos(angle_offset) as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(midpoint, cos(angle_offset))
+	
+	leal	416(%esp), %eax   ; Load address for temp result
+	movl	%eax, (%esp)      ; Push temp result address
+	leal	320(%esp), %edi   ; Load perpendicular address
+	movl	%edi, 4(%esp)     ; Push perpendicular address
+	fldt	352(%esp)         ; Load sin(angle_offset)
+	fstpt	8(%esp)           ; Push sin(angle_offset) as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(perpendicular, sin(angle_offset))
+	
+	movl	%ebx, (%esp)      ; Push intersection2 address
+	leal	368(%esp), %eax   ; Load first operand address (cos * midpoint)
+	movl	%eax, 4(%esp)     ; Push first operand
+	leal	416(%esp), %eax   ; Load second operand address (sin * perpendicular)
+	movl	%eax, 8(%esp)     ; Push second operand
+	call	__ZmiRK5PointS1_  ; Call operator-(cos*midpoint, sin*perpendicular)
+	
+	; Add intersection2 to result vector
+	movl	496(%esp), %eax   ; Load result vector address
+	movl	%eax, (%esp)      ; Push vector address
+	movl	%ebx, 4(%esp)     ; Push intersection2 address
+	call	__ZNSt6vectorI5PointSaIS0_EE9push_backERKS0_ ; Call vector.push_back(intersection2)
+	
+	; ========================================================================
+	; END OF STEP 3: Finding intersection points using spherical trigonometry
+	; ========================================================================
+
+	; ========================================================================
+	; STEP 4: Converting back to Cartesian coordinates
+	; ========================================================================
+	
+	; The intersection points calculated in step 3 are already in Cartesian coordinates
+	; on the unit sphere. We need to convert them back to Earth's surface coordinates
+	; by scaling them with Earth's radius.
+	
+	; Convert intersection1 from unit sphere to Earth surface coordinates
+	leal	368(%esp), %eax   ; Load intersection1 address
+	movl	%eax, (%esp)      ; Push intersection1 address
+	fldt	LC3               ; Load EARTH_RADIUS (6370.0)
+	fstpt	4(%esp)           ; Push EARTH_RADIUS as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(intersection1, EARTH_RADIUS)
+	
+	; Convert intersection2 from unit sphere to Earth surface coordinates  
+	leal	464(%esp), %eax   ; Load intersection2 address
+	movl	%eax, (%esp)      ; Push intersection2 address
+	fldt	LC3               ; Load EARTH_RADIUS (6370.0)
+	fstpt	4(%esp)           ; Push EARTH_RADIUS as parameter
+	call	__ZmlRK5Pointe    ; Call operator*(intersection2, EARTH_RADIUS)
+	
+	; ========================================================================
+	; END OF STEP 4: Converting back to Cartesian coordinates
+	; ========================================================================
+
+	; FUNCTION EXIT: Clean up and return vector with intersection points
+	movl	496(%esp), %eax   ; Load result vector address (return value)
+	addl	$476, %esp        ; Deallocate local stack space
+	popl	%ebx              ; Restore EBX register
+	popl	%esi              ; Restore ESI register
+	popl	%edi              ; Restore EDI register
+	popl	%ebp              ; Restore EBP register
+	ret                       ; Return from function
 
 ;===============================================================================
 ; SECTION 9: INTERVAL COVERAGE ANALYSIS
