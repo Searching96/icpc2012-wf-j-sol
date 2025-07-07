@@ -220,7 +220,7 @@ __Z14lat_lon_to_xyzee:
 	; Now FPU stack has: st(0) = lat_rad, st(1) = lon_rad
 	fxch	%st(1)            ; Exchange: st(0) = lon_rad, st(1) = lat_rad
 	fstpt	16(%esp)          ; Store lon_rad in local variable
-	fld	%st(0)            ; Duplicate lat_rad: st(0) = st(1) = lat_rad
+	fld		%st(0)            ; Duplicate lat_rad: st(0) = st(1) = lat_rad
 	fstpt	(%esp)            ; Store lat_rad for cosl function call
 	fstpt	80(%esp)          ; Store another copy of lat_rad
 	
@@ -371,7 +371,7 @@ __Z9magnitudeRK5Point:
 	faddp	%st, %st(1)       ; Add and pop: st(0) = p.x² + p.y² + p.z²
 	
 	; Calculate square root with precision handling
-	fld	%st(0)            ; Duplicate sum of squares: st(0) = st(1) = p.x² + p.y² + p.z²
+	fld		%st(0)            ; Duplicate sum of squares: st(0) = st(1) = p.x² + p.y² + p.z²
 	fsqrt                     ; Calculate sqrt: st(0) = sqrt(p.x² + p.y² + p.z²)
 	fstpt	16(%esp)          ; Store sqrt result in local variable
 	
@@ -386,7 +386,7 @@ __Z9magnitudeRK5Point:
 	fstpt	(%esp)            ; Store sum of squares as parameter
 	call	_sqrtl            ; Call high-precision sqrt library function
 	fstp	%st(0)            ; Pop the old sum from stack
-	jmp	L12               ; Jump to return
+	jmp		L12               ; Jump to return
 	
 L16:   ; Handle case where sum <= 0 (point is at origin)
 	fstp	%st(0)            ; Pop the sum of squares from stack
@@ -422,7 +422,7 @@ __Z9normalizeRK5Point:
 	fucomp	%st(1)            ; Compare EPS with magnitude (unordered compare)
 	fnstsw	%ax              ; Store FPU status word in AX
 	sahf                      ; Store AH into FLAGS register
-	ja	L24               ; Jump if EPS > magnitude (magnitude is too small)
+	ja		L24               ; Jump if EPS > magnitude (magnitude is too small)
 	
 	; Normal case: magnitude >= EPS, perform normalization
 	; result.x = p.x / magnitude
@@ -510,22 +510,22 @@ __Z8dist_xyzRK5PointS1_:
 	faddp	%st, %st(1)       ; Add to get final dot product
 	
 	; Store dot product and prepare for clamping
-	fld	%st(0)            ; Duplicate dot product
+	fld		%st(0)            ; Duplicate dot product
 	fstpt	16(%esp)          ; Store dot product in local variable
 	
 	; Clamp dot product to [-1.0, 1.0] range to avoid numerical errors
 	fld1                      ; Load 1.0
 	fstpt	32(%esp)          ; Store 1.0 in local variable
 	fldt	32(%esp)          ; Load 1.0 again
-	fld	%st(0)            ; Duplicate 1.0
+	fld		%st(0)            ; Duplicate 1.0
 	fucomp	%st(2)            ; Compare 1.0 with dot product (unordered)
 	fnstsw	%ax              ; Store FPU status word
 	sahf                      ; Transfer to CPU flags
-	ja	L35               ; Jump if 1.0 > dot (dot product is valid)
+	ja		L35               ; Jump if 1.0 > dot (dot product is valid)
 	
 	; dot >= 1.0, clamp to 1.0
 	fstp	%st(1)            ; Pop the duplicated 1.0
-	jmp	L33               ; Jump to acos calculation
+	jmp		L33               ; Jump to acos calculation
 	
 L36:   ; dot <= -1.0, clamp to -1.0
 	fstp	%st(1)            ; Pop the current value
@@ -542,17 +542,17 @@ L35:   ; Handle case where dot might be < -1.0
 	fstp	%st(0)            ; Pop the 1.0
 	fld1                      ; Load 1.0
 	fchs                      ; Change sign to get -1.0
-	fld	%st(0)            ; Duplicate -1.0
+	fld		%st(0)            ; Duplicate -1.0
 	fxch	%st(2)            ; Exchange with dot product
 	fucom	%st(2)            ; Compare dot with -1.0
 	fnstsw	%ax              ; Store FPU status word
 	fstp	%st(2)            ; Pop one of the values
 	sahf                      ; Transfer to CPU flags
-	jbe	L36               ; Jump if dot <= -1.0
+	jbe		L36               ; Jump if dot <= -1.0
 	
 	; dot > -1.0, use original dot product
 	fstp	%st(0)            ; Pop -1.0
-	jmp	L26               ; Jump to acos calculation
+	jmp		L26               ; Jump to acos calculation
 
 ;===============================================================================
 ; SECTION 5: GREAT CIRCLE POINT CALCULATION
@@ -610,18 +610,18 @@ __Z30point_at_angle_on_great_circleRK5PointS1_e:
 	faddp	%st, %st(1)       ; Add z product to get dot(u_norm, v_norm)
 	
 	; Store dot product and check for degeneracy
-	fld	%st(0)            ; Duplicate dot product
+	fld		%st(0)            ; Duplicate dot product
 	fstpt	240(%esp)         ; Store dot product
 	
 	; Check if u and v are nearly identical (angle_uv < EPS)
 	fld1                      ; Load 1.0
 	fstpt	128(%esp)         ; Store 1.0
 	fldt	128(%esp)         ; Load 1.0 again
-	fld	%st(0)            ; Duplicate 1.0
+	fld		%st(0)            ; Duplicate 1.0
 	fucomp	%st(2)            ; Compare 1.0 with dot product
 	fnstsw	%ax              ; Store FPU status
 	sahf                      ; Transfer to CPU flags
-	ja	L51               ; Jump if dot < 1.0 (points are different)
+	ja		L51               ; Jump if dot < 1.0 (points are different)
 	
 	; Points are nearly identical, return u
 	fxch	%st(3)            ; Exchange stack elements
@@ -640,7 +640,7 @@ L38:   ; Store result and clean up
 	
 L51:   ; Handle case where points are different
 	; ... (complex calculations for creating orthogonal basis and computing final point)
-	jmp	L38               ; Jump to result storage
+	jmp		L38               ; Jump to result storage
 
 ;===============================================================================
 ; SECTION 6: ARC ANALYSIS AND SAFETY CHECKING
@@ -1246,25 +1246,25 @@ __Z20get_covered_intervalsRK5PointS1_S1_e:
 	fucom	%st(1)            ; Compare dot_product with -1.0
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	jbe	L1900             ; Jump if dot_product <= -1.0
+	jbe		L1900             ; Jump if dot_product <= -1.0
 	
 	fldt	LC10              ; Load 1.0 (upper bound)
 	fxch	%st(1)            ; Swap stack elements
 	fucom	%st(1)            ; Compare dot_product with 1.0
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	jae	L1901             ; Jump if dot_product >= 1.0
+	jae		L1901             ; Jump if dot_product >= 1.0
 	
 	; dot_product is in valid range [-1.0, 1.0]
 	fstp	%st(1)            ; Pop upper bound
 	fstp	%st(1)            ; Pop lower bound
-	jmp	L1902             ; Continue to acos calculation
+	jmp		L1902             ; Continue to acos calculation
 	
 L1900:
 	; Clamp to -1.0
 	fstp	%st(0)            ; Pop dot_product
 	fstp	%st(0)            ; Pop lower bound (keep -1.0)
-	jmp	L1902             ; Continue to acos calculation
+	jmp		L1902             ; Continue to acos calculation
 	
 L1901:
 	; Clamp to 1.0
@@ -1283,7 +1283,7 @@ L1902:
 	fucom	%st(1)            ; Compare angle_uv with EPS
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	jb	L1903             ; Jump if angle_uv < EPS (points are nearly identical)
+	jb		L1903             ; Jump if angle_uv < EPS (points are nearly identical)
 	
 	fstp	%st(0)            ; Pop EPS
 	fstp	%st(0)            ; Pop angle_uv
@@ -1406,7 +1406,7 @@ L1912:
 	fucom	%st(1)            ; Compare d_k_to_plane_ang with r_ang + EPS
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	ja	L1913             ; Jump if d_k_to_plane_ang > r_ang + EPS (no intersection)
+	ja		L1913             ; Jump if d_k_to_plane_ang > r_ang + EPS (no intersection)
 	
 	; Small circle boundary intersects or is tangent to or contains the great circle
 	fstp	%st(0)            ; Pop r_ang + EPS
@@ -1422,14 +1422,14 @@ L1912:
 	fucom	%st(1)            ; Compare abs(difference) with EPS
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	ja	L1914             ; Jump if abs(difference) > EPS (not tangent)
+	ja		L1914             ; Jump if abs(difference) > EPS (not tangent)
 	
 	; Tangent case: alpha = 0
 	fstp	%st(0)            ; Pop abs(difference)
 	fstp	%st(0)            ; Pop EPS
 	fldz                      ; Load 0.0
 	fstpt	508(%esp)         ; Store alpha = 0.0
-	jmp	L1915             ; Jump to intersection point calculation
+	jmp		L1915             ; Jump to intersection point calculation
 	
 L1914:
 	; Non-tangent case: calculate alpha using law of cosines
@@ -1457,7 +1457,7 @@ L1914:
 	fucom	%st(1)            ; Compare cos_alpha_arg with -1.0 - EPS
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	jb	L1916             ; Jump if cos_alpha_arg < -1.0 - EPS (invalid)
+	jb		L1916             ; Jump if cos_alpha_arg < -1.0 - EPS (invalid)
 	
 	fldt	LC10              ; Load 1.0
 	fldt	LC5               ; Load EPS
@@ -1466,7 +1466,7 @@ L1914:
 	fucom	%st(1)            ; Compare cos_alpha_arg with 1.0 + EPS
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	ja	L1916             ; Jump if cos_alpha_arg > 1.0 + EPS (invalid)
+	ja		L1916             ; Jump if cos_alpha_arg > 1.0 + EPS (invalid)
 	
 	; cos_alpha_arg is in valid range, calculate alpha
 	fstp	%st(0)            ; Pop 1.0 + EPS
@@ -1482,24 +1482,24 @@ L1914:
 	fucom	%st(1)            ; Compare with 1.0
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	jae	L1917             ; Jump if cos_alpha_arg >= 1.0
+	jae		L1917             ; Jump if cos_alpha_arg >= 1.0
 	
 	fxch	%st(1)            ; Swap to compare with -1.0
 	fucom	%st(2)            ; Compare cos_alpha_arg with -1.0
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	jbe	L1918             ; Jump if cos_alpha_arg <= -1.0
+	jbe		L1918             ; Jump if cos_alpha_arg <= -1.0
 	
 	; cos_alpha_arg is in valid range [-1.0, 1.0]
 	fstp	%st(0)            ; Pop -1.0
 	fstp	%st(0)            ; Pop 1.0
-	jmp	L1919             ; Continue to acos calculation
+	jmp		L1919             ; Continue to acos calculation
 	
 L1917:
 	; Clamp to 1.0
 	fstp	%st(0)            ; Pop cos_alpha_arg
 	fstp	%st(0)            ; Pop -1.0
-	jmp	L1919             ; Continue to acos calculation
+	jmp		L1919             ; Continue to acos calculation
 	
 L1918:
 	; Clamp to -1.0
@@ -1511,18 +1511,18 @@ L1919:
 	; C++ EQUIVALENT: alpha = acos(max(-1.0, min(1.0, cos_alpha_arg)));
 	call	__acosl           ; Call acos function
 	fstpt	508(%esp)         ; Store alpha on stack
-	jmp	L1915             ; Jump to intersection point calculation
+	jmp		L1915             ; Jump to intersection point calculation
 	
 L1916:
 	; cos_alpha_arg is out of valid range - no intersection
 	fstp	%st(0)            ; Pop 1.0 + EPS
 	fstp	%st(0)            ; Pop -1.0 - EPS
 	fstp	%st(0)            ; Pop cos_alpha_arg
-	jmp	L1920             ; Jump to check midpoint case
+	jmp		L1920             ; Jump to check midpoint case
 	
 L1915:
 	; Continue with intersection point calculation (will be implemented in next steps)
-	jmp	L1921             ; Jump to next step
+	jmp		L1921             ; Jump to next step
 	
 L1913:
 	; No intersection between great circle and small circle boundary
@@ -1532,7 +1532,7 @@ L1913:
 L1920:
 	; C++ EQUIVALENT: Check midpoint case - arc is either entirely inside or entirely outside
 	; This will be handled in the next step
-	jmp	L1921             ; Jump to next step
+	jmp		L1921             ; Jump to next step
 	
 	; ========================================================================
 	; END OF STEP 2: Parameterize arc from 0 to 1 based on distance
@@ -1633,7 +1633,7 @@ L1921:
 	movl	%ecx, 8(%esp)     ; Push p1_gc address
 	call	__Z9is_on_arcRK5PointS1_S1_ ; Call is_on_arc(u, v, p1_gc)
 	testb	%al, %al          ; Test if p1_gc is on arc
-	je	L1925             ; Jump if p1_gc is NOT on arc
+	je		L1925             ; Jump if p1_gc is NOT on arc
 	
 	; C++ EQUIVALENT: critical_params.push_back(get_arc_parameter(u, v, p1_gc));
 	; p1_gc is on arc, get its parameter and add to critical_params
@@ -1690,20 +1690,20 @@ L1925:
 	fstpt	480(%esp,%eax,12) ; Store parameter at offset (count * 12)
 	incl	%eax              ; Increment count
 	movl	%eax, 504(%esp)   ; Store new count
-	jmp	L1927             ; Jump to interval testing
+	jmp		L1927             ; Jump to interval testing
 	
 L1926:
 	; Clean up stack if alpha <= EPS
 	fstp	%st(0)            ; Pop EPS
 	fstp	%st(0)            ; Pop alpha
-	jmp	L1927             ; Jump to interval testing
+	jmp		L1927             ; Jump to interval testing
 	
 L1927:
 	; C++ EQUIVALENT: Test intervals between critical points for coverage
 	; Sort critical_params (simplified bubble sort for assembly)
 	movl	504(%esp), %ecx   ; Load count of critical parameters
 	cmpl	$2, %ecx          ; Check if count > 1
-	jle	L1930             ; Skip sorting if count <= 1
+	jle		L1930             ; Skip sorting if count <= 1
 	
 	; Simple bubble sort implementation for critical_params
 	movl	$0, %edi          ; Initialize i = 0
@@ -1712,7 +1712,7 @@ L1928:
 	incl	%esi              ; j = i + 1
 L1929:
 	cmpl	%ecx, %esi        ; Compare j with count
-	jge	L1932             ; Jump if j >= count (inner loop done)
+	jge		L1932             ; Jump if j >= count (inner loop done)
 	
 	; Compare critical_params[i] with critical_params[j]
 	fldt	480(%esp,%edi,12) ; Load critical_params[i]
@@ -1720,14 +1720,14 @@ L1929:
 	fucom	%st(1)            ; Compare critical_params[i] with critical_params[j]
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	jbe	L1931             ; Jump if critical_params[i] <= critical_params[j]
+	jbe		L1931             ; Jump if critical_params[i] <= critical_params[j]
 	
 	; Swap critical_params[i] and critical_params[j]
 	fstpt	952(%esp)         ; Store critical_params[j] in temp
 	fstpt	480(%esp,%esi,12) ; Store critical_params[i] in position j
 	fldt	952(%esp)         ; Load temp
 	fstpt	480(%esp,%edi,12) ; Store temp in position i
-	jmp	L1933             ; Jump to next iteration
+	jmp		L1933             ; Jump to next iteration
 	
 L1931:
 	; No swap needed, clean up FPU stack
@@ -1736,12 +1736,12 @@ L1931:
 	
 L1933:
 	incl	%esi              ; j++
-	jmp	L1929             ; Continue inner loop
+	jmp		L1929             ; Continue inner loop
 	
 L1932:
 	incl	%edi              ; i++
 	cmpl	%ecx, %edi        ; Compare i with count-1
-	jl	L1928             ; Continue outer loop if i < count-1
+	jl		L1928             ; Continue outer loop if i < count-1
 	
 L1930:
 	; Now test intervals between critical points
@@ -1752,7 +1752,7 @@ L1930:
 	
 L1934:
 	cmpl	%ecx, %edi        ; Compare i with count-1
-	jge	L1940             ; Jump if i >= count-1 (loop done)
+	jge		L1940             ; Jump if i >= count-1 (loop done)
 	
 	; C++ EQUIVALENT: long double t_start = critical_params[i];
 	; C++ EQUIVALENT: long double t_end = critical_params[i+1];
@@ -1762,20 +1762,20 @@ L1934:
 	fldt	480(%esp,%esi,12) ; Load critical_params[i+1] (t_end)
 	
 	; C++ EQUIVALENT: if (t_end - t_start < EPS) continue;
-	fld	%st(0)            ; Duplicate t_end
+	fld		%st(0)            ; Duplicate t_end
 	fsub	%st(2), %st       ; Calculate t_end - t_start
 	fldt	LC5               ; Load EPS
 	fucom	%st(1)            ; Compare t_end - t_start with EPS
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	ja	L1935             ; Jump if t_end - t_start > EPS (valid interval)
+	ja		L1935             ; Jump if t_end - t_start > EPS (valid interval)
 	
 	; Interval too small, skip it
 	fstp	%st(0)            ; Pop EPS
 	fstp	%st(0)            ; Pop t_end - t_start
 	fstp	%st(0)            ; Pop t_end
 	fstp	%st(0)            ; Pop t_start
-	jmp	L1936             ; Jump to next iteration
+	jmp		L1936             ; Jump to next iteration
 	
 L1935:
 	; Valid interval, test coverage
@@ -1783,7 +1783,7 @@ L1935:
 	fstp	%st(0)            ; Pop t_end - t_start
 	
 	; C++ EQUIVALENT: long double t_mid = (t_start + t_end) / 2.0;
-	fld	%st(1)            ; Duplicate t_start
+	fld		%st(1)            ; Duplicate t_start
 	fadd	%st(1), %st       ; Calculate t_start + t_end
 	fldt	LC8               ; Load 0.5
 	fmulp	%st, %st(1)      ; Calculate (t_start + t_end) / 2.0
@@ -1815,14 +1815,14 @@ L1935:
 	fucom	%st(1)            ; Compare distance with R_sphere + EPS
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	jae	L1937             ; Jump if distance <= R_sphere + EPS (covered)
+	jae		L1937             ; Jump if distance <= R_sphere + EPS (covered)
 	
 	; Interval not covered, skip it
 	fstp	%st(0)            ; Pop distance
 	fstp	%st(0)            ; Pop R_sphere + EPS
 	fstp	%st(0)            ; Pop t_end
 	fstp	%st(0)            ; Pop t_start
-	jmp	L1936             ; Jump to next iteration
+	jmp		L1936             ; Jump to next iteration
 	
 L1937:
 	; C++ EQUIVALENT: intervals.push_back({t_start, t_end});
@@ -1839,7 +1839,7 @@ L1937:
 	
 L1936:
 	incl	%edi              ; i++
-	jmp	L1934             ; Continue loop
+	jmp		L1934             ; Continue loop
 	
 L1940:
 	; ========================================================================
@@ -1857,7 +1857,7 @@ L1940:
 	
 	; Function exit: return the result vector containing covered intervals
 	movl	528(%esp), %eax   ; Load result vector address (return value)
-	addl	$1024, %esp       ; Deallocate extended local stack space (increased for STEP 3)
+	addl	$512, %esp        ; Deallocate local stack space (matches initial allocation)
 	popl	%ebx              ; Restore EBX register
 	popl	%esi              ; Restore ESI register
 	popl	%edi              ; Restore EDI register
@@ -1883,12 +1883,12 @@ L1903:
 	fucom	%st(1)            ; Compare distance with R_sphere + EPS
 	fnstsw	%ax               ; Store FPU status
 	sahf                      ; Load flags
-	jae	L1905             ; Jump if distance <= R_sphere + EPS
+	jae		L1905             ; Jump if distance <= R_sphere + EPS
 	
 	; Point is outside R-sphere, return empty vector
 	fstp	%st(0)            ; Pop distance
 	fstp	%st(0)            ; Pop R_sphere + EPS
-	jmp	L1906             ; Jump to return empty vector
+	jmp		L1906             ; Jump to return empty vector
 	
 L1905:
 	; Point is inside R-sphere, return {{0.0, 1.0}}
@@ -1897,15 +1897,117 @@ L1905:
 	; Add interval [0.0, 1.0] to result vector
 	; Create interval struct and add to result vector
 	; This would add the complete interval [0.0, 1.0] to the result
-	jmp	L1940             ; Jump to STEP 4 (return function)
+	jmp		L1940             ; Jump to STEP 4 (return function)
 	
 L1906:
 	; Return empty vector (no coverage)
-	jmp	L1940             ; Jump to STEP 4 (return function)
+	; C++ EQUIVALENT: return vector<pair<long double, long double>>{}; // empty vector
+	; Ensure result vector is properly initialized as empty
+	movl	528(%esp), %eax   ; Load result vector address
+	movl	$0, (%eax)        ; Set vector.begin() = nullptr
+	movl	$0, 4(%eax)       ; Set vector.end() = nullptr  
+	movl	$0, 8(%eax)       ; Set vector.capacity_end() = nullptr
+	jmp		L1940             ; Jump to STEP 4 (return function)
 
 ; C++ EQUIVALENT: vector<pair<long double, long double>> merge_intervals(...)
 ; Merges overlapping intervals to create consolidated coverage map
 ; Uses standard interval merging algorithm with tolerance handling
+
+	.align 2
+	.p2align 4,,15
+	.globl	__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE
+	.def	__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE;	.scl	2;	.type	32;	.endef
+
+__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE:
+	pushl	%ebp              ; Save EBP register
+	pushl	%edi              ; Save EDI register
+	pushl	%esi              ; Save ESI register
+	pushl	%ebx              ; Save EBX register
+	subl	$64, %esp         ; Allocate local stack space
+	
+	; Load function parameters
+	movl	84(%esp), %edi    ; Load address of result vector
+	movl	88(%esp), %esi    ; Load address of input intervals vector
+	
+	; C++ EQUIVALENT: if (intervals.empty()) return vector<pair<long double, long double>>{};
+	movl	(%esi), %eax      ; Load intervals.begin()
+	movl	4(%esi), %ebx     ; Load intervals.end()
+	cmpl	%eax, %ebx        ; Compare begin vs end
+	je	L1950             ; Jump if empty (return empty vector)
+	
+	; Initialize result vector as empty
+	movl	$0, (%edi)        ; Set result.begin() = nullptr
+	movl	$0, 4(%edi)       ; Set result.end() = nullptr
+	movl	$0, 8(%edi)       ; Set result.capacity_end() = nullptr
+	
+	; C++ EQUIVALENT: merged.push_back(intervals[0]);
+	; Add first interval to merged result using existing vector functions
+	movl	%edi, (%esp)      ; Push result vector address
+	movl	%eax, 4(%esp)     ; Push first interval address
+	call	__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_
+	
+	; C++ EQUIVALENT: for (size_t i = 1; i < intervals.size(); ++i)
+	addl	$24, %eax         ; Move to second interval (24 bytes = sizeof(pair<long double, long double>))
+	
+L1951:
+	cmpl	%eax, %ebx        ; Compare current vs end
+	je	L1950             ; Jump if done
+	
+	; Get last interval in merged vector
+	movl	(%edi), %ecx      ; Load merged.begin()
+	movl	4(%edi), %edx     ; Load merged.end()
+	subl	$24, %edx         ; Point to last interval
+	
+	; C++ EQUIVALENT: if (intervals[i].first <= merged.back().second + EPS)
+	fldt	(%eax)            ; Load intervals[i].first
+	fldt	12(%edx)          ; Load merged.back().second
+	fldt	LC5               ; Load EPS
+	faddp	%st, %st(1)      ; Calculate merged.back().second + EPS
+	fucom	%st(1)            ; Compare intervals[i].first with merged.back().second + EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	ja	L1952             ; Jump if intervals[i].first > merged.back().second + EPS (no overlap)
+	
+	; Merge intervals: merged.back().second = max(merged.back().second, intervals[i].second)
+	fstp	%st(0)            ; Pop intervals[i].first
+	fldt	12(%eax)          ; Load intervals[i].second
+	fucom	%st(1)            ; Compare intervals[i].second with merged.back().second
+	fnstsw	%cx               ; Store FPU status
+	sahf                      ; Load flags
+	jbe	L1953             ; Jump if intervals[i].second <= merged.back().second
+	
+	; Update merged.back().second = intervals[i].second
+	fstpt	12(%edx)          ; Store intervals[i].second as new merged.back().second
+	fstp	%st(0)            ; Pop old merged.back().second
+	jmp	L1954             ; Jump to next iteration
+	
+L1953:
+	; Keep old merged.back().second
+	fstp	%st(0)            ; Pop intervals[i].second
+	fstp	%st(0)            ; Pop merged.back().second
+	jmp	L1954             ; Jump to next iteration
+	
+L1952:
+	; No overlap, add new interval using existing vector functions
+	fstp	%st(0)            ; Pop intervals[i].first
+	fstp	%st(0)            ; Pop merged.back().second + EPS
+	movl	%edi, (%esp)      ; Push result vector address
+	movl	%eax, 4(%esp)     ; Push current interval address
+	call	__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_
+	
+L1954:
+	addl	$24, %eax         ; Move to next interval
+	jmp	L1951             ; Continue loop
+	
+L1950:
+	; Function exit: return merged intervals vector
+	movl	84(%esp), %eax    ; Load result vector address (return value)
+	addl	$64, %esp         ; Deallocate local stack space
+	popl	%ebx              ; Restore EBX register
+	popl	%esi              ; Restore ESI register
+	popl	%edi              ; Restore EDI register
+	popl	%ebp              ; Restore EBP register
+	ret                       ; Return from function
 
 ; C++ EQUIVALENT: bool is_arc_safe(const Point& u, const Point& v, ...)
 ; Checks if entire arc is safe by verifying complete coverage
@@ -1933,7 +2035,7 @@ L1906:
 ; FLOYD-WARSHALL INITIALIZATION: Set up adjacency matrix with direct distances
 L988:
 	testl	%ebx, %ebx        ; Check if vertex count > 0
-	jle	L1033             ; Skip if no vertices
+	jle		L1033             ; Skip if no vertices
 	leal	(%ebx,%ebx,2), %edx ; Calculate 3 * vertex_count
 	movl	-168(%ebp), %ecx  ; Load adjacency matrix pointer
 	fldz                   ; Load 0.0 onto FPU stack
@@ -1947,7 +2049,7 @@ L1035:
 	fldt	(%eax,%edi)       ; Reload for next iteration
 	addl	$12, %edi         ; Move to next diagonal element
 	cmpl	%edi, %edx        ; Check if all diagonal elements set
-	jne	L1035             ; Continue if not done
+	jne		L1035             ; Continue if not done
 	fstp	%st(0)            ; Pop 0.0 from FPU stack
 	
 	; DIRECT DISTANCE CALCULATION: Fill matrix with direct arc distances
@@ -1959,7 +2061,7 @@ L1035:
 	movl	%eax, -208(%ebp)  ; Store current vertex pointer
 	movl	-164(%ebp), %eax  ; Load offset
 	cmpl	%eax, -160(%ebp)  ; Compare offset with matrix size
-	je	L1038             ; Jump if done with initialization
+	je		L1038             ; Jump if done with initialization
 	
 L1244:
 	; NESTED LOOP: Calculate distances between all vertex pairs
@@ -1983,7 +2085,7 @@ L1046:
 	fucomp	%st(1)            ; Compare EPS with distance
 	fnstsw	%ax              ; Store FPU status
 	sahf                      ; Transfer to CPU flags
-	ja	L1045             ; Jump if distance > EPS (valid distance)
+	ja		L1045             ; Jump if distance > EPS (valid distance)
 	
 	; STORE TEMPORARY DISTANCE: Save distance for arc safety check
 	fstpt	-200(%ebp)        ; Store distance temporarily
@@ -1999,7 +2101,7 @@ L1046:
 	call	__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe
 	testb	%al, %al          ; Test if arc is safe
 	fldt	-200(%ebp)        ; Reload distance
-	je	L1251             ; Jump if arc is NOT safe
+	je		L1251             ; Jump if arc is NOT safe
 	
 L1045:
 	; STORE VALID DISTANCE: Add distance to adjacency matrix
@@ -2008,7 +2110,7 @@ L1045:
 	movl	-12(%esi,%ecx), %eax ; Load matrix[i] row pointer
 	movl	(%esi,%ebx), %ecx ; Load matrix[j] row pointer
 	addl	%ebx, %eax        ; Calculate matrix[i][j] address
-	fld	%st(0)            ; Duplicate distance on FPU stack
+	fld		%st(0)            ; Duplicate distance on FPU stack
 	fstpt	(%ecx,%edx)       ; Store distance at matrix[j][i]
 	fstpt	(%eax)            ; Store distance at matrix[i][j]
 	jmp	L1041             ; Jump to next iteration
@@ -2065,7 +2167,7 @@ L1050:
 	fucom	%st(1)            ; Compare with -INF
 	fnstsw	%ax              ; Store FPU status
 	sahf                      ; Transfer to CPU flags
-	ja	L1252             ; Jump if matrix[i][k] == INF (skip this triplet)
+	ja		L1252             ; Jump if matrix[i][k] == INF (skip this triplet)
 	
 	; CHECK matrix[k][j] != INF
 	movl	(%edi,%esi), %eax ; Load matrix[k] row pointer
@@ -2073,7 +2175,7 @@ L1050:
 	fucom	%st(2)            ; Compare with -INF
 	fnstsw	%ax              ; Store FPU status
 	sahf                      ; Transfer to CPU flags
-	ja	L1253             ; Jump if matrix[k][j] == INF (skip this triplet)
+	ja		L1253             ; Jump if matrix[k][j] == INF (skip this triplet)
 	
 	; CALCULATE matrix[i][k] + matrix[k][j]
 	faddp	%st, %st(1)       ; Add: matrix[i][k] + matrix[k][j]
@@ -2081,11 +2183,11 @@ L1050:
 	fucom	%st(1)            ; Compare matrix[i][j] with (matrix[i][k] + matrix[k][j])
 	fnstsw	%ax              ; Store FPU status
 	sahf                      ; Transfer to CPU flags
-	jbe	L1254             ; Jump if current distance <= new distance
+	jbe		L1254             ; Jump if current distance <= new distance
 	
 	; UPDATE matrix[i][j]: Found shorter path through k
 	fstp	%st(0)            ; Pop old matrix[i][j]
-	jmp	L1104             ; Jump to store new distance
+	jmp		L1104             ; Jump to store new distance
 	
 	.p2align 4,,10        ; Align for performance
 L1254:
@@ -2101,7 +2203,7 @@ L1104:
 L1252:
 	; SKIP: matrix[i][k] == INF, no path through k
 	fstp	%st(0)            ; Pop matrix[i][k]
-	jmp	L1048             ; Jump to next j iteration
+	jmp		L1048             ; Jump to next j iteration
 	
 	.p2align 4,,10        ; Align for performance
 L1253:
@@ -2113,18 +2215,18 @@ L1048:
 	; INNER LOOP INCREMENT: j++
 	addl	$12, %edx         ; Move to next column (j++)
 	cmpl	%edx, -156(%ebp)  ; Check if j < V
-	jne	L1050             ; Continue inner loop if j < V
+	jne		L1050             ; Continue inner loop if j < V
 	
 	; MIDDLE LOOP INCREMENT: i++
 	addl	$12, -160(%ebp)   ; Move to next row (i++)
 	movl	-160(%ebp), %eax  ; Load new row pointer
 	cmpl	%eax, -164(%ebp)  ; Check if i < V
-	jne	L1051             ; Continue middle loop if i < V
+	jne		L1051             ; Continue middle loop if i < V
 	
 	; OUTER LOOP INCREMENT: k++
 	addl	$12, %esi         ; Move to next k (k++)
 	cmpl	%esi, -156(%ebp)  ; Check if k < V
-	jne	L1052             ; Continue outer loop if k < V
+	jne		L1052             ; Continue outer loop if k < V
 	
 	; FLOYD-WARSHALL COMPLETE: All-pairs shortest paths computed
 	fstp	%st(0)            ; Pop -INF constant from FPU stack
