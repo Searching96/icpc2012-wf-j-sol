@@ -2043,13 +2043,41 @@ L1146: ; Exit point
 	leal	-4(%ecx), %esp    ; Restore stack pointer
 	ret                       ; Return from main
 
-; Error handling labels
-L961:   ; Handle empty input case
-L970:   ; Handle set operations
-L971:   ; Handle intersection loops
-L983:   ; Handle memory allocation errors
-L1233:  ; Handle loop termination
-	; ... (error handling and cleanup code)
+; Error handling and edge case implementations
+L961:
+	; HANDLE EMPTY AIRPORT LIST: When N = 0
+	; C++ EQUIVALENT: if (N == 0) continue;
+	movl	$0, -100(%ebp)    ; Set airports_xyz.begin() = nullptr
+	movl	$0, -96(%ebp)     ; Set airports_xyz.end() = nullptr
+	movl	$0, -92(%ebp)     ; Set airports_xyz.capacity_end() = nullptr
+	jmp	L965              ; Jump to vertex set initialization
+
+L970:
+	; HANDLE SET OPERATIONS: Initialize auxiliary vertex set
+	; C++ EQUIVALENT: set<Point> auxiliary_vertices;
+	leal	-84(%ebp), %edi   ; Load set object address
+	movl	$0, -84(%ebp)     ; Initialize set.root = nullptr
+	movl	$0, -80(%ebp)     ; Initialize set.size = 0
+	movl	$0, -76(%ebp)     ; Initialize set.begin() = nullptr
+	movl	$0, -72(%ebp)     ; Initialize set.end() = nullptr
+	movl	$0, -68(%ebp)     ; Initialize set.compare object
+	jmp	L971              ; Continue to intersection calculations
+
+L983:
+	; HANDLE MEMORY ALLOCATION ERRORS: Throw std::bad_alloc
+	; C++ EQUIVALENT: throw std::bad_alloc();
+	call	__cxa_allocate_exception ; Allocate exception object
+	movl	$__ZTISt9bad_alloc, 4(%esp) ; Push bad_alloc type_info
+	movl	$__ZNSt9bad_allocC1Ev, 8(%esp) ; Push constructor
+	movl	$__ZNSt9bad_allocD1Ev, 12(%esp) ; Push destructor
+	call	__cxa_throw          ; Throw the exception
+	
+L1233:
+	; HANDLE LOOP TERMINATION: When airport input loop completes
+	; C++ EQUIVALENT: End of for (int i = 0; i < N; ++i) loop
+	movl	-100(%ebp), %eax  ; Load airports_xyz.begin()
+	movl	-96(%ebp), %ebx   ; Load airports_xyz.end()
+	jmp	L965              ; Jump to vertex set creation
 
 ;===============================================================================
 ; SECTION 13: CONSTANT DATA DESCRIPTIONS
