@@ -1662,35 +1662,6 @@ L1146:
 ; - Memory management for dynamic data structures
 ; - Mathematical library function calls (cos, sin, acos, sqrt, etc.)
 
-;===============================================================================
-; SECTION 13: CONSTANT DATA SECTION
-;===============================================================================
-
-; .LC0: PI = 3.14159265358979323846L
-; .LC1: 180.0 (for degree to radian conversion)
-; .LC2: R_EARTH = 6370.0L (Earth radius in kilometers)
-; .LC3: EPS = 1e-9L (epsilon for floating-point comparisons)
-; .LC4: -1.0 (for clamping dot products)
-
-;===============================================================================
-; NOTES ON ASSEMBLY OPTIMIZATION:
-;===============================================================================
-
-; 1. The compiler has heavily optimized the code with -O2 flag
-; 2. Extended precision (80-bit) floating-point arithmetic is used throughout
-; 3. Function inlining has been applied where beneficial
-; 4. Loop unrolling and vectorization may be present in repetitive calculations
-; 5. Register allocation has been optimized for x86-32 architecture
-; 6. Stack space is carefully managed to minimize overhead
-
-; The complete assembly file contains 6368 lines of highly optimized machine code
-; that implements the sophisticated geometric algorithms for finding the shortest
-; safe flight path between airports with limited fuel capacity.
-
-;===============================================================================
-; END OF HUMAN-READABLE ANNOTATED ASSEMBLY CODE
-;===============================================================================
-
 ; C++ EQUIVALENT: int main()
 ; The main function implements the complete flight path algorithm
 _main:
@@ -2081,6 +2052,16 @@ L1233:  ; Handle loop termination
 	; ... (error handling and cleanup code)
 
 ;===============================================================================
+; SECTION 13: CONSTANT DATA SECTION
+;===============================================================================
+
+; .LC0: PI = 3.14159265358979323846L
+; .LC1: 180.0 (for degree to radian conversion)
+; .LC2: R_EARTH = 6370.0L (Earth radius in kilometers)
+; .LC3: EPS = 1e-9L (epsilon for floating-point comparisons)
+; .LC4: -1.0 (for clamping dot products)
+
+;===============================================================================
 ; SECTION 14: CONSTANT DATA DEFINITIONS
 ;===============================================================================
 
@@ -2157,6 +2138,21 @@ LC17:   ; Large negative number
 	.def	__ZSt20__throw_length_errorPKc;     .scl 2; .type 32; .endef
 	.def	__ZSt17__throw_bad_allocv;          .scl 2; .type 32; .endef
 	.def	__ZSt16__throw_bad_castv;           .scl 2; .type 32; .endef
+
+;===============================================================================
+; NOTES ON ASSEMBLY OPTIMIZATION:
+;===============================================================================
+
+; 1. The compiler has heavily optimized the code with -O2 flag
+; 2. Extended precision (80-bit) floating-point arithmetic is used throughout
+; 3. Function inlining has been applied where beneficial
+; 4. Loop unrolling and vectorization may be present in repetitive calculations
+; 5. Register allocation has been optimized for x86-32 architecture
+; 6. Stack space is carefully managed to minimize overhead
+
+; The complete assembly file contains 6368 lines of highly optimized machine code
+; that implements the sophisticated geometric algorithms for finding the shortest
+; safe flight path between airports with limited fuel capacity.
 
 ;===============================================================================
 ; COMPILER IDENTIFICATION
