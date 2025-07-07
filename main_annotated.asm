@@ -2016,6 +2016,173 @@ L1950:
 ; 2. Merge overlapping intervals
 ; 3. Check if merged intervals cover [0,1] completely
 
+	.align 2
+	.p2align 4,,15
+	.globl	__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe
+	.def	__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe;	.scl	2;	.type	32;	.endef
+
+__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe:
+	pushl	%ebp              ; Save EBP register
+	pushl	%edi              ; Save EDI register
+	pushl	%esi              ; Save ESI register
+	pushl	%ebx              ; Save EBX register
+	subl	$128, %esp        ; Allocate local stack space for intervals vector
+	
+	; Load function parameters
+	movl	148(%esp), %edi   ; Load address of u
+	movl	152(%esp), %esi   ; Load address of v
+	movl	156(%esp), %ebx   ; Load address of k_centers vector
+	; R_sphere is loaded from 160(%esp) when needed
+	
+	; ========================================================================
+	; STEP 1: Get all covered intervals for the arc
+	; ========================================================================
+	
+	; C++ EQUIVALENT: vector<pair<long double, long double>> all_intervals;
+	; Initialize temporary intervals vector
+	leal	32(%esp), %eax    ; Load address for all_intervals vector
+	movl	$0, 32(%esp)      ; Set all_intervals.begin() = nullptr
+	movl	$0, 36(%esp)      ; Set all_intervals.end() = nullptr
+	movl	$0, 40(%esp)      ; Set all_intervals.capacity_end() = nullptr
+	
+	; C++ EQUIVALENT: for (const auto& k_center : k_centers) {
+	;                     auto intervals = get_covered_intervals(u, v, k_center, R_sphere);
+	;                     all_intervals.insert(all_intervals.end(), intervals.begin(), intervals.end());
+	;                 }
+	movl	(%ebx), %eax      ; Load k_centers.begin()
+	movl	4(%ebx), %ecx     ; Load k_centers.end()
+	
+L2001:
+	cmpl	%eax, %ecx        ; Compare current vs end
+	je	L2002             ; Jump if done with all k_centers
+	
+	; Call get_covered_intervals(u, v, k_center, R_sphere) using existing function
+	leal	64(%esp), %edx    ; Load address for temp intervals vector
+	movl	%edx, (%esp)      ; Push temp vector address
+	movl	%edi, 4(%esp)     ; Push u address
+	movl	%esi, 8(%esp)     ; Push v address
+	movl	%eax, 12(%esp)    ; Push k_center address
+	fldt	160(%esp)         ; Load R_sphere
+	fstpt	16(%esp)          ; Push R_sphere as parameter
+	call	__Z20get_covered_intervalsRK5PointS1_S1_e ; Call existing function
+	
+	; C++ EQUIVALENT: all_intervals.insert(all_intervals.end(), intervals.begin(), intervals.end());
+	; Append temp intervals to all_intervals using existing vector functions
+	movl	64(%esp), %edx    ; Load temp intervals.begin()
+	movl	68(%esp), %ecx    ; Load temp intervals.end()
+	
+L2003:
+	cmpl	%edx, %ecx        ; Compare current vs end
+	je	L2004             ; Jump if done with temp intervals
+	
+	; Add current interval to all_intervals using existing push_back
+	leal	32(%esp), %ebx    ; Load all_intervals vector address
+	movl	%ebx, (%esp)      ; Push all_intervals vector address
+	movl	%edx, 4(%esp)     ; Push current interval address
+	call	__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_ ; Use existing push_back
+	
+	addl	$24, %edx         ; Move to next interval (24 bytes = sizeof(pair<long double, long double>))
+	jmp	L2003             ; Continue copying intervals
+	
+L2004:
+	; Clean up temp intervals vector if needed
+	movl	64(%esp), %edx    ; Load temp intervals.begin()
+	testl	%edx, %edx        ; Check if allocated
+	je	L2005             ; Skip if not allocated
+	movl	%edx, (%esp)      ; Push temp intervals data
+	call	__ZdlPv           ; Free temp intervals memory
+	
+L2005:
+	; Move to next k_center
+	movl	156(%esp), %ebx   ; Reload k_centers vector address
+	addl	$36, %eax         ; Move to next k_center (sizeof(Point) = 36)
+	movl	(%ebx), %edx      ; Reload k_centers.begin()
+	movl	4(%ebx), %ecx     ; Reload k_centers.end()
+	jmp	L2001             ; Continue loop
+	
+L2002:
+	; ========================================================================
+	; END OF STEP 1: Get all covered intervals for the arc
+	; ========================================================================
+	
+	; ========================================================================
+	; STEP 2: Merge overlapping intervals
+	; ========================================================================
+	
+	; C++ EQUIVALENT: auto merged = merge_intervals(all_intervals);
+	; Use existing merge_intervals function to consolidate overlapping intervals
+	leal	96(%esp), %eax    ; Load address for merged vector
+	movl	%eax, (%esp)      ; Push merged vector address
+	leal	32(%esp), %eax    ; Load all_intervals address
+	movl	%eax, 4(%esp)     ; Push all_intervals address
+	call	__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE ; Call existing merge_intervals function
+	
+	; ========================================================================
+	; END OF STEP 2: Merge overlapping intervals
+	; ========================================================================
+	
+	; ========================================================================
+	; STEP 3: Check if merged intervals cover [0,1] completely
+	; ========================================================================
+	
+	; C++ EQUIVALENT: return merged.size() == 1 && merged[0].first <= EPS && merged[0].second >= 1.0 - EPS;
+	; Check if merged intervals completely cover [0,1] with tolerance
+	movl	96(%esp), %eax    ; Load merged.begin()
+	movl	100(%esp), %ebx   ; Load merged.end()
+	subl	%eax, %ebx        ; Calculate size in bytes
+	cmpl	$24, %ebx         ; Check if size == 1 interval (24 bytes = 2 * 12 bytes for long double pair)
+	jne	L2006             ; Jump if not exactly one interval (arc not safe)
+	
+	; Check if single interval covers [0,1] with EPS tolerance
+	; Check: merged[0].first <= EPS
+	fldt	(%eax)            ; Load merged[0].first
+	fldt	LC5               ; Load EPS constant
+	fucom	%st(1)            ; Compare EPS with merged[0].first
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	jb	L2007             ; Jump if EPS < merged[0].first (start not covered)
+	
+	; Check: merged[0].second >= 1.0 - EPS
+	fstp	%st(0)            ; Pop EPS
+	movl	96(%esp), %eax    ; Reload merged.begin()
+	fldt	12(%eax)          ; Load merged[0].second
+	fld1                      ; Load 1.0
+	fldt	LC5               ; Load EPS
+	fsubrp	%st, %st(1)      ; Calculate 1.0 - EPS
+	fucom	%st(1)            ; Compare merged[0].second with 1.0 - EPS
+	fnstsw	%ax               ; Store FPU status
+	sahf                      ; Load flags
+	fstp	%st(0)            ; Pop 1.0 - EPS
+	fstp	%st(0)            ; Pop merged[0].second
+	jae	L2008             ; Jump if merged[0].second >= 1.0 - EPS (arc is safe)
+	
+L2007:
+	; Clean up FPU stack if needed
+	fstp	%st(0)            ; Pop merged[0].first (if still on stack)
+	fstp	%st(0)            ; Pop EPS (if still on stack)
+	
+L2006:
+	; Arc is NOT safe - intervals don't completely cover [0,1]
+	movl	$0, %eax          ; Return false
+	jmp	L2009             ; Jump to function exit
+	
+L2008:
+	; Arc is safe - intervals completely cover [0,1]
+	movl	$1, %eax          ; Return true
+	
+L2009:
+	; ========================================================================
+	; END OF STEP 3: Check if merged intervals cover [0,1] completely
+	; ========================================================================
+	
+	; Function exit
+	addl	$128, %esp        ; Deallocate local stack space
+	popl	%ebx              ; Restore EBX register
+	popl	%esi              ; Restore ESI register
+	popl	%edi              ; Restore EDI register
+	popl	%ebp              ; Restore EBP register
+	ret                       ; Return from function
+
 ;===============================================================================
 ; SECTION 10: FLOYD-WARSHALL ALGORITHM IMPLEMENTATION
 ;===============================================================================
