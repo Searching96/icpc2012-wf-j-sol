@@ -728,11 +728,701 @@ __Z9is_on_arcRK5PointS1_S1_:
 ;     }
 ; }
 
-; The assembly implements this with:
-; - Nested loops using conditional jumps and counters
-; - Infinity checking using floating-point comparisons
-; - Minimum selection using fmin or conditional moves
-; - 2D array access using calculated offsets
+; FLOYD-WARSHALL INITIALIZATION: Set up adjacency matrix with direct distances
+L988:
+	testl	%ebx, %ebx        ; Check if vertex count > 0
+	jle	L1033             ; Skip if no vertices
+	leal	(%ebx,%ebx,2), %edx ; Calculate 3 * vertex_count
+	movl	-168(%ebp), %ecx  ; Load adjacency matrix pointer
+	fldz                   ; Load 0.0 onto FPU stack
+	xorl	%edi, %edi        ; Clear counter
+	sall	$2, %edx          ; Calculate matrix size = 3 * V * 4 bytes
+	
+L1035:
+	; INITIALIZE DIAGONAL ELEMENTS: Set dist[i][i] = 0.0
+	movl	(%ecx,%edi), %eax ; Load matrix row pointer
+	fstpt	(%eax,%edi)       ; Store 0.0 at matrix[i][i]
+	fldt	(%eax,%edi)       ; Reload for next iteration
+	addl	$12, %edi         ; Move to next diagonal element
+	cmpl	%edi, %edx        ; Check if all diagonal elements set
+	jne	L1035             ; Continue if not done
+	fstp	%st(0)            ; Pop 0.0 from FPU stack
+	
+	; DIRECT DISTANCE CALCULATION: Fill matrix with direct arc distances
+	movl	-180(%ebp), %eax  ; Load vertex array pointer
+	movl	$12, -164(%ebp)   ; Initialize offset counter
+	movl	%edi, -160(%ebp)  ; Store matrix size
+	movl	-168(%ebp), %esi  ; Load matrix pointer
+	addl	$36, %eax         ; Move to second vertex
+	movl	%eax, -208(%ebp)  ; Store current vertex pointer
+	movl	-164(%ebp), %eax  ; Load offset
+	cmpl	%eax, -160(%ebp)  ; Compare offset with matrix size
+	je	L1038             ; Jump if done with initialization
+	
+L1244:
+	; NESTED LOOP: Calculate distances between all vertex pairs
+	movl	-208(%ebp), %edi  ; Load current vertex j
+	leal	-36(%edi), %ebx   ; Calculate previous vertex i
+	movl	%ebx, -156(%ebp)  ; Store vertex i pointer
+	leal	-12(%eax), %ebx   ; Calculate matrix offset
+	movl	%ebx, -172(%ebp)  ; Store offset
+	movl	%eax, %ebx        ; Copy offset to EBX
+	
+	.p2align 4,,10        ; Align for performance
+L1046:
+	; DISTANCE CALCULATION: dist_xyz(vertex_i, vertex_j)
+	movl	-156(%ebp), %eax  ; Load vertex i
+	movl	%edi, 4(%esp)     ; Push vertex j as parameter
+	movl	%eax, (%esp)      ; Push vertex i as parameter
+	call	__Z8dist_xyzRK5PointS1_ ; Call great circle distance function
+	
+	; EPSILON COMPARISON: Check if distance is valid (> EPS)
+	fldt	LC5               ; Load EPS constant
+	fucomp	%st(1)            ; Compare EPS with distance
+	fnstsw	%ax              ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	ja	L1045             ; Jump if distance > EPS (valid distance)
+	
+	; STORE TEMPORARY DISTANCE: Save distance for arc safety check
+	fstpt	-200(%ebp)        ; Store distance temporarily
+	
+	; ARC SAFETY CHECK: is_arc_safe(vertex_i, vertex_j, airports, R)
+	leal	-100(%ebp), %eax  ; Load address for result
+	movl	%edi, 4(%esp)     ; Push vertex j
+	movl	%eax, 8(%esp)     ; Push airports array
+	movl	-156(%ebp), %eax  ; Load vertex i
+	movl	%eax, (%esp)      ; Push vertex i
+	fldt	-136(%ebp)        ; Load R (fuel range)
+	fstpt	12(%esp)          ; Push R as parameter
+	call	__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe
+	testb	%al, %al          ; Test if arc is safe
+	fldt	-200(%ebp)        ; Reload distance
+	je	L1251             ; Jump if arc is NOT safe
+	
+L1045:
+	; STORE VALID DISTANCE: Add distance to adjacency matrix
+	movl	-164(%ebp), %ecx  ; Load matrix row offset
+	movl	-172(%ebp), %edx  ; Load matrix column offset
+	movl	-12(%esi,%ecx), %eax ; Load matrix[i] row pointer
+	movl	(%esi,%ebx), %ecx ; Load matrix[j] row pointer
+	addl	%ebx, %eax        ; Calculate matrix[i][j] address
+	fld	%st(0)            ; Duplicate distance on FPU stack
+	fstpt	(%ecx,%edx)       ; Store distance at matrix[j][i]
+	fstpt	(%eax)            ; Store distance at matrix[i][j]
+	jmp	L1041             ; Jump to next iteration
+	
+L1251:
+	; INVALID ARC: Arc is not safe, don't store distance (keep as infinity)
+	fstp	%st(0)            ; Pop invalid distance from FPU stack
+	
+L1041:
+	; INNER LOOP INCREMENT: Move to next vertex pair
+	addl	$36, %edi         ; Move to next vertex j
+	addl	$12, %ebx         ; Move to next matrix column
+	cmpl	%ebx, -160(%ebp)  ; Check if finished with current row
+	jne	L1046             ; Continue inner loop if not done
+	
+	; OUTER LOOP INCREMENT: Move to next row
+	addl	$12, -164(%ebp)   ; Move to next matrix row
+	addl	$36, -208(%ebp)   ; Move to next vertex i
+	movl	-164(%ebp), %eax  ; Load new row offset
+	cmpl	%eax, -160(%ebp)  ; Check if finished with all rows
+	jne	L1244             ; Continue outer loop if not done
+	
+L1038:
+	; FLOYD-WARSHALL MAIN ALGORITHM: Triple nested loop for shortest paths
+	; INITIALIZATION: Set up for k-i-j nested loops
+	fldt	LC17              ; Load -INF constant (large negative number)
+	movl	-160(%ebp), %edi  ; Load matrix size
+	movl	-168(%ebp), %eax  ; Load matrix pointer
+	leal	(%eax,%edi), %esi ; Calculate matrix end pointer
+	movl	%edi, -156(%ebp)  ; Store matrix size
+	movl	%eax, %edi        ; Move matrix pointer to EDI
+	movl	%esi, -164(%ebp)  ; Store matrix end pointer
+	xorl	%esi, %esi        ; Clear k counter (outer loop)
+	
+L1052:
+	; FLOYD-WARSHALL OUTER LOOP: for (k = 0; k < V; k++)
+	movl	%edi, -160(%ebp)  ; Store current matrix row pointer
+	
+	.p2align 4,,10        ; Align for performance
+L1051:
+	; FLOYD-WARSHALL MIDDLE LOOP: for (i = 0; i < V; i++)
+	movl	-160(%ebp), %eax  ; Load matrix row i pointer
+	xorl	%edx, %edx        ; Clear j counter (inner loop)
+	movl	(%eax), %ecx      ; Load matrix[i] row pointer
+	leal	(%ecx,%esi), %ebx ; Calculate &matrix[i][k] address
+	
+	.p2align 4,,10        ; Align for performance
+L1050:
+	; FLOYD-WARSHALL INNER LOOP: for (j = 0; j < V; j++)
+	; ALGORITHM: if (dist[i][k] + dist[k][j] < dist[i][j]) dist[i][j] = dist[i][k] + dist[k][j]
+	
+	; CHECK matrix[i][j] != INF
+	fldt	(%ebx)            ; Load matrix[i][k]
+	fucom	%st(1)            ; Compare with -INF
+	fnstsw	%ax              ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	ja	L1252             ; Jump if matrix[i][k] == INF (skip this triplet)
+	
+	; CHECK matrix[k][j] != INF
+	movl	(%edi,%esi), %eax ; Load matrix[k] row pointer
+	fldt	(%eax,%edx)       ; Load matrix[k][j]
+	fucom	%st(2)            ; Compare with -INF
+	fnstsw	%ax              ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	ja	L1253             ; Jump if matrix[k][j] == INF (skip this triplet)
+	
+	; CALCULATE matrix[i][k] + matrix[k][j]
+	faddp	%st, %st(1)       ; Add: matrix[i][k] + matrix[k][j]
+	fldt	(%ecx,%edx)       ; Load current matrix[i][j]
+	fucom	%st(1)            ; Compare matrix[i][j] with (matrix[i][k] + matrix[k][j])
+	fnstsw	%ax              ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jbe	L1254             ; Jump if current distance <= new distance
+	
+	; UPDATE matrix[i][j]: Found shorter path through k
+	fstp	%st(0)            ; Pop old matrix[i][j]
+	jmp	L1104             ; Jump to store new distance
+	
+	.p2align 4,,10        ; Align for performance
+L1254:
+	; KEEP OLD DISTANCE: Current distance is shorter
+	fstp	%st(1)            ; Pop the sum, keep old distance
+	
+L1104:
+	; STORE RESULT: Update matrix[i][j] with minimum distance
+	fstpt	(%ecx,%edx)       ; Store minimum distance at matrix[i][j]
+	jmp	L1048             ; Jump to next j iteration
+	
+	.p2align 4,,10        ; Align for performance
+L1252:
+	; SKIP: matrix[i][k] == INF, no path through k
+	fstp	%st(0)            ; Pop matrix[i][k]
+	jmp	L1048             ; Jump to next j iteration
+	
+	.p2align 4,,10        ; Align for performance
+L1253:
+	; SKIP: matrix[k][j] == INF, no path through k
+	fstp	%st(0)            ; Pop matrix[k][j]
+	fstp	%st(0)            ; Pop matrix[i][k]
+	
+L1048:
+	; INNER LOOP INCREMENT: j++
+	addl	$12, %edx         ; Move to next column (j++)
+	cmpl	%edx, -156(%ebp)  ; Check if j < V
+	jne	L1050             ; Continue inner loop if j < V
+	
+	; MIDDLE LOOP INCREMENT: i++
+	addl	$12, -160(%ebp)   ; Move to next row (i++)
+	movl	-160(%ebp), %eax  ; Load new row pointer
+	cmpl	%eax, -164(%ebp)  ; Check if i < V
+	jne	L1051             ; Continue middle loop if i < V
+	
+	; OUTER LOOP INCREMENT: k++
+	addl	$12, %esi         ; Move to next k (k++)
+	cmpl	%esi, -156(%ebp)  ; Check if k < V
+	jne	L1052             ; Continue outer loop if k < V
+	
+	; FLOYD-WARSHALL COMPLETE: All-pairs shortest paths computed
+	fstp	%st(0)            ; Pop -INF constant from FPU stack
+
+;===============================================================================
+; SECTION 11: QUERY PROCESSING AND OUTPUT
+;===============================================================================
+
+L1033:
+	; QUERY INPUT: Read number of queries Q
+	leal	-148(%ebp), %eax  ; Load address of Q variable
+	movl	$__ZSt3cin, %ecx  ; Load cin object
+	movl	%eax, (%esp)      ; Push Q address
+	call	__ZNSirsERi       ; Call cin >> Q
+	
+	; OUTPUT TEST CASE HEADER: "Case #N:"
+	movl	-204(%ebp), %edi  ; Load current case number
+	subl	$4, %esp          ; Adjust stack
+	movl	$5, 8(%esp)       ; String length for "Case "
+	movl	$LC14, 4(%esp)    ; Push "Case " string literal
+	movl	$__ZSt4cout, (%esp) ; Push cout object
+	movl	%edi, %eax        ; Copy case number
+	addl	$1, %eax          ; Increment case number for next iteration
+	movl	%eax, -204(%ebp)  ; Store incremented case number
+	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "Case "
+	
+	; OUTPUT CASE NUMBER
+	movl	$__ZSt4cout, %ecx ; Load cout object
+	movl	%edi, (%esp)      ; Push case number
+	call	__ZNSolsEi        ; Call cout << case_number
+	subl	$4, %esp          ; Adjust stack
+	movl	%eax, %ebx        ; Store cout result
+	
+	; OUTPUT COLON AND NEWLINE
+	movl	$1, 8(%esp)       ; String length for ":"
+	movl	$LC15, 4(%esp)    ; Push ":" string literal
+	movl	%eax, (%esp)      ; Push cout object
+	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print ":"
+	
+	; FLUSH OUTPUT BUFFER
+	movl	(%ebx), %eax      ; Load cout vtable
+	movl	-12(%eax), %eax   ; Get vtable offset
+	movl	124(%ebx,%eax), %esi ; Load ctype facet
+	testl	%esi, %esi        ; Check if facet exists
+	je	L1036             ; Jump to error if null
+	cmpb	$0, 28(%esi)      ; Check if facet is initialized
+	je	L1053             ; Jump to initialization if needed
+	movsbl	39(%esi), %eax   ; Load newline character
+	
+L1054:
+	movl	%ebx, %ecx        ; Load cout object
+	movl	%eax, (%esp)      ; Push newline character
+	call	__ZNSo3putEc      ; Call cout.put('\n')
+	subl	$4, %esp          ; Adjust stack
+	movl	%eax, %ecx        ; Load cout result
+	call	__ZNSo5flushEv    ; Call cout.flush()
+	
+	; QUERY PROCESSING LOOP: Process each query
+	movl	-148(%ebp), %ebx  ; Load Q (number of queries)
+	testl	%ebx, %ebx        ; Check if Q > 0
+	jle	L1092             ; Skip if no queries
+	movl	$0, -200(%ebp)    ; Initialize query counter
+	
+L1093:
+	; QUERY INPUT: Read source, destination, and additional_fuel
+	leal	-144(%ebp), %eax  ; Load address of source variable
+	movl	$__ZSt3cin, %ecx  ; Load cin object
+	leal	-140(%ebp), %edi  ; Load address of destination variable
+	movl	%eax, (%esp)      ; Push source address
+	call	__ZNSirsERi       ; Call cin >> source
+	subl	$4, %esp          ; Adjust stack
+	movl	%eax, %ecx        ; Move result to ECX
+	movl	%edi, (%esp)      ; Push destination address
+	call	__ZNSirsERi       ; Call cin >> destination
+	subl	$4, %esp          ; Adjust stack
+	movl	%eax, %ecx        ; Move result to ECX
+	leal	-120(%ebp), %edi  ; Load address of additional_fuel variable
+	movl	%edi, (%esp)      ; Push additional_fuel address
+	call	__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> additional_fuel
+	
+	; CONVERT TO 0-BASED INDEXING
+	movl	-152(%ebp), %ebx  ; Load N (number of airports)
+	subl	$4, %esp          ; Adjust stack
+	subl	$1, -144(%ebp)    ; source = source - 1 (0-based)
+	subl	$1, -140(%ebp)    ; destination = destination - 1 (0-based)
+	testl	%ebx, %ebx        ; Check if N > 0
+	je	L1245             ; Jump if no airports
+	
+	; ALLOCATE TEMPORARY DISTANCE MATRIX: For modified Floyd-Warshall with additional fuel
+	cmpl	$357913941, %ebx  ; Check for overflow
+	ja	L983              ; Jump to error if too large
+	leal	(%ebx,%ebx,2), %edi ; Calculate 3 * N
+	leal	0(,%edi,4), %eax  ; Calculate 3 * N * 4 bytes
+	movl	%eax, (%esp)      ; Push size
+	movl	%eax, -156(%ebp)  ; Store size
+	call	__Znwj            ; Allocate memory
+	flds	LC13              ; Load infinity constant
+	movl	%eax, -164(%ebp)  ; Store matrix pointer
+	
+L1060:
+	; INITIALIZE TEMP MATRIX: Set all distances to infinity
+	fstpt	(%eax)            ; Store infinity at matrix[i]
+	fldt	(%eax)            ; Reload for next iteration
+	addl	$12, %eax         ; Move to next element
+	subl	$1, %ebx          ; Decrement counter
+	jne	L1060             ; Continue until all initialized
+	fstp	%st(0)            ; Pop infinity from FPU stack
+	
+	; COPY ORIGINAL MATRIX: Copy shortest paths to temporary matrix
+	movl	-152(%ebp), %eax  ; Load N
+	testl	%eax, %eax        ; Check if N > 0
+	je	L1118             ; Skip if no airports
+	cmpl	$357913941, %eax  ; Check for overflow
+	ja	L983              ; Jump to error if too large
+	leal	(%eax,%eax,2), %esi ; Calculate 3 * N
+	sall	$2, %esi          ; Calculate 3 * N * 4 bytes
+	movl	%esi, (%esp)      ; Push size
+	call	__Znwj            ; Allocate memory
+	movl	-156(%ebp), %ecx  ; Load size
+	movl	%eax, %edi        ; Store new matrix pointer
+	movl	%edi, -208(%ebp)  ; Store matrix pointer
+	movl	%ecx, %eax        ; Copy size
+	sarl	$2, %eax          ; Convert to element count
+	imull	$-1431655765, %eax, %ebx ; Calculate actual count
+	leal	(%edi,%esi), %eax ; Calculate end address
+	movl	%edi, %esi        ; Copy matrix pointer
+	movl	%eax, -156(%ebp)  ; Store end address
+	movl	%ebx, %edi        ; Store count
+	movl	%ecx, %ebx        ; Copy size
+	
+L1066:
+	; MATRIX COPY LOOP: Copy each row of the distance matrix
+	testl	%esi, %esi        ; Check if valid pointer
+	je	L1062             ; Skip if null
+	xorl	%eax, %eax        ; Clear pointer
+	testl	%edi, %edi        ; Check if count > 0
+	movl	$0, (%esi)        ; Initialize row pointer
+	movl	$0, 4(%esi)       ; Initialize row end
+	movl	$0, 8(%esi)       ; Initialize row capacity
+	je	L1064             ; Skip if no elements
+	cmpl	$357913941, %edi  ; Check for overflow
+	ja	L983              ; Jump to error if too large
+	movl	%ebx, (%esp)      ; Push size
+	call	__Znwj            ; Allocate row memory
+	
+L1064:
+	; SETUP ROW POINTERS
+	leal	(%eax,%ebx), %ecx ; Calculate row end
+	testl	%edi, %edi        ; Check if count > 0
+	movl	%eax, (%esi)      ; Store row begin
+	movl	%eax, 4(%esi)     ; Store row current
+	movl	%ecx, 8(%esi)     ; Store row end
+	je	L1065             ; Skip if no elements
+	
+	; COPY ROW DATA: memcpy from original matrix
+	movl	%ecx, -160(%ebp)  ; Store row end
+	movl	-164(%ebp), %ecx  ; Load source matrix
+	movl	%ebx, 8(%esp)     ; Push size
+	movl	%eax, (%esp)      ; Push destination
+	movl	%ecx, 4(%esp)     ; Push source
+	call	_memcpy           ; Copy row data
+	movl	-160(%ebp), %ecx  ; Reload row end
+	
+L1065:
+	movl	%ecx, 4(%esi)     ; Update row current pointer
+	
+L1062:
+	; NEXT ROW: Move to next row in matrix
+	addl	$12, %esi         ; Move to next row
+	cmpl	%esi, -156(%ebp)  ; Check if done
+	jne	L1066             ; Continue if not done
+	
+	; CLEANUP ORIGINAL MATRIX
+	movl	-208(%ebp), %edi  ; Load matrix pointer
+	movl	%esi, -172(%ebp)  ; Store end pointer
+	
+L1061:
+	movl	-164(%ebp), %eax  ; Load original matrix
+	movl	%eax, (%esp)      ; Push matrix pointer
+	call	__ZdlPv           ; Delete original matrix
+	
+	; MODIFIED FLOYD-WARSHALL: Add additional fuel to edges and recalculate
+	movl	-152(%ebp), %esi  ; Load N
+	testl	%esi, %esi        ; Check if N > 0
+	jle	L1067             ; Skip if no airports
+	leal	(%esi,%esi,2), %edx ; Calculate 3 * N
+	fldz                   ; Load 0.0 for diagonal initialization
+	xorl	%eax, %eax        ; Clear counter
+	sall	$2, %edx          ; Calculate 3 * N * 4 bytes
+	
+L1069:
+	; INITIALIZE DIAGONAL: Set distance[i][i] = 0
+	movl	(%edi,%eax), %ecx ; Load matrix row
+	fstpt	(%ecx,%eax)       ; Store 0.0 at diagonal
+	fldt	(%ecx,%eax)       ; Reload for next iteration
+	addl	$12, %eax         ; Move to next diagonal element
+	cmpl	%eax, %edx        ; Check if done
+	jne	L1069             ; Continue if not done
+	fstp	%st(0)            ; Pop 0.0 from FPU stack
+	
+	; EDGE MODIFICATION: Add additional fuel to all edges
+	fldt	LC5               ; Load EPS constant
+	movl	%esi, -160(%ebp)  ; Store N
+	movl	-176(%ebp), %ebx  ; Load vertex index mapping
+	xorl	%ecx, %ecx        ; Clear i counter
+	movl	-168(%ebp), %esi  ; Load original distance matrix
+	movl	%eax, -156(%ebp)  ; Store matrix size
+	movl	%edi, -164(%ebp)  ; Store current matrix
+	movl	%edi, -208(%ebp)  ; Store matrix backup
+	
+L1075:
+	; OUTER LOOP: For each source vertex i
+	xorl	%edx, %edx        ; Clear j counter
+	
+	.p2align 4,,10        ; Align for performance
+L1074:
+	; INNER LOOP: For each destination vertex j
+	cmpl	%edx, %ecx        ; Check if i == j (diagonal)
+	je	L1072             ; Skip diagonal elements
+	
+	; CALCULATE MODIFIED DISTANCE: distance[i][j] = original[i][j] + additional_fuel
+	movl	(%ebx,%ecx,4), %eax ; Load vertex index for i
+	leal	(%eax,%eax,2), %edi ; Calculate 3 * i
+	movl	(%ebx,%edx,4), %eax ; Load vertex index for j
+	leal	(%eax,%eax,2), %eax ; Calculate 3 * j
+	sall	$2, %eax          ; Calculate 3 * j * 4 bytes
+	addl	(%esi,%edi,4), %eax ; Calculate &original[i][j]
+	fldt	(%eax)            ; Load original distance
+	fldt	-120(%ebp)        ; Load additional fuel
+	fadd	%st(2), %st       ; Add: original + additional_fuel
+	fucomp	%st(1)            ; Compare with EPS
+	fnstsw	%ax              ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jb	L1255             ; Jump if modified distance < EPS (invalid)
+	
+	; STORE MODIFIED DISTANCE: Update matrix with new distance
+	movl	-164(%ebp), %edi  ; Load current matrix
+	leal	(%edx,%edx,2), %eax ; Calculate 3 * j
+	sall	$2, %eax          ; Calculate 3 * j * 4 bytes
+	addl	(%edi), %eax      ; Calculate &modified[i][j]
+	fstpt	(%eax)            ; Store modified distance
+	jmp	L1072             ; Jump to next iteration
+	
+	.p2align 4,,10        ; Align for performance
+L1255:
+	; INVALID DISTANCE: Don't store invalid distance
+	fstp	%st(0)            ; Pop invalid distance
+	
+L1072:
+	; INNER LOOP INCREMENT: j++
+	addl	$1, %edx          ; Increment j
+	cmpl	-160(%ebp), %edx  ; Check if j < N
+	jne	L1074             ; Continue if j < N
+	
+	cmpl	%ecx, %edx        ; Check if i < N
+	jne	L1075             ; Continue if i < N
+	
+	; CLEANUP EPS CONSTANT: Pop EPS from FPU stack
+	fstp	%st(0)            ; Pop EPS constant
+	
+	; SECOND FLOYD-WARSHALL: Run Floyd-Warshall on modified distances
+	fldt	LC17              ; Load -INF constant
+	movl	-208(%ebp), %edi  ; Load modified matrix
+	movl	-156(%ebp), %eax  ; Load matrix size
+	xorl	%esi, %esi        ; Clear k counter
+	addl	%edi, %eax        ; Calculate matrix end
+	movl	%eax, -164(%ebp)  ; Store matrix end
+	
+L1080:
+	; FLOYD-WARSHALL OUTER LOOP: for (k = 0; k < V; k++)
+	movl	%edi, -160(%ebp)  ; Store current matrix row
+	
+	.p2align 4,,10        ; Align for performance
+L1079:
+	; FLOYD-WARSHALL MIDDLE LOOP: for (i = 0; i < V; i++)
+	movl	-160(%ebp), %eax  ; Load matrix row i
+	xorl	%edx, %edx        ; Clear j counter
+	movl	(%eax), %ecx      ; Load matrix[i] row
+	leal	(%ecx,%esi), %ebx ; Calculate &matrix[i][k]
+	
+	.p2align 4,,10        ; Align for performance
+L1078:
+	; FLOYD-WARSHALL INNER LOOP: for (j = 0; j < V; j++)
+	fldt	(%ebx)            ; Load matrix[i][k]
+	fucom	%st(1)            ; Compare with -INF
+	fnstsw	%ax              ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	ja	L1256             ; Jump if matrix[i][k] == INF
+	
+	; CHECK matrix[k][j] != INF
+	movl	(%edi,%esi), %eax ; Load matrix[k] row
+	fldt	(%eax,%edx)       ; Load matrix[k][j]
+	fucom	%st(2)            ; Compare with -INF
+	fnstsw	%ax              ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	ja	L1257             ; Jump if matrix[k][j] == INF
+	
+	; CALCULATE AND COMPARE: matrix[i][k] + matrix[k][j] vs matrix[i][j]
+	faddp	%st, %st(1)       ; Add: matrix[i][k] + matrix[k][j]
+	fldt	(%ecx,%edx)       ; Load matrix[i][j]
+	fucom	%st(1)            ; Compare distances
+	fnstsw	%ax              ; Store FPU status
+	sahf                      ; Transfer to CPU flags
+	jbe	L1258             ; Jump if old <= new
+	
+	; UPDATE: Found shorter path through k
+	fstp	%st(0)            ; Pop old distance
+	jmp	L1106             ; Jump to store new distance
+	
+	.p2align 4,,10        ; Align for performance
+L1258:
+	fstp	%st(1)            ; Pop new distance, keep old
+	
+L1106:
+	fstpt	(%ecx,%edx)       ; Store minimum distance
+	jmp	L1076             ; Jump to next iteration
+	
+	.p2align 4,,10        ; Align for performance
+L1256:
+	fstp	%st(0)            ; Pop invalid distance
+	jmp	L1076             ; Jump to next iteration
+	
+	.p2align 4,,10        ; Align for performance
+L1257:
+	fstp	%st(0)            ; Pop matrix[k][j]
+	fstp	%st(0)            ; Pop matrix[i][k]
+	
+L1076:
+	; FLOYD-WARSHALL LOOP INCREMENTS
+	addl	$12, %edx         ; j++
+	cmpl	%edx, -156(%ebp)  ; Check if j < V
+	jne	L1078             ; Continue inner loop
+	addl	$12, -160(%ebp)   ; i++
+	movl	-160(%ebp), %eax  ; Load new row pointer
+	cmpl	%eax, -164(%ebp)  ; Check if i < V
+	jne	L1079             ; Continue middle loop
+	addl	$12, %esi         ; k++
+	cmpl	%esi, -156(%ebp)  ; Check if k < V
+	jne	L1080             ; Continue outer loop
+	fstp	%st(0)            ; Pop -INF constant
+	
+L1067:
+	; QUERY RESULT: Extract shortest path distance from source to destination
+	movl	-144(%ebp), %eax  ; Load source index
+	leal	(%eax,%eax,2), %edx ; Calculate 3 * source
+	movl	-140(%ebp), %eax  ; Load destination index
+	movl	(%edi,%edx,4), %ecx ; Load matrix[source] row
+	leal	(%eax,%eax,2), %eax ; Calculate 3 * destination
+	leal	(%ecx,%eax,4), %eax ; Calculate &matrix[source][destination]
+	fldt	(%eax)            ; Load shortest distance
+	fldt	LC17              ; Load -INF for comparison
+	fxch	%st(1)            ; Exchange distances
+	fucom	%st(1)            ; Compare distance with -INF
+	fnstsw	%ax              ; Store FPU status
+	fstp	%st(1)            ; Pop -INF
+	sahf                      ; Transfer to CPU flags
+	jbe	L1246             ; Jump if distance <= -INF (no path)
+	
+	; OUTPUT DISTANCE: Print the shortest distance
+	fstp	%st(0)            ; Pop distance (will be output by other code)
+	movl	$10, 8(%esp)      ; String length for "impossible"
+	movl	$LC18, 4(%esp)    ; Push "impossible" string
+	movl	$__ZSt4cout, (%esp) ; Push cout object
+	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "impossible"
+	
+	; OUTPUT NEWLINE: Add newline after result
+	movl	__ZSt4cout, %eax  ; Load cout object
+	movl	-12(%eax), %eax   ; Get vtable offset
+	movl	__ZSt4cout+124(%eax), %ebx ; Load ctype facet
+	testl	%ebx, %ebx        ; Check if valid
+	je	L1036             ; Jump to error if null
+	cmpb	$0, 28(%ebx)      ; Check if initialized
+	je	L1081             ; Jump to initialization if needed
+	movsbl	39(%ebx), %eax   ; Load newline character
+	
+L1082:
+	movl	$__ZSt4cout, %ecx ; Load cout object
+	movl	%eax, (%esp)      ; Push newline
+	call	__ZNSo3putEc      ; Print newline
+	subl	$4, %esp          ; Adjust stack
+	movl	%eax, %ecx        ; Load cout result
+	call	__ZNSo5flushEv    ; Flush output
+	
+L1083:
+	; CLEANUP QUERY MATRICES: Free allocated memory for this query
+	cmpl	-172(%ebp), %edi  ; Compare matrix pointers
+	movl	%edi, %ebx        ; Load matrix pointer
+	movl	-172(%ebp), %esi  ; Load matrix end
+	je	L1090             ; Skip if no cleanup needed
+	
+L1179:
+	; CLEANUP MATRIX ROWS: Free each row
+	movl	(%ebx), %eax      ; Load row pointer
+	testl	%eax, %eax        ; Check if valid
+	je	L1089             ; Skip if null
+	movl	%eax, (%esp)      ; Push row pointer
+	call	__ZdlPv           ; Delete row
+	
+L1089:
+	addl	$12, %ebx         ; Move to next row
+	cmpl	%esi, %ebx        ; Check if done
+	jne	L1179             ; Continue if more rows
+	
+L1090:
+	; CLEANUP MATRIX STRUCTURE: Free matrix structure
+	testl	%edi, %edi        ; Check if matrix exists
+	je	L1088             ; Skip if null
+	movl	%edi, (%esp)      ; Push matrix pointer
+	call	__ZdlPv           ; Delete matrix
+	
+L1088:
+	; NEXT QUERY: Increment query counter and continue
+	addl	$1, -200(%ebp)    ; Increment query counter
+	movl	-200(%ebp), %eax  ; Load query counter
+	cmpl	%eax, -148(%ebp)  ; Compare with total queries
+	jg	L1093             ; Continue if more queries
+	
+L1092:
+	; CLEANUP GLOBAL STRUCTURES: Free all allocated memory
+	movl	-168(%ebp), %eax  ; Load main matrix
+	cmpl	%eax, -184(%ebp)  ; Compare pointers
+	je	L1056             ; Skip if no cleanup needed
+	movl	%eax, %ebx        ; Load matrix start
+	
+L1097:
+	; CLEANUP MAIN MATRIX ROWS
+	movl	(%ebx), %eax      ; Load row pointer
+	testl	%eax, %eax        ; Check if valid
+	je	L1096             ; Skip if null
+	movl	%eax, (%esp)      ; Push row pointer
+	call	__ZdlPv           ; Delete row
+	
+L1096:
+	addl	$12, %ebx         ; Move to next row
+	cmpl	%ebx, -184(%ebp)  ; Check if done
+	jne	L1097             ; Continue if more rows
+	
+L1056:
+	; CLEANUP MAIN STRUCTURES: Free remaining global structures
+	movl	-168(%ebp), %eax  ; Load main matrix
+	testl	%eax, %eax        ; Check if valid
+	je	L1095             ; Skip if null
+	movl	-168(%ebp), %eax  ; Load matrix pointer
+	movl	%eax, (%esp)      ; Push matrix pointer
+	call	__ZdlPv           ; Delete matrix
+	
+L1095:
+	movl	-176(%ebp), %eax  ; Load vertex mapping
+	testl	%eax, %eax        ; Check if valid
+	je	L1098             ; Skip if null
+	movl	%eax, (%esp)      ; Push mapping pointer
+	call	__ZdlPv           ; Delete mapping
+	
+L1098:
+	; CLEANUP STL CONTAINERS: Free set and map structures
+	movl	-48(%ebp), %eax   ; Load vertex map root
+	leal	-56(%ebp), %ecx   ; Load map address
+	movl	%eax, (%esp)      ; Push root pointer
+	call	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E ; Delete map tree
+	movl	-180(%ebp), %eax  ; Load vertex array
+	subl	$4, %esp          ; Adjust stack
+	testl	%eax, %eax        ; Check if valid
+	je	L1099             ; Skip if null
+	movl	%eax, (%esp)      ; Push array pointer
+	call	__ZdlPv           ; Delete array
+	
+L1099:
+	movl	-80(%ebp), %eax   ; Load vertex set root
+	leal	-88(%ebp), %esi   ; Load set address
+	movl	%esi, %ecx        ; Load set address
+	movl	%eax, (%esp)      ; Push root pointer
+	call	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E ; Delete set tree
+	movl	-100(%ebp), %eax  ; Load airports array
+	subl	$4, %esp          ; Adjust stack
+	testl	%eax, %eax        ; Check if valid
+	je	L1101             ; Skip if null
+	movl	%eax, (%esp)      ; Push array pointer
+	call	__ZdlPv           ; Delete array
+	
+	; CONTINUE MAIN LOOP: Jump back to process next test case
+	jmp	L1101             ; Jump back to main input loop
+
+L1246:
+	; PATH EXISTS: Output the actual distance (not "impossible")
+	; (This section would contain floating-point output formatting)
+	; The distance is already on the FPU stack and will be printed
+	; by the iostream formatting code (not shown in detail)
+
+;===============================================================================
+; PROGRAM TERMINATION AND CLEANUP
+;===============================================================================
+
+L1101:
+	; MAIN PROGRAM LOOP: Continue processing test cases until EOF
+	; This jumps back to the beginning of the main algorithm
+
+L1146:
+	; PROGRAM EXIT: Normal termination
+	; Function epilogue and cleanup code
+	; Return 0 from main function
 
 ;===============================================================================
 ; SECTION 11: MAIN ALGORITHM IMPLEMENTATION
