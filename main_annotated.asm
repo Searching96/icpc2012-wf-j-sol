@@ -2052,57 +2052,73 @@ L1233:  ; Handle loop termination
 	; ... (error handling and cleanup code)
 
 ;===============================================================================
-; SECTION 13: CONSTANT DATA SECTION
+; SECTION 13: CONSTANT DATA DESCRIPTIONS
 ;===============================================================================
 
-; .LC0: PI = 3.14159265358979323846L
-; .LC1: 180.0 (for degree to radian conversion)
-; .LC2: R_EARTH = 6370.0L (Earth radius in kilometers)
-; .LC3: EPS = 1e-9L (epsilon for floating-point comparisons)
-; .LC4: -1.0 (for clamping dot products)
+; LC2: 180.0 (for degree to radian conversion)
+; LC3: 6370.0L (Earth radius in kilometers) 
+; LC5: 1e-9L (EPS epsilon for floating-point comparisons)
+; LC8: 0.5 (half constant used in angle calculations)
+; LC9: -1.0 (for clamping dot products to valid range)
+; LC10: 1.0 (for clamping dot products to valid range)
+; LC12: PI = 3.14159265358979323846L
+; LC13: Infinity (for distance initialization)
+; LC17: Very small negative value (for numerical stability)
 
 ;===============================================================================
 ; SECTION 14: CONSTANT DATA DEFINITIONS
 ;===============================================================================
 
 ; The constants section contains floating-point literals used throughout the program:
+
+	.align 4
 LC2:    ; 180.0 (for degree to radian conversion)
 	.long	1127481344
 	
+	.align 4
 LC3:    ; 6370.0 (Earth radius in kilometers)
 	.long	1170673664
 	
+	.align 16
 LC5:    ; 1e-9 (EPS constant for floating-point comparisons)
 	.long	917808535
 	.long	-1989124287
 	.long	16353
 
-; Additional constants for mathematical operations:
-LC8:    ; 0.5 (used in calculations)
+	.align 4
+LC8:    ; 0.5 (half constant used in angle calculations)
 	.long	1056964608
 	
-LC9:    ; 1.0 (used in comparisons)
+	.align 16
+LC9:    ; -1.0 (for clamping dot products to valid range)
 	.long	633437445
 	.long	-2147483646
 	.long	16383
-
-LC10:   ; -1.0 (used in clamping operations)
+	
+	.align 16
+LC10:   ; 1.0 (for clamping dot products to valid range)
 	.long	633437445
 	.long	-2147483646
 	.long	49151
-
-LC12:   ; PI constant
+	
+	.align 16
+LC12:   ; PI (3.14159265358979323846L)
 	.long	-1266874890
 	.long	-5
 	.long	16382
-
-LC13:   ; Infinity representation
+	
+	.align 4
+LC13:   ; Infinity constant (for distance initialization)
 	.long	2139095040
-
-LC17:   ; Large negative number
+	
+	.align 16
+LC17:   ; Very small negative value (for numerical stability)
 	.long	-1
 	.long	-1
 	.long	32766
+
+; Global iostream initialization object
+.lcomm __ZStL8__ioinit,1,1
 
 ;===============================================================================
 ; EXTERNAL FUNCTION REFERENCES
