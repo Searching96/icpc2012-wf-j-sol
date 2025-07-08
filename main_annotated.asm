@@ -787,6 +787,58 @@ __Z9is_on_arcRK5PointS1_S1_:
 	popl	%edi              ; Restore EDI register
 	ret                       ; Return (AL contains result: 0=on arc, 1=not on arc)
 
+	.p2align 4,,15
+	.globl	__Z17get_arc_parameterRK5PointS1_S1_
+	.def	__Z17get_arc_parameterRK5PointS1_S1_;	.scl	2;	.type	32;	.endef
+
+; C++ EQUIVALENT: long double get_arc_parameter(const Point& u, const Point& v, const Point& p)
+; Returns the parameter t in [0, 1] for point P on the arc U-V based on distance
+; Algorithm: t = dist(u,p) / dist(u,v), where t=0 at u and t=1 at v
+; If u == v (dist_uv < EPS), returns 0.0
+__Z17get_arc_parameterRK5PointS1_S1_:
+	pushl	%ebx              ; Save EBX register (callee-saved)
+	subl	$40, %esp         ; Allocate 40 bytes of local stack space
+	
+	; Load function parameters
+	movl	52(%esp), %eax    ; Load address of point v
+	movl	48(%esp), %ebx    ; Load address of point u
+	
+	; C++ EQUIVALENT: long double dist_uv = dist_xyz(u, v);
+	movl	%eax, 4(%esp)     ; Push v address as parameter 2
+	movl	%ebx, (%esp)      ; Push u address as parameter 1
+	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, v)
+	
+	; C++ EQUIVALENT: if (dist_uv < EPS) return 0.0;
+	fldt	LC5               ; Load EPS constant
+	fucomp	%st(1)            ; Compare EPS with dist_uv (EPS ? dist_uv)
+	fnstsw	%ax               ; Store FPU status word
+	sahf                      ; Transfer AH to CPU flags
+	jbe	L60               ; Jump if EPS <= dist_uv (continue normal calculation)
+	
+	; dist_uv < EPS case: return 0.0
+	fstp	%st(0)            ; Pop dist_uv from FPU stack
+	addl	$40, %esp         ; Deallocate local stack space
+	fldz                      ; Load 0.0 as return value
+	popl	%ebx              ; Restore EBX register
+	ret                       ; Return 0.0
+
+	.p2align 4,,10            ; Align for performance
+L60:	; Normal case: dist_uv >= EPS
+	fstpt	16(%esp)          ; Store dist_uv in local variable
+	
+	; C++ EQUIVALENT: long double dist_up = dist_xyz(u, p);
+	movl	56(%esp), %eax    ; Load address of point p
+	movl	%ebx, (%esp)      ; Push u address as parameter 1
+	movl	%eax, 4(%esp)     ; Push p address as parameter 2
+	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, p)
+	
+	; C++ EQUIVALENT: return dist_up / dist_uv;
+	fldt	16(%esp)          ; Load dist_uv from local variable
+	addl	$40, %esp         ; Deallocate local stack space
+	popl	%ebx              ; Restore EBX register
+	fdivrp	%st, %st(1)       ; Divide: dist_up / dist_uv, pop dist_uv
+	ret                       ; Return result (dist_up / dist_uv)
+
 ;===============================================================================
 ; SECTION 7: STL CONTAINER OPERATIONS
 ;===============================================================================
