@@ -8,39 +8,39 @@ After a comprehensive cross-check between `main.cpp` and `main_cpp.asm`, all C++
 ## Detailed Function Analysis
 
 ### 1. Core Data Structure Operations
-| C++ Function | Assembly Symbol | Status |
-|--------------|-----------------|--------|
-| `Point operator+(const Point&, const Point&)` | `__ZplRK5PointS1_` | ✅ Complete |
-| `Point operator-(const Point&, const Point&)` | `__ZmiRK5PointS1_` | ✅ Complete |
-| `Point operator*(const Point&, long double)` | `__ZmlRK5Pointe` | ✅ Complete |
-| `Point operator*(long double, const Point&)` | `__ZmleRK5Point` | ✅ Complete |
-| `Point operator/(const Point&, long double)` | `__ZdvRK5Pointe` | ✅ Complete |
+| C++ Function                                   | Assembly Symbol         | Status        |
+|-----------------------------------------------|--------------------------|---------------|
+| `Point operator+(const Point&, const Point&)` | `__ZplRK5PointS1_`       | ✅ Complete   |
+| `Point operator-(const Point&, const Point&)` | `__ZmiRK5PointS1_`       | ✅ Complete   |
+| `Point operator*(const Point&, long double)`  | `__ZmlRK5Pointe`         | ✅ Complete   |
+| `Point operator*(long double, const Point&)`  | `__ZmleRK5Point`         | ✅ Complete   |
+| `Point operator/(const Point&, long double)`  | `__ZdvRK5Pointe`         | ✅ Complete   |
 
 ### 2. Geometric Utility Functions
-| C++ Function | Assembly Symbol | Status |
-|--------------|-----------------|--------|
-| `lat_lon_to_xyz(long double, long double)` | `__Z14lat_lon_to_xyzee` | ✅ Complete |
-| `dot(const Point&, const Point&)` | `__Z3dotRK5PointS1_` | ✅ Complete |
-| `cross(const Point&, const Point&)` | `__Z5crossRK5PointS1_` | ✅ Complete |
-| `magnitude(const Point&)` | `__Z9magnitudeRK5Point` | ✅ Complete |
-| `normalize(const Point&)` | `__Z9normalizeRK5Point` | ✅ Complete |
-| `dist_xyz(const Point&, const Point&)` | `__Z8dist_xyzRK5PointS1_` | ✅ Complete |
+| C++ Function                                   | Assembly Symbol         | Status        |
+|-----------------------------------------------|--------------------------|---------------|
+| `lat_lon_to_xyz(long double, long double)`    | `__Z14lat_lon_to_xyzee`  | ✅ Complete   |
+| `dot(const Point&, const Point&)`             | `__Z3dotRK5PointS1_`     | ✅ Complete   |
+| `cross(const Point&, const Point&)`           | `__Z5crossRK5PointS1_`   | ✅ Complete   |
+| `magnitude(const Point&)`                     | `__Z9magnitudeRK5Point`  | ✅ Complete   |
+| `normalize(const Point&)`                     | `__Z9normalizeRK5Point`  | ✅ Complete   |
+| `dist_xyz(const Point&, const Point&)`        | `__Z8dist_xyzRK5PointS1_`| ✅ Complete   |
 
 ### 3. Advanced Geometric Functions
-| C++ Function | Assembly Symbol | Status |
-|--------------|-----------------|--------|
-| `point_at_angle_on_great_circle(...)` | `__Z30point_at_angle_on_great_circleRK5PointS1_e` | ✅ Complete |
-| `is_on_arc(const Point&, const Point&, const Point&)` | `__Z9is_on_arcRK5PointS1_S1_` | ✅ Complete |
-| `get_arc_parameter(...)` | `__Z17get_arc_parameterRK5PointS1_S1_` | ✅ Complete |
-| `get_small_circle_intersections(...)` | `__Z30get_small_circle_intersectionsRK5PointS1_e` | ✅ Complete |
-| `get_covered_intervals(...)` | `__Z20get_covered_intervalsRK5PointS1_S1_e` | ✅ Complete |
-| `merge_intervals(...)` | `__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE` | ✅ Complete |
-| `is_arc_safe(...)` | `__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe` | ✅ Complete |
+| C++ Function                                   | Assembly Symbol                                       | Status        |
+|-----------------------------------------------|--------------------------------------------------------|---------------|
+| `point_at_angle_on_great_circle(...)`         | `__Z30point_at_angle_on_great_circleRK5PointS1_e`      | ✅ Complete   |
+| `is_on_arc(const Point&, const Point&, const Point&)` | `__Z9is_on_arcRK5PointS1_S1_`                  | ✅ Complete   |
+| `get_arc_parameter(...)`                      | `__Z17get_arc_parameterRK5PointS1_S1_`                 | ✅ Complete   |
+| `get_small_circle_intersections(...)`         | `__Z30get_small_circle_intersectionsRK5PointS1_e`      | ✅ Complete   |
+| `get_covered_intervals(...)`                  | `__Z20get_covered_intervalsRK5PointS1_S1_e`            | ✅ Complete   |
+| `merge_intervals(...)`                        | `__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE`   | ✅ Complete   |
+| `is_arc_safe(...)`                            | `__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe`    | ✅ Complete   |
 
 ### 4. Main Program Function
-| C++ Function | Assembly Implementation | Status |
-|--------------|------------------------|--------|
-| `int main()` | Present with complete logic | ✅ Complete |
+| C++ Function | Assembly Implementation        | Status        |
+|--------------|--------------------------------|---------------|
+| `int main()` | Present with complete logic    | ✅ Complete   |
 
 ## STL Container Implementation Analysis
 
