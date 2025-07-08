@@ -4513,6 +4513,7 @@ LC17:   ; Very small negative value (for numerical stability)
 	.def	_sinl;        .scl	2;	.type	32;	.endef  ; sin() for long double
 	.def	_sqrtl;       .scl	2;	.type	32;	.endef  ; sqrt() for long double
 	.def	_acosl;       .scl	2;	.type	32;	.endef  ; acos() for long double
+	.def	_asinl;       .scl	2;	.type	32;	.endef  ; asin() for long double
 
 ; Memory management functions:
 	.def	__Znwj;       .scl	2;	.type	32;	.endef  ; operator new
@@ -4522,12 +4523,18 @@ LC17:   ; Very small negative value (for numerical stability)
 	.def	__ZSt29_Rb_tree_insert_and_rebalancebPSt18_Rb_tree_node_baseS0_RS_; .scl 2; .type 32; .endef
 	.def	__ZSt18_Rb_tree_incrementPSt18_Rb_tree_node_base; .scl 2; .type 32; .endef
 	.def	__ZSt18_Rb_tree_decrementPSt18_Rb_tree_node_base; .scl 2; .type 32; .endef
+	.def	__ZNSt6vectorI5PointSaIS0_EE9push_backERKS0_; .scl 2; .type 32; .endef
+	.def	__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_; .scl 2; .type 32; .endef
 
 ; I/O stream functions:
 	.def	__ZNSt8ios_base15sync_with_stdioEb; .scl 2; .type 32; .endef
 	.def	__ZNSirsERi;                        .scl 2; .type 32; .endef
 	.def	__ZNSi10_M_extractIeEERSiRT_;       .scl 2; .type 32; .endef
 	.def	__ZNSo9_M_insertIeEERSoT_;          .scl 2; .type 32; .endef
+	.def	__ZNSolsEi;                         .scl 2; .type 32; .endef
+	.def	__ZNSolsEe;                         .scl 2; .type 32; .endef
+	.def	__ZNSo3putEc;                       .scl 2; .type 32; .endef
+	.def	__ZNSo5flushEv;                     .scl 2; .type 32; .endef
 
 ; Utility functions:
 	.def	_memmove;     .scl	2;	.type	32;	.endef  ; Memory move
