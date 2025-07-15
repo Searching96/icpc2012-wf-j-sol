@@ -14,184 +14,184 @@
 ; SECTION 1: GLOBAL CONSTANTS AND INITIALIZATION
 ;===============================================================================
 
-	.file	"main.cpp"
+	.file		"main.cpp"
 	
 ; Standard library template instantiation for character type conversion
 	.section	.text$_ZNKSt5ctypeIcE8do_widenEc,"x"
-	.linkonce discard
-	.align 2
-	.p2align 4,,15
-	.globl	__ZNKSt5ctypeIcE8do_widenEc
-	.def	__ZNKSt5ctypeIcE8do_widenEc;	.scl	2;	.type	32;	.endef
+	.linkonce 	discard
+	.align 		2
+	.p2align 	4,,15
+	.globl		__ZNKSt5ctypeIcE8do_widenEc
+	.def		__ZNKSt5ctypeIcE8do_widenEc;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: std::ctype<char>::do_widen(char c)
 ; This is a standard library function for character conversion
 __ZNKSt5ctypeIcE8do_widenEc:
-	movzbl	4(%esp), %eax    ; Load character parameter and zero-extend to 32-bit
-	ret	$4               ; Return with stack cleanup (4 bytes)
+	movzbl		4(%esp), %eax    ; Load character parameter and zero-extend to 32-bit
+	ret		$4               ; Return with stack cleanup (4 bytes)
 
 	.text
-	.p2align 4,,15
-	.def	___tcf_0;	.scl	3;	.type	32;	.endef
+	.p2align 	4,,15
+	.def		___tcf_0;	.scl	3;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Global constructor cleanup for std::ios_base::Init
 ; This handles the destruction of the global iostream initialization object
 ___tcf_0:
-	movl	$__ZStL8__ioinit, %ecx    ; Load address of global ios_base::Init object
-	jmp	__ZNSt8ios_base4InitD1Ev   ; Jump to destructor
+	movl		$__ZStL8__ioinit, %ecx    ; Load address of global ios_base::Init object
+	jmp		__ZNSt8ios_base4InitD1Ev   ; Jump to destructor
 
 ;===============================================================================
 ; SECTION 2: POINT STRUCTURE OPERATORS
 ;===============================================================================
 
-	.p2align 4,,15
-	.globl	__ZplRK5PointS1_
-	.def	__ZplRK5PointS1_;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__ZplRK5PointS1_
+	.def		__ZplRK5PointS1_;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Point operator+(const Point& a, const Point& b)
 ; Returns {a.x + b.x, a.y + b.y, a.z + b.z}
 __ZplRK5PointS1_:
-	movl	8(%esp), %ecx     ; Load address of first Point (a)
-	movl	12(%esp), %edx    ; Load address of second Point (b)  
-	movl	4(%esp), %eax     ; Load address of result Point
+	movl		8(%esp), %ecx     ; Load address of first Point (a)
+	movl		12(%esp), %edx    ; Load address of second Point (b)  
+	movl		4(%esp), %eax     ; Load address of result Point
 	
 	; Add x components (80-bit extended precision)
-	fldt	(%ecx)            ; Load a.x onto FPU stack
-	fldt	(%edx)            ; Load b.x onto FPU stack
-	faddp	%st, %st(1)       ; Add: st(1) = st(1) + st(0), pop st(0)
-	fstpt	(%eax)            ; Store result.x and pop
+	fldt		(%ecx)            ; Load a.x onto FPU stack
+	fldt		(%edx)            ; Load b.x onto FPU stack
+	faddp		%st, %st(1)       ; Add: st(1) = st(1) + st(0), pop st(0)
+	fstpt		(%eax)            ; Store result.x and pop
 
 	; Add y components
-	fldt	12(%ecx)          ; Load a.y (offset 12 bytes from start)
-	fldt	12(%edx)          ; Load b.y
-	faddp	%st, %st(1)       ; Add y components
-	fstpt	12(%eax)          ; Store result.y
+	fldt		12(%ecx)          ; Load a.y (offset 12 bytes from start)
+	fldt		12(%edx)          ; Load b.y
+	faddp		%st, %st(1)       ; Add y components
+	fstpt		12(%eax)          ; Store result.y
 
 	; Add z components  
-	fldt	24(%ecx)          ; Load a.z (offset 24 bytes from start)
-	fldt	24(%edx)          ; Load b.z
-	faddp	%st, %st(1)       ; Add z components
-	fstpt	24(%eax)          ; Store result.z
+	fldt		24(%ecx)          ; Load a.z (offset 24 bytes from start)
+	fldt		24(%edx)          ; Load b.z
+	faddp		%st, %st(1)       ; Add z components
+	fstpt		24(%eax)          ; Store result.z
 	ret
 
 	.p2align 4,,15
-	.globl	__ZmiRK5PointS1_
-	.def	__ZmiRK5PointS1_;	.scl	2;	.type	32;	.endef
+	.globl		__ZmiRK5PointS1_
+	.def		__ZmiRK5PointS1_;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Point operator-(const Point& a, const Point& b)
 ; Returns {a.x - b.x, a.y - b.y, a.z - b.z}
 __ZmiRK5PointS1_:
-	movl	8(%esp), %ecx     ; Load address of first Point (a)
-	movl	12(%esp), %edx    ; Load address of second Point (b)
-	movl	4(%esp), %eax     ; Load address of result Point
+	movl		8(%esp), %ecx     ; Load address of first Point (a)
+	movl		12(%esp), %edx    ; Load address of second Point (b)
+	movl		4(%esp), %eax     ; Load address of result Point
 	
 	; Subtract x components
-	fldt	(%ecx)            ; Load a.x
-	fldt	(%edx)            ; Load b.x
-	fsubrp	%st, %st(1)       ; Subtract: st(1) = st(1) - st(0), pop st(0)
-	fstpt	(%eax)            ; Store result.x
+	fldt		(%ecx)            ; Load a.x
+	fldt		(%edx)            ; Load b.x
+	fsubrp		%st, %st(1)       ; Subtract: st(1) = st(1) - st(0), pop st(0)
+	fstpt		(%eax)            ; Store result.x
 
 	; Subtract y components
-	fldt	12(%ecx)          ; Load a.y
-	fldt	12(%edx)          ; Load b.y
-	fsubrp	%st, %st(1)       ; Subtract y components
-	fstpt	12(%eax)          ; Store result.y
+	fldt		12(%ecx)          ; Load a.y
+	fldt		12(%edx)          ; Load b.y
+	fsubrp		%st, %st(1)       ; Subtract y components
+	fstpt		12(%eax)          ; Store result.y
 
 	; Subtract z components
-	fldt	24(%ecx)          ; Load a.z
-	fldt	24(%edx)          ; Load b.z
-	fsubrp	%st, %st(1)       ; Subtract z components
-	fstpt	24(%eax)          ; Store result.z
+	fldt		24(%ecx)          ; Load a.z
+	fldt		24(%edx)          ; Load b.z
+	fsubrp		%st, %st(1)       ; Subtract z components
+	fstpt		24(%eax)          ; Store result.z
 	ret
 
 	.p2align 4,,15
-	.globl	__ZmlRK5Pointe
-	.def	__ZmlRK5Pointe;	.scl	2;	.type	32;	.endef
+	.globl		__ZmlRK5Pointe
+	.def		__ZmlRK5Pointe;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Point operator*(const Point& a, long double s)
 ; Returns {a.x * s, a.y * s, a.z * s}
 __ZmlRK5Pointe:
-	fldt	12(%esp)          ; Load scalar value s
-	movl	8(%esp), %edx     ; Load address of Point a
-	movl	4(%esp), %eax     ; Load address of result Point
+	fldt		12(%esp)          ; Load scalar value s
+	movl		8(%esp), %edx     ; Load address of Point a
+	movl		4(%esp), %eax     ; Load address of result Point
 	
 	; Multiply x component by scalar
-	fldt	(%edx)            ; Load a.x
-	fmul	%st(1), %st       ; Multiply a.x by s
-	fstpt	(%eax)            ; Store result.x
+	fldt		(%edx)            ; Load a.x
+	fmul		%st(1), %st       ; Multiply a.x by s
+	fstpt		(%eax)            ; Store result.x
 
 	; Multiply y component by scalar
-	fldt	12(%edx)          ; Load a.y
-	fmul	%st(1), %st       ; Multiply a.y by s
-	fstpt	12(%eax)          ; Store result.y
+	fldt		12(%edx)          ; Load a.y
+	fmul		%st(1), %st       ; Multiply a.y by s
+	fstpt		12(%eax)          ; Store result.y
 
 	; Multiply z component by scalar
-	fldt	24(%edx)          ; Load a.z
-	fmulp	%st, %st(1)       ; Multiply a.z by s and pop
-	fstpt	24(%eax)          ; Store result.z
+	fldt		24(%edx)          ; Load a.z
+	fmulp		%st, %st(1)       ; Multiply a.z by s and pop
+	fstpt		24(%eax)          ; Store result.z
 	ret
 
 	.p2align 4,,15
-	.globl	__ZmleRK5Point
-	.def	__ZmleRK5Point;	.scl	2;	.type	32;	.endef
+	.globl		__ZmleRK5Point
+	.def		__ZmleRK5Point;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Point operator*(long double s, const Point& a)
 ; Returns {s * a.x, s * a.y, s * a.z}
 __ZmleRK5Point:
-	fldt	8(%esp)           ; Load scalar value s
-	movl	20(%esp), %edx    ; Load address of Point a
-	movl	4(%esp), %eax     ; Load address of result Point
+	fldt		8(%esp)           ; Load scalar value s
+	movl		20(%esp), %edx    ; Load address of Point a
+	movl		4(%esp), %eax     ; Load address of result Point
 	
 	; Multiply scalar by x component
-	fldt	(%edx)            ; Load a.x
-	fmul	%st(1), %st       ; Multiply s by a.x
-	fstpt	(%eax)            ; Store result.x
+	fldt		(%edx)            ; Load a.x
+	fmul		%st(1), %st       ; Multiply s by a.x
+	fstpt		(%eax)            ; Store result.x
 
 	; Multiply scalar by y component
-	fldt	12(%edx)          ; Load a.y
-	fmul	%st(1), %st       ; Multiply s by a.y
-	fstpt	12(%eax)          ; Store result.y
+	fldt		12(%edx)          ; Load a.y
+	fmul		%st(1), %st       ; Multiply s by a.y
+	fstpt		12(%eax)          ; Store result.y
 
 	; Multiply scalar by z component
-	fldt	24(%edx)          ; Load a.z
-	fmulp	%st, %st(1)       ; Multiply s by a.z and pop
-	fstpt	24(%eax)          ; Store result.z
+	fldt		24(%edx)          ; Load a.z
+	fmulp		%st, %st(1)       ; Multiply s by a.z and pop
+	fstpt		24(%eax)          ; Store result.z
 	ret
 
 	.p2align 4,,15
-	.globl	__ZdvRK5Pointe
-	.def	__ZdvRK5Pointe;	.scl	2;	.type	32;	.endef
+	.globl		__ZdvRK5Pointe
+	.def		__ZdvRK5Pointe;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Point operator/(const Point& a, long double s)
 ; Returns {a.x / s, a.y / s, a.z / s}
 __ZdvRK5Pointe:
-	fldt	12(%esp)          ; Load scalar divisor s
-	movl	8(%esp), %edx     ; Load address of Point a
-	movl	4(%esp), %eax     ; Load address of result Point
+	fldt		12(%esp)          ; Load scalar divisor s
+	movl		8(%esp), %edx     ; Load address of Point a
+	movl		4(%esp), %eax     ; Load address of result Point
 	
 	; Divide x component by scalar
-	fldt	(%edx)            ; Load a.x
-	fdiv	%st(1), %st       ; Divide a.x by s
-	fstpt	(%eax)            ; Store result.x
+	fldt		(%edx)            ; Load a.x
+	fdiv		%st(1), %st       ; Divide a.x by s
+	fstpt		(%eax)            ; Store result.x
 
 	; Divide y component by scalar
-	fldt	12(%edx)          ; Load a.y
-	fdiv	%st(1), %st       ; Divide a.y by s
-	fstpt	12(%eax)          ; Store result.y
+	fldt		12(%edx)          ; Load a.y
+	fdiv		%st(1), %st       ; Divide a.y by s
+	fstpt		12(%eax)          ; Store result.y
 
 	; Divide z component by scalar
-	fldt	24(%edx)          ; Load a.z
-	fdivp	%st, %st(1)       ; Divide a.z by s and pop
-	fstpt	24(%eax)          ; Store result.z
+	fldt		24(%edx)          ; Load a.z
+	fdivp		%st, %st(1)       ; Divide a.z by s and pop
+	fstpt		24(%eax)          ; Store result.z
 	ret
 
 ;===============================================================================
 ; SECTION 3: GEOMETRIC UTILITY FUNCTIONS
 ;===============================================================================
 
-	.p2align 4,,15
-	.globl	__Z14lat_lon_to_xyzee
-	.def	__Z14lat_lon_to_xyzee;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z14lat_lon_to_xyzee
+	.def		__Z14lat_lon_to_xyzee;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Point lat_lon_to_xyz(long double lat_deg, long double lon_deg)
 ; Converts latitude/longitude in degrees to 3D Cartesian coordinates on Earth sphere
@@ -199,448 +199,448 @@ __ZdvRK5Pointe:
 ;          y = R_EARTH * cos(lat_rad) * sin(lon_rad)  
 ;          z = R_EARTH * sin(lat_rad)
 __Z14lat_lon_to_xyzee:
-	pushl	%ebx              ; Save EBX register (callee-saved)
-	fldpi                     ; Load PI constant onto FPU stack
-	subl	$104, %esp        ; Allocate 104 bytes of local stack space
+	pushl		%ebx              ; Save EBX register (callee-saved)
+	fldpi                     	  ; Load PI constant onto FPU stack
+	subl		$104, %esp        ; Allocate 104 bytes of local stack space
 	
 	; Load parameters from stack
-	fldt	116(%esp)         ; Load lat_deg parameter (80-bit long double)
-	movl	112(%esp), %ebx   ; Load return structure address into EBX
+	fldt		116(%esp)         ; Load lat_deg parameter (80-bit long double)
+	movl		112(%esp), %ebx   ; Load return structure address into EBX
 	
 	; Convert lat_deg to radians: lat_rad = lat_deg * PI / 180.0
-	fmul	%st(1), %st       ; Multiply lat_deg by PI (st(1) = PI)
-	flds	LC2               ; Load 180.0 constant (32-bit float)
-	fdivr	%st, %st(1)       ; Divide: st(1) = st(1) / st(0) = (lat_deg * PI) / 180.0
+	fmul		%st(1), %st       ; Multiply lat_deg by PI (st(1) = PI)
+	flds		LC2               ; Load 180.0 constant (32-bit float)
+	fdivr		%st, %st(1)       ; Divide: st(1) = st(1) / st(0) = (lat_deg * PI) / 180.0
 	
 	; Load and convert lon_deg to radians
-	fldt	128(%esp)         ; Load lon_deg parameter 
-	fmulp	%st, %st(3)       ; Multiply lon_deg by PI and pop
-	fdivrp	%st, %st(2)       ; Divide by 180.0 and pop: lon_rad = (lon_deg * PI) / 180.0
+	fldt		128(%esp)         ; Load lon_deg parameter 
+	fmulp		%st, %st(3)       ; Multiply lon_deg by PI and pop
+	fdivrp		%st, %st(2)       ; Divide by 180.0 and pop: lon_rad = (lon_deg * PI) / 180.0
 	
 	; Now FPU stack has: st(0) = lat_rad, st(1) = lon_rad
-	fxch	%st(1)            ; Exchange: st(0) = lon_rad, st(1) = lat_rad
-	fstpt	16(%esp)          ; Store lon_rad in local variable
+	fxch		%st(1)            ; Exchange: st(0) = lon_rad, st(1) = lat_rad
+	fstpt		16(%esp)          ; Store lon_rad in local variable
 	fld		%st(0)            ; Duplicate lat_rad: st(0) = st(1) = lat_rad
-	fstpt	(%esp)            ; Store lat_rad for cosl function call
-	fstpt	80(%esp)          ; Store another copy of lat_rad
+	fstpt		(%esp)            ; Store lat_rad for cosl function call
+	fstpt		80(%esp)          ; Store another copy of lat_rad
 	
 	; Calculate cos(lat_rad) using library function
-	call	_cosl             ; Call cosl(lat_rad), result in st(0)
+	call		_cosl             ; Call cosl(lat_rad), result in st(0)
 	
 	; Load R_EARTH constant and prepare for coordinate calculations
-	flds	LC3               ; Load R_EARTH constant (6370.0)
-	fmul	%st, %st(1)       ; Multiply cos(lat_rad) by R_EARTH
-	fstpt	64(%esp)          ; Store R_EARTH * cos(lat_rad) for z calculation
-	fstpt	48(%esp)          ; Store R_EARTH * cos(lat_rad) for x,y calculations
+	flds		LC3               ; Load R_EARTH constant (6370.0)
+	fmul		%st, %st(1)       ; Multiply cos(lat_rad) by R_EARTH
+	fstpt		64(%esp)          ; Store R_EARTH * cos(lat_rad) for z calculation
+	fstpt		48(%esp)          ; Store R_EARTH * cos(lat_rad) for x,y calculations
 	
 	; Calculate cos(lon_rad)
-	fldt	16(%esp)          ; Load lon_rad
-	fstpt	(%esp)            ; Store lon_rad for cosl function call
-	call	_cosl             ; Call cosl(lon_rad), result in st(0)
-	fstpt	32(%esp)          ; Store cos(lon_rad)
+	fldt		16(%esp)          ; Load lon_rad
+	fstpt		(%esp)            ; Store lon_rad for cosl function call
+	call		_cosl             ; Call cosl(lon_rad), result in st(0)
+	fstpt		32(%esp)          ; Store cos(lon_rad)
 	
 	; Calculate sin(lon_rad) 
-	fldt	16(%esp)          ; Load lon_rad again
-	fstpt	(%esp)            ; Store lon_rad for sinl function call
-	call	_sinl             ; Call sinl(lon_rad), result in st(0)
-	fstpt	16(%esp)          ; Store sin(lon_rad)
+	fldt		16(%esp)          ; Load lon_rad again
+	fstpt		(%esp)            ; Store lon_rad for sinl function call
+	call		_sinl             ; Call sinl(lon_rad), result in st(0)
+	fstpt		16(%esp)          ; Store sin(lon_rad)
 	
 	; Calculate sin(lat_rad)
-	fldt	80(%esp)          ; Load lat_rad
-	fstpt	(%esp)            ; Store lat_rad for sinl function call
-	call	_sinl             ; Call sinl(lat_rad), result in st(0)
+	fldt		80(%esp)          ; Load lat_rad
+	fstpt		(%esp)            ; Store lat_rad for sinl function call
+	call		_sinl             ; Call sinl(lat_rad), result in st(0)
 	
 	; Calculate final coordinates
 	; x = R_EARTH * cos(lat_rad) * cos(lon_rad)
-	fldt	32(%esp)          ; Load cos(lon_rad)
-	movl	%ebx, %eax        ; Prepare return value (structure address)
-	fldt	48(%esp)          ; Load R_EARTH * cos(lat_rad)
-	fmul	%st, %st(1)       ; Multiply: cos(lon_rad) * R_EARTH * cos(lat_rad)
-	fxch	%st(1)            ; Exchange to get result in st(0)
-	fstpt	(%ebx)            ; Store x coordinate in result structure
+	fldt		32(%esp)          ; Load cos(lon_rad)
+	movl		%ebx, %eax        ; Prepare return value (structure address)
+	fldt		48(%esp)          ; Load R_EARTH * cos(lat_rad)
+	fmul		%st, %st(1)       ; Multiply: cos(lon_rad) * R_EARTH * cos(lat_rad)
+	fxch		%st(1)            ; Exchange to get result in st(0)
+	fstpt		(%ebx)            ; Store x coordinate in result structure
 	
 	; y = R_EARTH * cos(lat_rad) * sin(lon_rad)
-	fldt	16(%esp)          ; Load sin(lon_rad)
-	fmulp	%st, %st(1)       ; Multiply by R_EARTH * cos(lat_rad)
-	fstpt	12(%ebx)          ; Store y coordinate in result structure
+	fldt		16(%esp)          ; Load sin(lon_rad)
+	fmulp		%st, %st(1)       ; Multiply by R_EARTH * cos(lat_rad)
+	fstpt		12(%ebx)          ; Store y coordinate in result structure
 	
 	; z = R_EARTH * sin(lat_rad)
-	fldt	64(%esp)          ; Load R_EARTH * cos(lat_rad) (actually should be just R_EARTH)
-	fmulp	%st, %st(1)       ; Multiply by sin(lat_rad)
-	fstpt	24(%ebx)          ; Store z coordinate in result structure
+	fldt		64(%esp)          ; Load R_EARTH * cos(lat_rad) (actually should be just R_EARTH)
+	fmulp		%st, %st(1)       ; Multiply by sin(lat_rad)
+	fstpt		24(%ebx)          ; Store z coordinate in result structure
 	
 	; Function epilogue
-	addl	$104, %esp        ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
+	addl		$104, %esp        ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
 	ret                       ; Return (result address already in EAX)
 
-	.p2align 4,,15
-	.globl	__Z3dotRK5PointS1_
-	.def	__Z3dotRK5PointS1_;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z3dotRK5PointS1_
+	.def		__Z3dotRK5PointS1_;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: long double dot(const Point& p1, const Point& p2)
 ; Returns p1.x * p2.x + p1.y * p2.y + p1.z * p2.z
 __Z3dotRK5PointS1_:
-	movl	4(%esp), %eax     ; Load address of first Point
-	movl	8(%esp), %edx     ; Load address of second Point
+	movl		4(%esp), %eax     ; Load address of first Point
+	movl		8(%esp), %edx     ; Load address of second Point
 	
 	; Calculate p1.x * p2.x
-	fldt	(%eax)            ; Load p1.x
-	fldt	(%edx)            ; Load p2.x
-	fmulp	%st, %st(1)       ; Multiply and pop
+	fldt		(%eax)            ; Load p1.x
+	fldt		(%edx)            ; Load p2.x
+	fmulp		%st, %st(1)       ; Multiply and pop
 	
 	; Calculate p1.y * p2.y and add to previous result
-	fldt	12(%eax)          ; Load p1.y
-	fldt	12(%edx)          ; Load p2.y
-	fmulp	%st, %st(1)       ; Multiply and pop
-	faddp	%st, %st(1)       ; Add to running sum
+	fldt		12(%eax)          ; Load p1.y
+	fldt		12(%edx)          ; Load p2.y
+	fmulp		%st, %st(1)       ; Multiply and pop
+	faddp		%st, %st(1)       ; Add to running sum
 	
 	; Calculate p1.z * p2.z and add to previous result
-	fldt	24(%eax)          ; Load p1.z
-	fldt	24(%edx)          ; Load p2.z
-	fmulp	%st, %st(1)       ; Multiply and pop
-	faddp	%st, %st(1)       ; Add to get final dot product
+	fldt		24(%eax)          ; Load p1.z
+	fldt		24(%edx)          ; Load p2.z
+	fmulp		%st, %st(1)       ; Multiply and pop
+	faddp		%st, %st(1)       ; Add to get final dot product
 	ret
 
-	.p2align 4,,15
-	.globl	__Z5crossRK5PointS1_
-	.def	__Z5crossRK5PointS1_;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z5crossRK5PointS1_
+	.def		__Z5crossRK5PointS1_;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Point cross(const Point& p1, const Point& p2)
 ; Returns cross product {p1.y*p2.z - p1.z*p2.y, p1.z*p2.x - p1.x*p2.z, p1.x*p2.y - p1.y*p2.x}
 __Z5crossRK5PointS1_:
-	movl	8(%esp), %eax     ; Load address of first Point
-	movl	12(%esp), %edx    ; Load address of second Point
-	movl	4(%esp), %ecx     ; Load address of result Point
+	movl		8(%esp), %eax     ; Load address of first Point
+	movl		12(%esp), %edx    ; Load address of second Point
+	movl		4(%esp), %ecx     ; Load address of result Point
 	
 	; Calculate x component: p1.y*p2.z - p1.z*p2.y
-	fldt	12(%eax)          ; Load p1.y
-	fldt	24(%edx)          ; Load p2.z
-	fmulp	%st, %st(1)       ; Calculate p1.y * p2.z
-	fldt	24(%eax)          ; Load p1.z
-	fldt	12(%edx)          ; Load p2.y
-	fmulp	%st, %st(1)       ; Calculate p1.z * p2.y
-	fsubrp	%st, %st(1)       ; Subtract to get x component
-	fstpt	(%ecx)            ; Store result.x
+	fldt		12(%eax)          ; Load p1.y
+	fldt		24(%edx)          ; Load p2.z
+	fmulp		%st, %st(1)       ; Calculate p1.y * p2.z
+	fldt		24(%eax)          ; Load p1.z
+	fldt		12(%edx)          ; Load p2.y
+	fmulp		%st, %st(1)       ; Calculate p1.z * p2.y
+	fsubrp		%st, %st(1)       ; Subtract to get x component
+	fstpt		(%ecx)            ; Store result.x
 	
 	; Calculate y component: p1.z*p2.x - p1.x*p2.z
-	fldt	24(%eax)          ; Load p1.z
-	fldt	(%edx)            ; Load p2.x
-	fmulp	%st, %st(1)       ; Calculate p1.z * p2.x
-	fldt	(%eax)            ; Load p1.x
-	fldt	24(%edx)          ; Load p2.z
-	fmulp	%st, %st(1)       ; Calculate p1.x * p2.z
-	fsubrp	%st, %st(1)       ; Subtract to get y component
-	fstpt	12(%ecx)          ; Store result.y
+	fldt		24(%eax)          ; Load p1.z
+	fldt		(%edx)            ; Load p2.x
+	fmulp		%st, %st(1)       ; Calculate p1.z * p2.x
+	fldt		(%eax)            ; Load p1.x
+	fldt		24(%edx)          ; Load p2.z
+	fmulp		%st, %st(1)       ; Calculate p1.x * p2.z
+	fsubrp		%st, %st(1)       ; Subtract to get y component
+	fstpt		12(%ecx)          ; Store result.y
 	
 	; Calculate z component: p1.x*p2.y - p1.y*p2.x
-	fldt	(%eax)            ; Load p1.x
-	fldt	12(%edx)          ; Load p2.y
-	fmulp	%st, %st(1)       ; Calculate p1.x * p2.y
-	fldt	12(%eax)          ; Load p1.y
-	fldt	(%edx)            ; Load p2.x
-	fmulp	%st, %st(1)       ; Calculate p1.y * p2.x
-	fsubrp	%st, %st(1)       ; Subtract to get z component
-	fstpt	24(%ecx)          ; Store result.z
+	fldt		(%eax)            ; Load p1.x
+	fldt		12(%edx)          ; Load p2.y
+	fmulp		%st, %st(1)       ; Calculate p1.x * p2.y
+	fldt		12(%eax)          ; Load p1.y
+	fldt		(%edx)            ; Load p2.x
+	fmulp		%st, %st(1)       ; Calculate p1.y * p2.x
+	fsubrp		%st, %st(1)       ; Subtract to get z component
+	fstpt		24(%ecx)          ; Store result.z
 	ret
 
-	.p2align 4,,15
-	.globl	__Z9magnitudeRK5Point
-	.def	__Z9magnitudeRK5Point;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z9magnitudeRK5Point
+	.def		__Z9magnitudeRK5Point;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: long double magnitude(const Point& p)
 ; Returns sqrt(p.x*p.x + p.y*p.y + p.z*p.z)
 ; This function calculates the Euclidean norm/magnitude of a 3D point/vector
 __Z9magnitudeRK5Point:
-	subl	$44, %esp         ; Allocate 44 bytes of local stack space
-	movl	48(%esp), %eax    ; Load address of Point parameter into EAX
+	subl		$44, %esp         ; Allocate 44 bytes of local stack space
+	movl		48(%esp), %eax    ; Load address of Point parameter into EAX
 	
 	; Load all three coordinates onto FPU stack
-	fldt	(%eax)            ; Load p.x onto FPU stack: st(0) = p.x
-	fldt	12(%eax)          ; Load p.y onto FPU stack: st(0) = p.y, st(1) = p.x
-	fldt	24(%eax)          ; Load p.z onto FPU stack: st(0) = p.z, st(1) = p.y, st(2) = p.x
+	fldt		(%eax)            ; Load p.x onto FPU stack: st(0) = p.x
+	fldt		12(%eax)          ; Load p.y onto FPU stack: st(0) = p.y, st(1) = p.x
+	fldt		24(%eax)          ; Load p.z onto FPU stack: st(0) = p.z, st(1) = p.y, st(2) = p.x
 	
 	; Calculate sum of squares: p.x² + p.y² + p.z²
-	fxch	%st(2)            ; Exchange st(0) and st(2): st(0) = p.x, st(1) = p.y, st(2) = p.z
-	fmul	%st(0), %st       ; Square p.x: st(0) = p.x², st(1) = p.y, st(2) = p.z
-	fxch	%st(1)            ; Exchange st(0) and st(1): st(0) = p.y, st(1) = p.x², st(2) = p.z
-	fmul	%st(0), %st       ; Square p.y: st(0) = p.y², st(1) = p.x², st(2) = p.z
-	faddp	%st, %st(1)       ; Add and pop: st(0) = p.x² + p.y², st(1) = p.z
-	fxch	%st(1)            ; Exchange: st(0) = p.z, st(1) = p.x² + p.y²
-	fmul	%st(0), %st       ; Square p.z: st(0) = p.z², st(1) = p.x² + p.y²
-	faddp	%st, %st(1)       ; Add and pop: st(0) = p.x² + p.y² + p.z²
+	fxch		%st(2)            ; Exchange st(0) and st(2): st(0) = p.x, st(1) = p.y, st(2) = p.z
+	fmul		%st(0), %st       ; Square p.x: st(0) = p.x², st(1) = p.y, st(2) = p.z
+	fxch		%st(1)            ; Exchange st(0) and st(1): st(0) = p.y, st(1) = p.x², st(2) = p.z
+	fmul		%st(0), %st       ; Square p.y: st(0) = p.y², st(1) = p.x², st(2) = p.z
+	faddp		%st, %st(1)       ; Add and pop: st(0) = p.x² + p.y², st(1) = p.z
+	fxch		%st(1)            ; Exchange: st(0) = p.z, st(1) = p.x² + p.y²
+	fmul		%st(0), %st       ; Square p.z: st(0) = p.z², st(1) = p.x² + p.y²
+	faddp		%st, %st(1)       ; Add and pop: st(0) = p.x² + p.y² + p.z²
 	
 	; Calculate square root with precision handling
 	fld		%st(0)            ; Duplicate sum of squares: st(0) = st(1) = p.x² + p.y² + p.z²
-	fsqrt                     ; Calculate sqrt: st(0) = sqrt(p.x² + p.y² + p.z²)
-	fstpt	16(%esp)          ; Store sqrt result in local variable
+	fsqrt                     	  ; Calculate sqrt: st(0) = sqrt(p.x² + p.y² + p.z²)
+	fstpt		16(%esp)          ; Store sqrt result in local variable
 	
 	; Check if the original sum is zero (for precision)
-	fldz                      ; Load 0.0: st(0) = 0.0, st(1) = p.x² + p.y² + p.z²
-	fucomp	%st(1)            ; Compare 0.0 with sum of squares (unordered compare)
-	fnstsw	%ax              ; Store FPU status word in AX
-	sahf                      ; Store AH into FLAGS register
-	jbe	L16               ; Jump if sum <= 0 (Below or Equal)
+	fldz                      	  ; Load 0.0: st(0) = 0.0, st(1) = p.x² + p.y² + p.z²
+	fucomp		%st(1)            ; Compare 0.0 with sum of squares (unordered compare)
+	fnstsw		%ax               ; Store FPU status word in AX
+	sahf                      	  ; Store AH into FLAGS register
+	jbe		L16               ; Jump if sum <= 0 (Below or Equal)
 	
 	; If sum > 0, use high-precision sqrt library function
-	fstpt	(%esp)            ; Store sum of squares as parameter
-	call	_sqrtl            ; Call high-precision sqrt library function
-	fstp	%st(0)            ; Pop the old sum from stack
+	fstpt		(%esp)            ; Store sum of squares as parameter
+	call		_sqrtl            ; Call high-precision sqrt library function
+	fstp		%st(0)            ; Pop the old sum from stack
 	jmp		L12               ; Jump to return
 	
 L16:   ; Handle case where sum <= 0 (point is at origin)
-	fstp	%st(0)            ; Pop the sum of squares from stack
+	fstp		%st(0)            ; Pop the sum of squares from stack
 	
 L12:   ; Return path
-	fldt	16(%esp)          ; Load the computed sqrt result
-	addl	$44, %esp         ; Deallocate local stack space
-	ret                       ; Return with result in st(0)
+	fldt		16(%esp)          ; Load the computed sqrt result
+	addl		$44, %esp         ; Deallocate local stack space
+	ret                       	  ; Return with result in st(0)
 
-	.p2align 4,,15
-	.globl	__Z9normalizeRK5Point
-	.def	__Z9normalizeRK5Point;	.scl	2;	.type	32;	.endef
+	.p2align	4,,15
+	.globl		__Z9normalizeRK5Point
+	.def		__Z9normalizeRK5Point;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Point normalize(const Point& p)
 ; Returns p / magnitude(p), or {0,0,0} if magnitude < EPS
 ; This function normalizes a 3D vector to unit length
 __Z9normalizeRK5Point:
-	pushl	%esi              ; Save ESI register (callee-saved)
-	pushl	%ebx              ; Save EBX register (callee-saved)
-	subl	$20, %esp         ; Allocate 20 bytes of local stack space
+	pushl		%esi              ; Save ESI register (callee-saved)
+	pushl		%ebx              ; Save EBX register (callee-saved)
+	subl		$20, %esp         ; Allocate 20 bytes of local stack space
 	
 	; Load function parameters
-	movl	36(%esp), %esi    ; Load address of input Point into ESI
-	movl	32(%esp), %ebx    ; Load address of result Point into EBX
+	movl		36(%esp), %esi    ; Load address of input Point into ESI
+	movl		32(%esp), %ebx    ; Load address of result Point into EBX
 	
 	; Calculate magnitude of input point
-	movl	%esi, (%esp)      ; Push input Point address as parameter
-	call	__Z9magnitudeRK5Point ; Call magnitude function
+	movl		%esi, (%esp)      ; Push input Point address as parameter
+	call		__Z9magnitudeRK5Point ; Call magnitude function
 	; Result (magnitude) is now in st(0)
 	
 	; Compare magnitude with EPS threshold
-	fldt	LC5               ; Load EPS constant (1e-9L) onto FPU stack
-	fucomp	%st(1)            ; Compare EPS with magnitude (unordered compare)
-	fnstsw	%ax              ; Store FPU status word in AX
-	sahf                      ; Store AH into FLAGS register
+	fldt		LC5               ; Load EPS constant (1e-9L) onto FPU stack
+	fucomp		%st(1)            ; Compare EPS with magnitude (unordered compare)
+	fnstsw		%ax               ; Store FPU status word in AX
+	sahf                      	  ; Store AH into FLAGS register
 	ja		L24               ; Jump if EPS > magnitude (magnitude is too small)
 	
 	; Normal case: magnitude >= EPS, perform normalization
 	; result.x = p.x / magnitude
-	fldt	(%esi)            ; Load input p.x
-	movl	%ebx, %eax        ; Prepare return value (result structure address)
-	fdiv	%st(1), %st       ; Divide p.x by magnitude
-	fstpt	(%ebx)            ; Store normalized x coordinate
-	
+	fldt		(%esi)            ; Load input p.x
+	movl		%ebx, %eax        ; Prepare return value (result structure address)
+	fdiv		%st(1), %st       ; Divide p.x by magnitude
+	fstpt		(%ebx)            ; Store normalized x coordinate
+		
 	; result.y = p.y / magnitude  
-	fldt	12(%esi)          ; Load input p.y
-	fdiv	%st(1), %st       ; Divide p.y by magnitude
-	fstpt	12(%ebx)          ; Store normalized y coordinate
+	fldt		12(%esi)          ; Load input p.y
+	fdiv		%st(1), %st       ; Divide p.y by magnitude
+	fstpt		12(%ebx)          ; Store normalized y coordinate
 	
 	; result.z = p.z / magnitude
-	fldt	24(%esi)          ; Load input p.z
-	fdivp	%st, %st(1)       ; Divide p.z by magnitude and pop
-	fstpt	24(%ebx)          ; Store normalized z coordinate
+	fldt		24(%esi)          ; Load input p.z
+	fdivp		%st, %st(1)       ; Divide p.z by magnitude and pop
+	fstpt		24(%ebx)          ; Store normalized z coordinate
 	
 	; Function epilogue
-	addl	$20, %esp         ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	ret                       ; Return with result address in EAX
+	addl		$20, %esp         ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	ret                       	  ; Return with result address in EAX
 
 L24:   ; Handle case where magnitude < EPS (return zero vector)
-	fstp	%st(0)            ; Pop magnitude from FPU stack
-	fldz                      ; Load 0.0 onto FPU stack
-	movl	%ebx, %eax        ; Prepare return value (result structure address)
+	fstp		%st(0)            ; Pop magnitude from FPU stack
+	fldz                      	  ; Load 0.0 onto FPU stack
+	movl		%ebx, %eax        ; Prepare return value (result structure address)
 	
 	; Set all coordinates to zero
-	fstpt	(%ebx)            ; Store 0.0 in result.x
-	fldt	(%ebx)            ; Load the zero we just stored
-	fstpt	12(%ebx)          ; Store 0.0 in result.y  
-	fldt	12(%ebx)          ; Load the zero we just stored
-	fstpt	24(%ebx)          ; Store 0.0 in result.z
+	fstpt		(%ebx)            ; Store 0.0 in result.x
+	fldt		(%ebx)            ; Load the zero we just stored
+	fstpt		12(%ebx)          ; Store 0.0 in result.y  
+	fldt		12(%ebx)          ; Load the zero we just stored
+	fstpt		24(%ebx)          ; Store 0.0 in result.z
 	
 	; Function epilogue
-	addl	$20, %esp         ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	ret                       ; Return with result address in EAX
+	addl		$20, %esp         ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	ret                       	  ; Return with result address in EAX
 
 ;===============================================================================
 ; SECTION 4: GREAT CIRCLE DISTANCE FUNCTIONS
 ;===============================================================================
 
-	.p2align 4,,15
-	.globl	__Z8dist_xyzRK5PointS1_
-	.def	__Z8dist_xyzRK5PointS1_;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z8dist_xyzRK5PointS1_
+	.def		__Z8dist_xyzRK5PointS1_;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: long double dist_xyz(const Point& p1, const Point& p2)
 ; Great circle distance between two points using acos(dot(normalize(p1), normalize(p2))) * R_EARTH
 ; This calculates the angular distance between two points on the Earth's surface
 __Z8dist_xyzRK5PointS1_:
-	subl	$156, %esp        ; Allocate 156 bytes of local stack space
+	subl		$156, %esp        ; Allocate 156 bytes of local stack space
 	
 	; Normalize first point p1
-	movl	160(%esp), %edx   ; Load address of p1
-	leal	48(%esp), %eax    ; Load address for normalized p1 (local variable)
-	movl	%eax, (%esp)      ; Push result address as first parameter
-	movl	%edx, 4(%esp)     ; Push p1 address as second parameter
-	call	__Z9normalizeRK5Point ; Call normalize(p1)
+	movl		160(%esp), %edx   ; Load address of p1
+	leal		48(%esp), %eax    ; Load address for normalized p1 (local variable)
+	movl		%eax, (%esp)      ; Push result address as first parameter
+	movl		%edx, 4(%esp)     ; Push p1 address as second parameter
+	call		__Z9normalizeRK5Point ; Call normalize(p1)
 	
 	; Normalize second point p2
-	movl	164(%esp), %edx   ; Load address of p2
-	leal	96(%esp), %eax    ; Load address for normalized p2 (local variable)
-	movl	%eax, (%esp)      ; Push result address as first parameter
-	movl	%edx, 4(%esp)     ; Push p2 address as second parameter
-	call	__Z9normalizeRK5Point ; Call normalize(p2)
+	movl		164(%esp), %edx   ; Load address of p2
+	leal		96(%esp), %eax    ; Load address for normalized p2 (local variable)
+	movl		%eax, (%esp)      ; Push result address as first parameter
+	movl		%edx, 4(%esp)     ; Push p2 address as second parameter
+	call		__Z9normalizeRK5Point ; Call normalize(p2)
 	
 	; Calculate dot product of normalized vectors
 	; dot = u1.x * u2.x + u1.y * u2.y + u1.z * u2.z
-	fldt	96(%esp)          ; Load normalized p2.x
-	fldt	48(%esp)          ; Load normalized p1.x
-	fmulp	%st, %st(1)       ; Multiply x components
+	fldt		96(%esp)          ; Load normalized p2.x
+	fldt		48(%esp)          ; Load normalized p1.x
+	fmulp		%st, %st(1)       ; Multiply x components
 	
-	fldt	108(%esp)         ; Load normalized p2.y (offset 96+12)
-	fldt	60(%esp)          ; Load normalized p1.y (offset 48+12)
-	fmulp	%st, %st(1)       ; Multiply y components
-	faddp	%st, %st(1)       ; Add to x product
+	fldt		108(%esp)         ; Load normalized p2.y (offset 96+12)
+	fldt		60(%esp)          ; Load normalized p1.y (offset 48+12)
+	fmulp		%st, %st(1)       ; Multiply y components
+	faddp		%st, %st(1)       ; Add to x product
 	
-	fldt	120(%esp)         ; Load normalized p2.z (offset 96+24)
-	fldt	72(%esp)          ; Load normalized p1.z (offset 48+24)
-	fmulp	%st, %st(1)       ; Multiply z components
-	faddp	%st, %st(1)       ; Add to get final dot product
+	fldt		120(%esp)         ; Load normalized p2.z (offset 96+24)
+	fldt		72(%esp)          ; Load normalized p1.z (offset 48+24)
+	fmulp		%st, %st(1)       ; Multiply z components
+	faddp		%st, %st(1)       ; Add to get final dot product
 	
 	; Store dot product and prepare for clamping
 	fld		%st(0)            ; Duplicate dot product
-	fstpt	16(%esp)          ; Store dot product in local variable
+	fstpt		16(%esp)          ; Store dot product in local variable
 	
 	; Clamp dot product to [-1.0, 1.0] range to avoid numerical errors
-	fld1                      ; Load 1.0
-	fstpt	32(%esp)          ; Store 1.0 in local variable
-	fldt	32(%esp)          ; Load 1.0 again
+	fld1                      	  ; Load 1.0
+	fstpt		32(%esp)          ; Store 1.0 in local variable
+	fldt		32(%esp)          ; Load 1.0 again
 	fld		%st(0)            ; Duplicate 1.0
-	fucomp	%st(2)            ; Compare 1.0 with dot product (unordered)
-	fnstsw	%ax              ; Store FPU status word
-	sahf                      ; Transfer to CPU flags
+	fucomp		%st(2)            ; Compare 1.0 with dot product (unordered)
+	fnstsw		%ax               ; Store FPU status word
+	sahf                     	  ; Transfer to CPU flags
 	ja		L35               ; Jump if 1.0 > dot (dot product is valid)
 	
 	; dot >= 1.0, clamp to 1.0
-	fstp	%st(1)            ; Pop the duplicated 1.0
+	fstp		%st(1)            ; Pop the duplicated 1.0
 	jmp		L33               ; Jump to acos calculation
 	
 L36:   ; dot <= -1.0, clamp to -1.0
-	fstp	%st(1)            ; Pop the current value
+	fstp		%st(1)            ; Pop the current value
 	
 L33:   ; Continue with clamped value
 L26:   ; Calculate acos and final distance
-	fstpt	(%esp)            ; Store clamped dot product as parameter
-	call	_acosl            ; Call acos function to get angle in radians
-	fmuls	LC3               ; Multiply by R_EARTH constant to get distance
-	addl	$156, %esp        ; Deallocate local stack space
-	ret                       ; Return with distance in st(0)
+	fstpt		(%esp)            ; Store clamped dot product as parameter
+	call		_acosl            ; Call acos function to get angle in radians
+	fmuls		LC3               ; Multiply by R_EARTH constant to get distance
+	addl		$156, %esp        ; Deallocate local stack space
+	ret                       	  ; Return with distance in st(0)
 	
 L35:   ; Handle case where dot might be < -1.0
-	fstp	%st(0)            ; Pop the 1.0
-	fld1                      ; Load 1.0
-	fchs                      ; Change sign to get -1.0
+	fstp		%st(0)            ; Pop the 1.0
+	fld1                     	  ; Load 1.0
+	fchs                      	  ; Change sign to get -1.0
 	fld		%st(0)            ; Duplicate -1.0
-	fxch	%st(2)            ; Exchange with dot product
-	fucom	%st(2)            ; Compare dot with -1.0
-	fnstsw	%ax              ; Store FPU status word
-	fstp	%st(2)            ; Pop one of the values
-	sahf                      ; Transfer to CPU flags
+	fxch		%st(2)            ; Exchange with dot product
+	fucom		%st(2)            ; Compare dot with -1.0
+	fnstsw		%ax               ; Store FPU status word
+	fstp		%st(2)            ; Pop one of the values
+	sahf                      	  ; Transfer to CPU flags
 	jbe		L36               ; Jump if dot <= -1.0
 	
 	; dot > -1.0, use original dot product
-	fstp	%st(0)            ; Pop -1.0
+	fstp		%st(0)            ; Pop -1.0
 	jmp		L26               ; Jump to acos calculation
 
 ;===============================================================================
 ; SECTION 5: GREAT CIRCLE POINT CALCULATION
 ;===============================================================================
 
-	.p2align 4,,15
-	.globl	__Z30point_at_angle_on_great_circleRK5PointS1_e
-	.def	__Z30point_at_angle_on_great_circleRK5PointS1_e;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z30point_at_angle_on_great_circleRK5PointS1_e
+	.def		__Z30point_at_angle_on_great_circleRK5PointS1_e;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: Point point_at_angle_on_great_circle(const Point& u, const Point& v, long double angle_from_u)
 ; Returns point P on great circle through u and v at angular distance angle_from_u from u
 ; Algorithm: P = u_norm * cos(angle_from_u) + v_ortho_norm * sin(angle_from_u)
 ; where v_ortho_norm = normalize(v_norm - u_norm * dot(u_norm, v_norm))
 __Z30point_at_angle_on_great_circleRK5PointS1_e:
-	pushl	%esi              ; Save ESI register
-	pushl	%ebx              ; Save EBX register  
-	subl	$340, %esp        ; Allocate 340 bytes of local stack space
+	pushl		%esi              ; Save ESI register
+	pushl		%ebx              ; Save EBX register  
+	subl		$340, %esp        ; Allocate 340 bytes of local stack space
 	
 	; Load parameters
-	movl	356(%esp), %esi   ; Load address of point u
-	movl	352(%esp), %ebx   ; Load address of result point
-	movl	360(%esp), %edx   ; Load address of point v
+	movl		356(%esp), %esi   ; Load address of point u
+	movl		352(%esp), %ebx   ; Load address of result point
+	movl		360(%esp), %edx   ; Load address of point v
 	
 	; Normalize point u
-	leal	144(%esp), %eax   ; Address for normalized u
-	movl	%eax, (%esp)      ; Push result address
-	movl	%esi, 4(%esp)     ; Push u address
-	call	__Z9normalizeRK5Point ; Call normalize(u)
+	leal		144(%esp), %eax   ; Address for normalized u
+	movl		%eax, (%esp)      ; Push result address
+	movl		%esi, 4(%esp)     ; Push u address
+	call		__Z9normalizeRK5Point ; Call normalize(u)
 	
 	; Store normalized u components in local variables  
-	fldt	144(%esp)         ; Load u_norm.x
-	fstpt	32(%esp)          ; Store u_norm.x
-	fldt	156(%esp)         ; Load u_norm.y
-	fstpt	16(%esp)          ; Store u_norm.y
-	fldt	168(%esp)         ; Load u_norm.z
-	fstpt	48(%esp)          ; Store u_norm.z
+	fldt		144(%esp)         ; Load u_norm.x
+	fstpt		32(%esp)          ; Store u_norm.x
+	fldt		156(%esp)         ; Load u_norm.y
+	fstpt		16(%esp)          ; Store u_norm.y
+	fldt		168(%esp)         ; Load u_norm.z
+	fstpt		48(%esp)          ; Store u_norm.z
 	
 	; Normalize point v
-	leal	192(%esp), %eax   ; Address for normalized v
-	movl	%eax, (%esp)      ; Push result address
-	movl	%edx, 4(%esp)     ; Push v address
-	call	__Z9normalizeRK5Point ; Call normalize(v)
+	leal		192(%esp), %eax   ; Address for normalized v
+	movl		%eax, (%esp)      ; Push result address
+	movl		%edx, 4(%esp)     ; Push v address
+	call		__Z9normalizeRK5Point ; Call normalize(v)
 	
 	; Calculate dot product of normalized u and v
-	fldt	192(%esp)         ; Load v_norm.x
-	fldt	204(%esp)         ; Load v_norm.y
-	fldt	216(%esp)         ; Load v_norm.z
-	fldt	32(%esp)          ; Load u_norm.x
-	fmul	%st(3), %st       ; u_norm.x * v_norm.x
-	fldt	16(%esp)          ; Load u_norm.y
-	fmul	%st(3), %st       ; u_norm.y * v_norm.y
-	faddp	%st, %st(1)       ; Add x and y products
-	fldt	48(%esp)          ; Load u_norm.z
-	fmul	%st(2), %st       ; u_norm.z * v_norm.z
-	faddp	%st, %st(1)       ; Add z product to get dot(u_norm, v_norm)
+	fldt		192(%esp)         ; Load v_norm.x
+	fldt		204(%esp)         ; Load v_norm.y
+	fldt		216(%esp)         ; Load v_norm.z
+	fldt		32(%esp)          ; Load u_norm.x
+	fmul		%st(3), %st       ; u_norm.x * v_norm.x
+	fldt		16(%esp)          ; Load u_norm.y
+	fmul		%st(3), %st       ; u_norm.y * v_norm.y
+	faddp		%st, %st(1)       ; Add x and y products
+	fldt		48(%esp)          ; Load u_norm.z
+	fmul		%st(2), %st       ; u_norm.z * v_norm.z
+	faddp		%st, %st(1)       ; Add z product to get dot(u_norm, v_norm)
 	
 	; Store dot product and check for degeneracy
 	fld		%st(0)            ; Duplicate dot product
-	fstpt	240(%esp)         ; Store dot product
+	fstpt		240(%esp)         ; Store dot product
 	
 	; Check if u and v are nearly identical (angle_uv < EPS)
-	fld1                      ; Load 1.0
-	fstpt	128(%esp)         ; Store 1.0
-	fldt	128(%esp)         ; Load 1.0 again
+	fld1                      	  ; Load 1.0
+	fstpt		128(%esp)         ; Store 1.0
+	fldt		128(%esp)         ; Load 1.0 again
 	fld		%st(0)            ; Duplicate 1.0
-	fucomp	%st(2)            ; Compare 1.0 with dot product
-	fnstsw	%ax              ; Store FPU status
-	sahf                      ; Transfer to CPU flags
+	fucomp		%st(2)            ; Compare 1.0 with dot product
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
 	ja		L51               ; Jump if dot < 1.0 (points are different)
 	
 	; Points are nearly identical, return u
-	fxch	%st(3)            ; Exchange stack elements
+	fxch		%st(3)            ; Exchange stack elements
 	
 L38:   ; Store result and clean up
 	; When points are nearly identical, return u (which is already on FPU stack)
 	; u is already normalized and on the stack, just store it as result
-	fstpt	(%ebx)            ; Store result.x = u_norm.x
-	fldt	32(%esp)          ; Load u_norm.x again
-	fstpt	12(%ebx)          ; Store result.y = u_norm.y (using stored u_norm.y)
-	fldt	16(%esp)          ; Load u_norm.y
-	fstpt	12(%ebx)          ; Store result.y = u_norm.y
-	fldt	48(%esp)          ; Load u_norm.z
-	fstpt	24(%ebx)          ; Store result.z = u_norm.z
+	fstpt		(%ebx)            ; Store result.x = u_norm.x
+	fldt		32(%esp)          ; Load u_norm.x again
+	fstpt		12(%ebx)          ; Store result.y = u_norm.y (using stored u_norm.y)
+	fldt		16(%esp)          ; Load u_norm.y
+	fstpt		12(%ebx)          ; Store result.y = u_norm.y
+	fldt		48(%esp)          ; Load u_norm.z
+	fstpt		24(%ebx)          ; Store result.z = u_norm.z
 	
 	; Function epilogue
-	addl	$340, %esp        ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
+	addl		$340, %esp        ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
 	ret
 
 L51:   ; Handle case where points are different
@@ -648,196 +648,196 @@ L51:   ; Handle case where points are different
 	; where v_ortho_norm = normalize(v_norm - u_norm * dot(u_norm, v_norm))
 	
 	; Clean up stack from previous calculations
-	fstp	%st(0)            ; Pop remaining values
-	fstp	%st(0)
-	fstp	%st(0)
+	fstp		%st(0)            ; Pop remaining values
+	fstp		%st(0)
+	fstp		%st(0)
 	
 	; Step 1: Calculate v_ortho = v_norm - u_norm * dot(u_norm, v_norm)
-	fldt	240(%esp)         ; Load dot product (dot(u_norm, v_norm))
+	fldt		240(%esp)         ; Load dot product (dot(u_norm, v_norm))
 	
 	; v_ortho.x = v_norm.x - u_norm.x * dot
-	fldt	192(%esp)         ; Load v_norm.x
-	fldt	32(%esp)          ; Load u_norm.x
-	fmul	%st(2), %st       ; u_norm.x * dot
-	fsubrp	%st, %st(1)      ; v_norm.x - (u_norm.x * dot)
-	fstpt	256(%esp)         ; Store v_ortho.x
+	fldt		192(%esp)         ; Load v_norm.x
+	fldt		32(%esp)          ; Load u_norm.x
+	fmul		%st(2), %st       ; u_norm.x * dot
+	fsubrp		%st, %st(1)      ; v_norm.x - (u_norm.x * dot)
+	fstpt		256(%esp)         ; Store v_ortho.x
 	
 	; v_ortho.y = v_norm.y - u_norm.y * dot
-	fldt	204(%esp)         ; Load v_norm.y
-	fldt	16(%esp)          ; Load u_norm.y
-	fmul	%st(2), %st       ; u_norm.y * dot
-	fsubrp	%st, %st(1)      ; v_norm.y - (u_norm.y * dot)
-	fstpt	268(%esp)         ; Store v_ortho.y
+	fldt		204(%esp)         ; Load v_norm.y
+	fldt		16(%esp)          ; Load u_norm.y
+	fmul		%st(2), %st       ; u_norm.y * dot
+	fsubrp		%st, %st(1)      ; v_norm.y - (u_norm.y * dot)
+	fstpt		268(%esp)         ; Store v_ortho.y
 	
 	; v_ortho.z = v_norm.z - u_norm.z * dot
-	fldt	216(%esp)         ; Load v_norm.z
-	fldt	48(%esp)          ; Load u_norm.z
-	fmulp	%st, %st(1)      ; u_norm.z * dot
-	fsubrp	%st, %st(1)      ; v_norm.z - (u_norm.z * dot)
-	fstpt	280(%esp)         ; Store v_ortho.z
+	fldt		216(%esp)         ; Load v_norm.z
+	fldt		48(%esp)          ; Load u_norm.z
+	fmulp		%st, %st(1)      ; u_norm.z * dot
+	fsubrp		%st, %st(1)      ; v_norm.z - (u_norm.z * dot)
+	fstpt		280(%esp)         ; Store v_ortho.z
 	
 	; Step 2: Normalize v_ortho to get v_ortho_norm
-	leal	292(%esp), %eax   ; Address for v_ortho_norm result
-	movl	%eax, (%esp)      ; Push result address
-	leal	256(%esp), %eax   ; Address of v_ortho
-	movl	%eax, 4(%esp)     ; Push v_ortho address
-	call	__Z9normalizeRK5Point ; Call normalize(v_ortho)
+	leal		292(%esp), %eax   ; Address for v_ortho_norm result
+	movl		%eax, (%esp)      ; Push result address
+	leal		256(%esp), %eax   ; Address of v_ortho
+	movl		%eax, 4(%esp)     ; Push v_ortho address
+	call		__Z9normalizeRK5Point ; Call normalize(v_ortho)
 	
 	; Step 3: Load angle_from_u parameter and calculate cos and sin
-	fldt	364(%esp)         ; Load angle_from_u parameter
-	fld	%st(0)            ; Duplicate angle
-	fcos                      ; Calculate cos(angle_from_u)
-	fstpt	328(%esp)         ; Store cos(angle_from_u) at safe location
-	fsin                      ; Calculate sin(angle_from_u)
-	fstpt	340(%esp)         ; Store sin(angle_from_u) at safe location
+	fldt		364(%esp)         ; Load angle_from_u parameter
+	fld		%st(0)            ; Duplicate angle
+	fcos                      	  ; Calculate cos(angle_from_u)
+	fstpt		328(%esp)         ; Store cos(angle_from_u) at safe location
+	fsin                      	  ; Calculate sin(angle_from_u)
+	fstpt		340(%esp)         ; Store sin(angle_from_u) at safe location
 	
 	; Step 4: Calculate result = u_norm * cos(angle_from_u) + v_ortho_norm * sin(angle_from_u)
 	; result.x = u_norm.x * cos + v_ortho_norm.x * sin
-	fldt	32(%esp)          ; Load u_norm.x
-	fldt	328(%esp)         ; Load cos(angle_from_u)
-	fmulp	%st, %st(1)      ; u_norm.x * cos
-	fldt	292(%esp)         ; Load v_ortho_norm.x
-	fldt	340(%esp)         ; Load sin(angle_from_u)
-	fmulp	%st, %st(1)      ; v_ortho_norm.x * sin
-	faddp	%st, %st(1)      ; Add both terms
-	fstpt	(%ebx)            ; Store result.x
+	fldt		32(%esp)          ; Load u_norm.x
+	fldt		328(%esp)         ; Load cos(angle_from_u)
+	fmulp		%st, %st(1)       ; u_norm.x * cos
+	fldt		292(%esp)         ; Load v_ortho_norm.x
+	fldt		340(%esp)         ; Load sin(angle_from_u)
+	fmulp		%st, %st(1)       ; v_ortho_norm.x * sin
+	faddp		%st, %st(1)       ; Add both terms
+	fstpt		(%ebx)            ; Store result.x
 	
 	; result.y = u_norm.y * cos + v_ortho_norm.y * sin
-	fldt	16(%esp)          ; Load u_norm.y
-	fldt	328(%esp)         ; Load cos(angle_from_u)
-	fmulp	%st, %st(1)      ; u_norm.y * cos
-	fldt	304(%esp)         ; Load v_ortho_norm.y  
-	fldt	340(%esp)         ; Load sin(angle_from_u)
-	fmulp	%st, %st(1)      ; v_ortho_norm.y * sin
-	faddp	%st, %st(1)      ; Add both terms
-	fstpt	12(%ebx)          ; Store result.y
+	fldt		16(%esp)          ; Load u_norm.y
+	fldt		328(%esp)         ; Load cos(angle_from_u)
+	fmulp		%st, %st(1)       ; u_norm.y * cos
+	fldt		304(%esp)         ; Load v_ortho_norm.y  
+	fldt		340(%esp)         ; Load sin(angle_from_u)
+	fmulp		%st, %st(1)       ; v_ortho_norm.y * sin
+	faddp		%st, %st(1)       ; Add both terms
+	fstpt		12(%ebx)          ; Store result.y
 	
 	; result.z = u_norm.z * cos + v_ortho_norm.z * sin
-	fldt	48(%esp)          ; Load u_norm.z
-	fldt	328(%esp)         ; Load cos(angle_from_u)
-	fmulp	%st, %st(1)      ; u_norm.z * cos
-	fldt	316(%esp)         ; Load v_ortho_norm.z
-	fldt	340(%esp)         ; Load sin(angle_from_u)
-	fmulp	%st, %st(1)      ; v_ortho_norm.z * sin
-	faddp	%st, %st(1)      ; Add both terms
-	fstpt	24(%ebx)          ; Store result.z
+	fldt		48(%esp)          ; Load u_norm.z
+	fldt		328(%esp)         ; Load cos(angle_from_u)
+	fmulp		%st, %st(1)       ; u_norm.z * cos
+	fldt		316(%esp)         ; Load v_ortho_norm.z
+	fldt		340(%esp)         ; Load sin(angle_from_u)
+	fmulp		%st, %st(1)       ; v_ortho_norm.z * sin
+	faddp		%st, %st(1)       ; Add both terms
+	fstpt		24(%ebx)          ; Store result.z
 	
 	; Function epilogue
-	addl	$340, %esp        ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
+	addl		$340, %esp        ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
 	ret
 
 ;===============================================================================
 ; SECTION 6: ARC ANALYSIS AND SAFETY CHECKING
 ;===============================================================================
 
-	.p2align 4,,15
-	.globl	__Z9is_on_arcRK5PointS1_S1_
-	.def	__Z9is_on_arcRK5PointS1_S1_;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z9is_on_arcRK5PointS1_S1_
+	.def		__Z9is_on_arcRK5PointS1_S1_;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: bool is_on_arc(const Point& u, const Point& v, const Point& p)
 ; Checks if point p lies on the great circle arc from u to v
 ; Algorithm: Check if dist(u,p) + dist(p,v) ≈ dist(u,v) within EPS tolerance
 ; Returns 1 if point is on arc, 0 otherwise
 __Z9is_on_arcRK5PointS1_S1_:
-	pushl	%edi              ; Save EDI register
-	pushl	%esi              ; Save ESI register
-	pushl	%ebx              ; Save EBX register
-	subl	$48, %esp         ; Allocate 48 bytes of local stack space
+	pushl		%edi              ; Save EDI register
+	pushl		%esi              ; Save ESI register
+	pushl		%ebx              ; Save EBX register
+	subl		$48, %esp         ; Allocate 48 bytes of local stack space
 	
 	; Load function parameters
-	movl	64(%esp), %edi    ; Load address of point u
-	movl	68(%esp), %esi    ; Load address of point v
-	movl	72(%esp), %ebx    ; Load address of point p
+	movl		64(%esp), %edi    ; Load address of point u
+	movl		68(%esp), %esi    ; Load address of point v
+	movl		72(%esp), %ebx    ; Load address of point p
 	
 	; C++ EQUIVALENT: long double dist_uv = dist_xyz(u, v);
-	movl	%esi, 4(%esp)     ; Push v address as parameter 2
-	movl	%edi, (%esp)      ; Push u address as parameter 1
-	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, v)
-	fstpt	32(%esp)          ; Store dist_uv in local variable
+	movl		%esi, 4(%esp)     ; Push v address as parameter 2
+	movl		%edi, (%esp)      ; Push u address as parameter 1
+	call		__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, v)
+	fstpt		32(%esp)          ; Store dist_uv in local variable
 	
 	; C++ EQUIVALENT: long double dist_up = dist_xyz(u, p);
-	movl	%ebx, 4(%esp)     ; Push p address as parameter 2
-	movl	%edi, (%esp)      ; Push u address as parameter 1
-	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, p)
-	fstpt	16(%esp)          ; Store dist_up in local variable
+	movl		%ebx, 4(%esp)     ; Push p address as parameter 2
+	movl		%edi, (%esp)      ; Push u address as parameter 1
+	call		__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, p)
+	fstpt		16(%esp)          ; Store dist_up in local variable
 	
 	; C++ EQUIVALENT: long double dist_pv = dist_xyz(p, v);
-	movl	%esi, 4(%esp)     ; Push v address as parameter 2
-	movl	%ebx, (%esp)      ; Push p address as parameter 1
-	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(p, v)
+	movl		%esi, 4(%esp)     ; Push v address as parameter 2
+	movl		%ebx, (%esp)      ; Push p address as parameter 1
+	call		__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(p, v)
 	
 	; C++ EQUIVALENT: return abs(dist_up + dist_pv - dist_uv) <= EPS;
-	fldt	16(%esp)          ; Load dist_up
-	faddp	%st, %st(1)       ; Add dist_up + dist_pv
-	fldt	32(%esp)          ; Load dist_uv
-	fsubrp	%st, %st(1)       ; Subtract: (dist_up + dist_pv) - dist_uv
-	fabs                      ; Take absolute value
-	fldt	LC5               ; Load EPS constant
-	fucompp               ; Compare |difference| with EPS and pop both
-	fnstsw	%ax               ; Store FPU status word in AX
-	sahf                      ; Transfer AH to CPU flags
-	seta	%al               ; Set AL = 1 if |difference| > EPS, 0 otherwise
+	fldt		16(%esp)          ; Load dist_up
+	faddp		%st, %st(1)       ; Add dist_up + dist_pv
+	fldt		32(%esp)          ; Load dist_uv
+	fsubrp		%st, %st(1)       ; Subtract: (dist_up + dist_pv) - dist_uv
+	fabs                      	  ; Take absolute value
+	fldt		LC5               ; Load EPS constant
+	fucompp               		  ; Compare |difference| with EPS and pop both
+	fnstsw		%ax               ; Store FPU status word in AX
+	sahf                     	  ; Transfer AH to CPU flags
+	seta		%al               ; Set AL = 1 if |difference| > EPS, 0 otherwise
 	
 	; Function epilogue
-	addl	$48, %esp         ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	popl	%edi              ; Restore EDI register
-	ret                       ; Return (AL contains result: 0=on arc, 1=not on arc)
+	addl		$48, %esp         ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	popl		%edi              ; Restore EDI register
+	ret                       	  ; Return (AL contains result: 0=on arc, 1=not on arc)
 
-	.p2align 4,,15
-	.globl	__Z17get_arc_parameterRK5PointS1_S1_
-	.def	__Z17get_arc_parameterRK5PointS1_S1_;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z17get_arc_parameterRK5PointS1_S1_
+	.def		__Z17get_arc_parameterRK5PointS1_S1_;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: long double get_arc_parameter(const Point& u, const Point& v, const Point& p)
 ; Returns the parameter t in [0, 1] for point P on the arc U-V based on distance
 ; Algorithm: t = dist(u,p) / dist(u,v), where t=0 at u and t=1 at v
 ; If u == v (dist_uv < EPS), returns 0.0
 __Z17get_arc_parameterRK5PointS1_S1_:
-	pushl	%ebx              ; Save EBX register (callee-saved)
-	subl	$40, %esp         ; Allocate 40 bytes of local stack space
+	pushl		%ebx              ; Save EBX register (callee-saved)
+	subl		$40, %esp         ; Allocate 40 bytes of local stack space
 	
 	; Load function parameters
-	movl	52(%esp), %eax    ; Load address of point v
-	movl	48(%esp), %ebx    ; Load address of point u
+	movl		52(%esp), %eax    ; Load address of point v
+	movl		48(%esp), %ebx    ; Load address of point u
 	
 	; C++ EQUIVALENT: long double dist_uv = dist_xyz(u, v);
-	movl	%eax, 4(%esp)     ; Push v address as parameter 2
-	movl	%ebx, (%esp)      ; Push u address as parameter 1
-	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, v)
+	movl		%eax, 4(%esp)     ; Push v address as parameter 2
+	movl		%ebx, (%esp)      ; Push u address as parameter 1
+	call		__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, v)
 	
 	; C++ EQUIVALENT: if (dist_uv < EPS) return 0.0;
-	fldt	LC5               ; Load EPS constant
-	fucomp	%st(1)            ; Compare EPS with dist_uv (EPS ? dist_uv)
-	fnstsw	%ax               ; Store FPU status word
-	sahf                      ; Transfer AH to CPU flags
-	jbe	L60               ; Jump if EPS <= dist_uv (continue normal calculation)
+	fldt		LC5               ; Load EPS constant
+	fucomp		%st(1)            ; Compare EPS with dist_uv (EPS ? dist_uv)
+	fnstsw		%ax               ; Store FPU status word
+	sahf                      	  ; Transfer AH to CPU flags
+	jbe		L60               ; Jump if EPS <= dist_uv (continue normal calculation)
 	
 	; dist_uv < EPS case: return 0.0
-	fstp	%st(0)            ; Pop dist_uv from FPU stack
-	addl	$40, %esp         ; Deallocate local stack space
-	fldz                      ; Load 0.0 as return value
-	popl	%ebx              ; Restore EBX register
-	ret                       ; Return 0.0
+	fstp		%st(0)            ; Pop dist_uv from FPU stack
+	addl		$40, %esp         ; Deallocate local stack space
+	fldz                      	  ; Load 0.0 as return value
+	popl		%ebx              ; Restore EBX register
+	ret                       	  ; Return 0.0
 
-	.p2align 4,,10            ; Align for performance
+	.p2align 	4,,10             ; Align for performance
 L60:	; Normal case: dist_uv >= EPS
-	fstpt	16(%esp)          ; Store dist_uv in local variable
+	fstpt		16(%esp)          ; Store dist_uv in local variable
 	
 	; C++ EQUIVALENT: long double dist_up = dist_xyz(u, p);
-	movl	56(%esp), %eax    ; Load address of point p
-	movl	%ebx, (%esp)      ; Push u address as parameter 1
-	movl	%eax, 4(%esp)     ; Push p address as parameter 2
-	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, p)
+	movl		56(%esp), %eax    ; Load address of point p
+	movl		%ebx, (%esp)      ; Push u address as parameter 1
+	movl		%eax, 4(%esp)     ; Push p address as parameter 2
+	call		__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, p)
 	
 	; C++ EQUIVALENT: return dist_up / dist_uv;
-	fldt	16(%esp)          ; Load dist_uv from local variable
-	addl	$40, %esp         ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	fdivrp	%st, %st(1)       ; Divide: dist_up / dist_uv, pop dist_uv
-	ret                       ; Return result (dist_up / dist_uv)
+	fldt		16(%esp)          ; Load dist_uv from local variable
+	addl		$40, %esp         ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	fdivrp		%st, %st(1)       ; Divide: dist_up / dist_uv, pop dist_uv
+	ret                       	  ; Return result (dist_up / dist_uv)
 
 ;===============================================================================
 ; SECTION 7: STL CONTAINER OPERATIONS
@@ -853,157 +853,157 @@ L60:	; Normal case: dist_uv >= EPS
 ; These are heavily optimized template instantiations for Point storage
 
 	.section	.text$_ZNSt6vectorI5PointSaIS0_EE12emplace_backIJS0_EEEvDpOT_,"x"
-	.linkonce discard
-	.align 2
-	.p2align 4,,15
-	.globl	__ZNSt6vectorI5PointSaIS0_EE12emplace_backIJS0_EEEvDpOT_
-	.def	__ZNSt6vectorI5PointSaIS0_EE12emplace_backIJS0_EEEvDpOT_;	.scl	2;	.type	32;	.endef
+	.linkonce 	discard
+	.align 		2
+	.p2align 	4,,15
+	.globl		__ZNSt6vectorI5PointSaIS0_EE12emplace_backIJS0_EEEvDpOT_
+	.def		__ZNSt6vectorI5PointSaIS0_EE12emplace_backIJS0_EEEvDpOT_;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: std::vector<Point>::emplace_back(Point&& point)
 ; Fast path for adding Point to vector when capacity is available
 __ZNSt6vectorI5PointSaIS0_EE12emplace_backIJS0_EEEvDpOT_:
-	movl	4(%ecx), %eax     ; Load vector.end() pointer
-	cmpl	8(%ecx), %eax     ; Compare with vector.capacity_end()
-	pushl	%ebx              ; Save EBX register
-	movl	8(%esp), %edx     ; Load address of Point to add
-	je	L176                  ; Jump if no space available (need reallocation)
+	movl		4(%ecx), %eax     ; Load vector.end() pointer
+	cmpl		8(%ecx), %eax     ; Compare with vector.capacity_end()
+	pushl		%ebx              ; Save EBX register
+	movl		8(%esp), %edx     ; Load address of Point to add
+	je		L176              ; Jump if no space available (need reallocation)
 	
 	; Fast path: Copy Point data directly to end of vector
-	testl	%eax, %eax        ; Check if end pointer is valid
-	je	L177                  ; Jump if null pointer
+	testl		%eax, %eax        ; Check if end pointer is valid
+	je		L177              ; Jump if null pointer
 	
 	; Copy all 36 bytes of Point structure (3 long doubles = 3 * 12 bytes)
-	movl	(%edx), %ebx      ; Copy bytes 0-3 of Point
-	movl	%ebx, (%eax)      ; Store to vector end
-	movl	4(%edx), %ebx     ; Copy bytes 4-7 of Point
-	movl	%ebx, 4(%eax)     ; Store to vector end
-	movl	8(%edx), %ebx     ; Copy bytes 8-11 of Point
-	movl	%ebx, 8(%eax)     ; Store to vector end
-	movl	12(%edx), %ebx    ; Copy bytes 12-15 of Point
-	movl	%ebx, 12(%eax)    ; Store to vector end
-	movl	16(%edx), %ebx    ; Copy bytes 16-19 of Point
-	movl	%ebx, 16(%eax)    ; Store to vector end
-	movl	20(%edx), %ebx    ; Copy bytes 20-23 of Point
-	movl	%ebx, 20(%eax)    ; Store to vector end
-	movl	24(%edx), %ebx    ; Copy bytes 24-27 of Point
-	movl	%ebx, 24(%eax)    ; Store to vector end
-	movl	28(%edx), %ebx    ; Copy bytes 28-31 of Point
-	movl	%ebx, 28(%eax)    ; Store to vector end
-	movl	32(%edx), %edx    ; Copy bytes 32-35 of Point
-	movl	%edx, 32(%eax)    ; Store to vector end
+	movl		(%edx), %ebx      ; Copy bytes 0-3 of Point
+	movl		%ebx, (%eax)      ; Store to vector end
+	movl		4(%edx), %ebx     ; Copy bytes 4-7 of Point
+	movl		%ebx, 4(%eax)     ; Store to vector end
+	movl		8(%edx), %ebx     ; Copy bytes 8-11 of Point
+	movl		%ebx, 8(%eax)     ; Store to vector end
+	movl		12(%edx), %ebx    ; Copy bytes 12-15 of Point
+	movl		%ebx, 12(%eax)    ; Store to vector end
+	movl		16(%edx), %ebx    ; Copy bytes 16-19 of Point
+	movl		%ebx, 16(%eax)    ; Store to vector end
+	movl		20(%edx), %ebx    ; Copy bytes 20-23 of Point
+	movl		%ebx, 20(%eax)    ; Store to vector end
+	movl		24(%edx), %ebx    ; Copy bytes 24-27 of Point
+	movl		%ebx, 24(%eax)    ; Store to vector end
+	movl		28(%edx), %ebx    ; Copy bytes 28-31 of Point
+	movl		%ebx, 28(%eax)    ; Store to vector end
+	movl		32(%edx), %edx    ; Copy bytes 32-35 of Point
+	movl		%edx, 32(%eax)    ; Store to vector end
 	
 L177:
-	addl	$36, %eax         ; Add sizeof(Point) to end pointer
-	movl	%eax, 4(%ecx)     ; Store new end pointer
-	popl	%ebx              ; Restore EBX register
-	ret	$4                    ; Return with stack cleanup
+	addl		$36, %eax         ; Add sizeof(Point) to end pointer
+	movl		%eax, 4(%ecx)     ; Store new end pointer
+	popl		%ebx              ; Restore EBX register
+	ret		$4                ; Return with stack cleanup
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10       	  ; Align for performance
 L176:
 	; Slow path: Need to reallocate vector storage
-	movl	%edx, 8(%esp)     ; Pass Point address to reallocation function
-	popl	%ebx              ; Restore EBX register
-	jmp	__ZNSt6vectorI5PointSaIS0_EE19_M_emplace_back_auxIJS0_EEEvDpOT_
+	movl		%edx, 8(%esp)     ; Pass Point address to reallocation function
+	popl		%ebx              ; Restore EBX register
+	jmp		__ZNSt6vectorI5PointSaIS0_EE19_M_emplace_back_auxIJS0_EEEvDpOT_
 
 ; C++ EQUIVALENT: std::set<Point>::insert() operations  
 ; Uses red-black tree implementation for efficient sorted storage
 
 	.section	.text$_ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E,"x"
-	.linkonce discard
-	.align 2
-	.p2align 4,,15
-	.globl	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E
-	.def	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E;	.scl	2;	.type	32;	.endef
+	.linkonce 	discard
+	.align 		2
+	.p2align 	4,,15
+	.globl		__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E
+	.def		__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: std::_Rb_tree<Point>::_M_erase(node*)
 ; Recursive function to delete red-black tree subtree
 __ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E:
-	pushl	%edi              ; Save EDI register
-	pushl	%esi              ; Save ESI register
-	pushl	%ebx              ; Save EBX register
-	subl	$16, %esp         ; Allocate 16 bytes of local stack space
+	pushl		%edi              ; Save EDI register
+	pushl		%esi              ; Save ESI register
+	pushl		%ebx              ; Save EBX register
+	subl		$16, %esp         ; Allocate 16 bytes of local stack space
 	
-	movl	32(%esp), %ebx    ; Load node pointer from parameter
-	testl	%ebx, %ebx        ; Check if node is null
-	je	L141                  ; Jump if null (base case)
+	movl		32(%esp), %ebx    ; Load node pointer from parameter
+	testl		%ebx, %ebx        ; Check if node is null
+	je		L141                  ; Jump if null (base case)
 	
-	movl	%ecx, %edi        ; Save tree pointer (this)
+	movl		%ecx, %edi        ; Save tree pointer (this)
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        ; Align for performance
 L147:
 	; Recursively delete right subtree
-	movl	12(%ebx), %eax    ; Load node->right pointer
-	movl	%edi, %ecx        ; Restore tree pointer
-	movl	%eax, (%esp)      ; Push right child as parameter
-	call	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E
+	movl		12(%ebx), %eax    ; Load node->right pointer
+	movl		%edi, %ecx        ; Restore tree pointer
+	movl		%eax, (%esp)      ; Push right child as parameter
+	call		__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E
 	
 	; Save left child and delete current node
-	movl	8(%ebx), %esi     ; Load node->left pointer
-	subl	$4, %esp          ; Adjust stack after call
-	movl	%ebx, (%esp)      ; Push node pointer as parameter
-	call	__ZdlPv               ; Call operator delete
+	movl		8(%ebx), %esi     ; Load node->left pointer
+	subl		$4, %esp          ; Adjust stack after call
+	movl		%ebx, (%esp)      ; Push node pointer as parameter
+	call		__ZdlPv               ; Call operator delete
 	
 	; Continue with left subtree
-	testl	%esi, %esi        ; Check if left child exists
-	movl	%esi, %ebx        ; Move left child to current node
-	jne	L147                  ; Jump if left child exists
+	testl		%esi, %esi        ; Check if left child exists
+	movl		%esi, %ebx        ; Move left child to current node
+	jne		L147                  ; Jump if left child exists
 	
 L141:
-	addl	$16, %esp         ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	popl	%edi              ; Restore EDI register
-	ret	$4                    ; Return with stack cleanup
+	addl		$16, %esp         ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	popl		%edi              ; Restore EDI register
+	ret		$4                    ; Return with stack cleanup
 
 ; C++ EQUIVALENT: std::map<Point, int>::operator[]() operations
 ; Uses red-black tree for efficient key-value mapping
 
 	.section	.text$_ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E,"x"
-	.linkonce discard
-	.align 2
-	.p2align 4,,15
-	.globl	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E
-	.def	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E;	.scl	2;	.type	32;	.endef
+	.linkonce 	discard
+	.align 		2
+	.p2align 	4,,15
+	.globl		__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E
+	.def		__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E;	.scl	2;	.type	32;	.endef
 
 ; C++ EQUIVALENT: std::_Rb_tree<Point, std::pair<const Point, int>>::_M_erase(node*)
 ; Recursive function to delete red-black tree subtree for map<Point, int>
 __ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E:
-	pushl	%edi              ; Save EDI register
-	pushl	%esi              ; Save ESI register
-	pushl	%ebx              ; Save EBX register
-	subl	$16, %esp         ; Allocate 16 bytes of local stack space
+	pushl		%edi              ; Save EDI register
+	pushl		%esi              ; Save ESI register
+	pushl		%ebx              ; Save EBX register
+	subl		$16, %esp         ; Allocate 16 bytes of local stack space
 	
-	movl	32(%esp), %ebx    ; Load node pointer from parameter
-	testl	%ebx, %ebx        ; Check if node is null
-	je	L141                  ; Jump if null (base case)
+	movl		32(%esp), %ebx    ; Load node pointer from parameter
+	testl		%ebx, %ebx        ; Check if node is null
+	je		L141              ; Jump if null (base case)
 	
-	movl	%ecx, %edi        ; Save tree pointer (this)
+	movl		%ecx, %edi        ; Save tree pointer (this)
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        	  ; Align for performance
 L147:
 	; Recursively delete right subtree
-	movl	12(%ebx), %eax    ; Load node->right pointer
-	movl	%edi, %ecx        ; Restore tree pointer
-	movl	%eax, (%esp)      ; Push right child as parameter
-	call	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E
+	movl		12(%ebx), %eax    ; Load node->right pointer
+	movl		%edi, %ecx        ; Restore tree pointer
+	movl		%eax, (%esp)      ; Push right child as parameter
+	call		__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E
 	
 	; Save left child and delete current node
-	movl	8(%ebx), %esi     ; Load node->left pointer
-	subl	$4, %esp          ; Adjust stack after call
-	movl	%ebx, (%esp)      ; Push node pointer as parameter
-	call	__ZdlPv               ; Call operator delete
+	movl		8(%ebx), %esi     ; Load node->left pointer
+	subl		$4, %esp          ; Adjust stack after call
+	movl		%ebx, (%esp)      ; Push node pointer as parameter
+	call		__ZdlPv           ; Call operator delete
 	
 	; Continue with left subtree
-	testl	%esi, %esi        ; Check if left child exists
-	movl	%esi, %ebx        ; Move left child to current node
-	jne	L147                  ; Jump if left child exists
+	testl		%esi, %esi        ; Check if left child exists
+	movl		%esi, %ebx        ; Move left child to current node
+	jne		L147              ; Jump if left child exists
 	
 L141:
-	addl	$16, %esp         ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	popl	%edi              ; Restore EDI register
-	ret	$4                    ; Return with stack cleanup
+	addl		$16, %esp         ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	popl		%edi              ; Restore EDI register
+	ret		$4                ; Return with stack cleanup
 
 ;===============================================================================
 ; SECTION 8: SMALL CIRCLE INTERSECTIONS
@@ -1017,81 +1017,81 @@ L141:
 ; 3. Finding intersection points using spherical trigonometry
 ; 4. Converting back to Cartesian coordinates
 
-	.p2align 4,,15
-	.globl	__Z30get_small_circle_intersectionsRK5PointS1_e
-	.def	__Z30get_small_circle_intersectionsRK5PointS1_e;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z30get_small_circle_intersectionsRK5PointS1_e
+	.def		__Z30get_small_circle_intersectionsRK5PointS1_e;	.scl	2;	.type	32;	.endef
 
 __Z30get_small_circle_intersectionsRK5PointS1_e:
-	pushl	%ebp              ; Save EBP register
-	pushl	%edi              ; Save EDI register
-	pushl	%esi              ; Save ESI register
-	pushl	%ebx              ; Save EBX register
-	subl	$476, %esp        ; Allocate 476 bytes of local stack space
+	pushl		%ebp              ; Save EBP register
+	pushl		%edi              ; Save EDI register
+	pushl		%esi              ; Save ESI register
+	pushl		%ebx              ; Save EBX register
+	subl		$476, %esp        ; Allocate 476 bytes of local stack space
 	
 	; Load function parameters
-	movl	500(%esp), %eax   ; Load address of center1
-	leal	176(%esp), %edi   ; Load address for normalized center1 (c1_norm)
-	movl	496(%esp), %ebx   ; Load address of result vector
-	leal	224(%esp), %esi   ; Load address for normalized center2 (c2_norm)
+	movl		500(%esp), %eax   ; Load address of center1
+	leal		176(%esp), %edi   ; Load address for normalized center1 (c1_norm)
+	movl		496(%esp), %ebx   ; Load address of result vector
+	leal		224(%esp), %esi   ; Load address for normalized center2 (c2_norm)
 	
 	; ========================================================================
 	; STEP 1: Computing angular distance between sphere centers
 	; ========================================================================
 	
 	; C++ EQUIVALENT: Point c1_norm = normalize(center1);
-	movl	%edi, (%esp)      ; Push result address
-	movl	%eax, 4(%esp)     ; Push center1 address  
-	call	__Z9normalizeRK5Point ; Call normalize(center1)
-	
+	movl		%edi, (%esp)      ; Push result address
+	movl		%eax, 4(%esp)     ; Push center1 address  
+	call		__Z9normalizeRK5Point ; Call normalize(center1)
+		
 	; C++ EQUIVALENT: Point c2_norm = normalize(center2);
-	movl	504(%esp), %eax   ; Load address of center2
-	movl	%esi, (%esp)      ; Push result address
-	movl	%eax, 4(%esp)     ; Push center2 address
-	call	__Z9normalizeRK5Point ; Call normalize(center2)
+	movl		504(%esp), %eax   ; Load address of center2
+	movl		%esi, (%esp)      ; Push result address
+	movl		%eax, 4(%esp)     ; Push center2 address
+	call		__Z9normalizeRK5Point ; Call normalize(center2)
 	
 	; C++ EQUIVALENT: long double dot_product = dot(c1_norm, c2_norm);
-	movl	%edi, (%esp)      ; Push c1_norm address
-	movl	%esi, 4(%esp)     ; Push c2_norm address
-	call	__Z3dotRK5PointS1_ ; Call dot(c1_norm, c2_norm)
-	fstpt	32(%esp)          ; Store dot_product on stack
+	movl		%edi, (%esp)      ; Push c1_norm address
+	movl		%esi, 4(%esp)     ; Push c2_norm address
+	call		__Z3dotRK5PointS1_ ; Call dot(c1_norm, c2_norm)
+	fstpt		32(%esp)          ; Store dot_product on stack
 	
 	; C++ EQUIVALENT: Clamp dot_product to [-1.0, 1.0] to avoid numerical errors
-	fldt	32(%esp)          ; Load dot_product
-	fldt	LC9               ; Load -1.0 (lower bound)
-	fxch	%st(1)            ; Swap stack elements
-	fucom	%st(1)            ; Compare dot_product with -1.0
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	jbe	L885              ; Jump if dot_product <= -1.0
+	fldt		32(%esp)          ; Load dot_product
+	fldt		LC9               ; Load -1.0 (lower bound)
+	fxch		%st(1)            ; Swap stack elements
+	fucom		%st(1)            ; Compare dot_product with -1.0
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
+	jbe		L885              ; Jump if dot_product <= -1.0
 	
-	fldt	LC10              ; Load 1.0 (upper bound)
-	fxch	%st(1)            ; Swap stack elements
-	fucom	%st(1)            ; Compare dot_product with 1.0
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	jae	L886              ; Jump if dot_product >= 1.0
+	fldt		LC10              ; Load 1.0 (upper bound)
+	fxch		%st(1)            ; Swap stack elements
+	fucom		%st(1)            ; Compare dot_product with 1.0
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
+	jae		L886              ; Jump if dot_product >= 1.0
 	
 	; dot_product is in valid range [-1.0, 1.0]
-	fstp	%st(1)            ; Pop upper bound
-	fstp	%st(1)            ; Pop lower bound
-	jmp	L887              ; Continue to acos calculation
+	fstp		%st(1)            ; Pop upper bound
+	fstp		%st(1)            ; Pop lower bound
+	jmp		L887              ; Continue to acos calculation
 	
 L885:
 	; Clamp to -1.0
-	fstp	%st(0)            ; Pop dot_product
-	fstp	%st(0)            ; Pop lower bound (keep -1.0)
-	jmp	L887              ; Continue to acos calculation
+	fstp		%st(0)            ; Pop dot_product
+	fstp		%st(0)            ; Pop lower bound (keep -1.0)
+	jmp		L887              ; Continue to acos calculation
 	
 L886:
 	; Clamp to 1.0
-	fstp	%st(0)            ; Pop dot_product
-	fxch	%st(1)            ; Swap to get 1.0 on top
-	fstp	%st(1)            ; Pop lower bound (keep 1.0)
+	fstp		%st(0)            ; Pop dot_product
+	fxch		%st(1)            ; Swap to get 1.0 on top
+	fstp		%st(1)            ; Pop lower bound (keep 1.0)
 	
 L887:
 	; C++ EQUIVALENT: long double angular_distance = acos(clamped_dot_product);
-	call	__acosl           ; Call acos function
-	fstpt	48(%esp)          ; Store angular_distance on stack
+	call		__acosl           ; Call acos function
+	fstpt		48(%esp)          ; Store angular_distance on stack
 	
 	; ========================================================================
 	; END OF STEP 1: Computing angular distance between sphere centers
@@ -1102,41 +1102,41 @@ L887:
 	; ========================================================================
 	
 	; C++ EQUIVALENT: long double R_rad = R_sphere / EARTH_RADIUS;
-	fldt	508(%esp)         ; Load R_sphere parameter
-	fldt	LC3               ; Load EARTH_RADIUS (6370.0)
-	fdivp	%st, %st(1)      ; Divide: R_sphere / EARTH_RADIUS
-	fstpt	64(%esp)          ; Store R_rad on stack
+	fldt		508(%esp)         ; Load R_sphere parameter
+	fldt		LC3               ; Load EARTH_RADIUS (6370.0)
+	fdivp		%st, %st(1)      ; Divide: R_sphere / EARTH_RADIUS
+	fstpt		64(%esp)          ; Store R_rad on stack
 	
 	; C++ EQUIVALENT: if (angular_distance > 2.0 * R_rad) return empty_vector;
 	; Check if circles are too far apart to intersect
-	fldt	48(%esp)          ; Load angular_distance
-	fldt	64(%esp)          ; Load R_rad
-	fadd	%st(0), %st       ; Calculate 2.0 * R_rad
-	fxch	%st(1)            ; Swap stack elements
-	fucom	%st(1)            ; Compare angular_distance with 2.0 * R_rad
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	ja	L888              ; Jump if angular_distance > 2.0 * R_rad (no intersection)
+	fldt		48(%esp)          ; Load angular_distance
+	fldt		64(%esp)          ; Load R_rad
+	fadd		%st(0), %st       ; Calculate 2.0 * R_rad
+	fxch		%st(1)            ; Swap stack elements
+	fucom		%st(1)            ; Compare angular_distance with 2.0 * R_rad
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
+	ja		L888              ; Jump if angular_distance > 2.0 * R_rad (no intersection)
 	
 	; C++ EQUIVALENT: if (angular_distance < abs(R_rad - R_rad)) return empty_vector;
 	; Since both radii are R_rad, abs(R_rad - R_rad) = 0
 	; So we check if angular_distance < 0, which is impossible for acos result
-	fstp	%st(0)            ; Pop 2.0 * R_rad
-	fstp	%st(0)            ; Pop angular_distance
+	fstp		%st(0)            ; Pop 2.0 * R_rad
+	fstp		%st(0)            ; Pop angular_distance
 	
 	; C++ EQUIVALENT: if (angular_distance < EPS) -> circles are nearly identical
-	fldt	48(%esp)          ; Reload angular_distance
-	fldt	LC5               ; Load EPS constant
-	fucom	%st(1)            ; Compare angular_distance with EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	jb	L888              ; Jump if angular_distance < EPS (circles are identical)
+	fldt		48(%esp)          ; Reload angular_distance
+	fldt		LC5               ; Load EPS constant
+	fucom		%st(1)            ; Compare angular_distance with EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
+	jb		L888              ; Jump if angular_distance < EPS (circles are identical)
 	
-	fstp	%st(0)            ; Pop EPS
-	fstp	%st(0)            ; Pop angular_distance
+	fstp		%st(0)            ; Pop EPS
+	fstp		%st(0)            ; Pop angular_distance
 	
 	; If we reach here, circles intersect - continue to step 3
-	jmp	L889              ; Jump to step 3 (intersection point calculation)
+	jmp		L889              ; Jump to step 3 (intersection point calculation)
 	
 	; ========================================================================
 	; END OF STEP 2: Checking if spheres intersect (distance constraints)
@@ -1146,13 +1146,13 @@ L888:
 	; NO INTERSECTION: Return empty vector
 	; C++ EQUIVALENT: return vector<Point>(); // empty vector
 	; Vector is already initialized empty, so just return
-	movl	496(%esp), %eax   ; Load result vector address (return value)
-	addl	$476, %esp        ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	popl	%edi              ; Restore EDI register
-	popl	%ebp              ; Restore EBP register
-	ret                       ; Return from function
+	movl		496(%esp), %eax   ; Load result vector address (return value)
+	addl		$476, %esp        ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	popl		%edi              ; Restore EDI register
+	popl		%ebp              ; Restore EBP register
+	ret                       	  ; Return from function
 	
 L889:
 	; ========================================================================
@@ -1161,119 +1161,119 @@ L889:
 	
 	; Calculate the angle from center1 to the midpoint between intersections
 	; Using law of cosines: cos(angle_to_midpoint) = cos(R_rad) / cos(angular_distance/2)
-	fldt	48(%esp)          ; Load angular_distance
-	fldt	LC8               ; Load 0.5
-	fmulp	%st, %st(1)      ; Calculate angular_distance / 2
-	call	__cosl            ; Call cos(angular_distance / 2)
-	fstpt	80(%esp)          ; Store cos(angular_distance / 2)
+	fldt		48(%esp)          ; Load angular_distance
+	fldt		LC8               ; Load 0.5
+	fmulp		%st, %st(1)       ; Calculate angular_distance / 2
+	call		__cosl            ; Call cos(angular_distance / 2)
+	fstpt		80(%esp)          ; Store cos(angular_distance / 2)
 	
-	fldt	64(%esp)          ; Load R_rad
-	call	__cosl            ; Call cos(R_rad)
-	fldt	80(%esp)          ; Load cos(angular_distance / 2)
-	fdivp	%st, %st(1)      ; Divide: cos(R_rad) / cos(angular_distance / 2)
-	call	__acosl           ; Call acos to get angle_to_midpoint
-	fstpt	96(%esp)          ; Store angle_to_midpoint
+	fldt		64(%esp)          ; Load R_rad
+	call		__cosl            ; Call cos(R_rad)
+	fldt		80(%esp)          ; Load cos(angular_distance / 2)
+	fdivp		%st, %st(1)       ; Divide: cos(R_rad) / cos(angular_distance / 2)
+	call		__acosl           ; Call acos to get angle_to_midpoint
+	fstpt		96(%esp)          ; Store angle_to_midpoint
 	
 	; Calculate perpendicular distance from great circle to intersection points
 	; Using sin(angle_offset) = sin(R_rad) / sin(angular_distance/2)
-	fldt	64(%esp)          ; Load R_rad
-	call	__sinl            ; Call sin(R_rad)
-	fldt	48(%esp)          ; Load angular_distance
-	fldt	LC8               ; Load 0.5
-	fmulp	%st, %st(1)      ; Calculate angular_distance / 2
-	call	__sinl            ; Call sin(angular_distance / 2)
-	fdivp	%st, %st(1)      ; Divide: sin(R_rad) / sin(angular_distance / 2)
-	call	__asinl           ; Call asin to get angle_offset
-	fstpt	112(%esp)         ; Store angle_offset
+	fldt		64(%esp)          ; Load R_rad
+	call		__sinl            ; Call sin(R_rad)
+	fldt		48(%esp)          ; Load angular_distance
+	fldt		LC8               ; Load 0.5
+	fmulp		%st, %st(1)       ; Calculate angular_distance / 2
+	call		__sinl            ; Call sin(angular_distance / 2)
+	fdivp		%st, %st(1)       ; Divide: sin(R_rad) / sin(angular_distance / 2)
+	call		__asinl           ; Call asin to get angle_offset
+	fstpt		112(%esp)         ; Store angle_offset
 	
 	; Calculate the midpoint on the great circle between c1_norm and c2_norm
 	; midpoint = point_at_angle_on_great_circle(c1_norm, c2_norm, angle_to_midpoint)
-	leal	128(%esp), %eax   ; Load address for midpoint result
-	movl	%eax, (%esp)      ; Push midpoint address
-	movl	%edi, 4(%esp)     ; Push c1_norm address
-	movl	%esi, 8(%esp)     ; Push c2_norm address
-	fldt	96(%esp)          ; Load angle_to_midpoint
-	fstpt	12(%esp)          ; Push angle_to_midpoint as parameter
-	call	__Z33point_at_angle_on_great_circleRK5PointS1_e ; Call point_at_angle_on_great_circle
+	leal		128(%esp), %eax   ; Load address for midpoint result
+	movl		%eax, (%esp)      ; Push midpoint address
+	movl		%edi, 4(%esp)     ; Push c1_norm address
+	movl		%esi, 8(%esp)     ; Push c2_norm address
+	fldt		96(%esp)          ; Load angle_to_midpoint
+	fstpt		12(%esp)          ; Push angle_to_midpoint as parameter
+	call		__Z33point_at_angle_on_great_circleRK5PointS1_e ; Call point_at_angle_on_great_circle
 	
 	; Calculate perpendicular vector to the great circle plane
 	; perpendicular = normalize(cross(c1_norm, c2_norm))
-	leal	272(%esp), %eax   ; Load address for cross product result
-	movl	%eax, (%esp)      ; Push cross product address
-	movl	%edi, 4(%esp)     ; Push c1_norm address
-	movl	%esi, 8(%esp)     ; Push c2_norm address
-	call	__Z5crossRK5PointS1_ ; Call cross(c1_norm, c2_norm)
+	leal		272(%esp), %eax   ; Load address for cross product result
+	movl		%eax, (%esp)      ; Push cross product address
+	movl		%edi, 4(%esp)     ; Push c1_norm address
+	movl		%esi, 8(%esp)     ; Push c2_norm address
+	call		__Z5crossRK5PointS1_ ; Call cross(c1_norm, c2_norm)
 	
-	leal	320(%esp), %eax   ; Load address for normalized perpendicular
-	movl	%eax, (%esp)      ; Push result address
-	leal	272(%esp), %edi   ; Load cross product address
-	movl	%edi, 4(%esp)     ; Push cross product address
-	call	__Z9normalizeRK5Point ; Call normalize(cross_product)
+	leal		320(%esp), %eax   ; Load address for normalized perpendicular
+	movl		%eax, (%esp)      ; Push result address
+	leal		272(%esp), %edi   ; Load cross product address
+	movl		%edi, 4(%esp)     ; Push cross product address
+	call		__Z9normalizeRK5Point ; Call normalize(cross_product)
 	
 	; Calculate cos(angle_offset) and sin(angle_offset) for intersection points
-	fldt	112(%esp)         ; Load angle_offset
-	fsincos                   ; Calculate both sin and cos (cos on top, sin below)
-	fstpt	336(%esp)         ; Store cos(angle_offset)
-	fstpt	352(%esp)         ; Store sin(angle_offset)
+	fldt		112(%esp)         ; Load angle_offset
+	fsincos                   	  ; Calculate both sin and cos (cos on top, sin below)
+	fstpt		336(%esp)         ; Store cos(angle_offset)
+	fstpt		352(%esp)         ; Store sin(angle_offset)
 	
 	; Calculate intersection1 = cos(angle_offset) * midpoint + sin(angle_offset) * perpendicular
-	leal	368(%esp), %ebx   ; Load address for intersection1
-	movl	%ebx, (%esp)      ; Push intersection1 address
-	leal	128(%esp), %eax   ; Load midpoint address
-	movl	%eax, 4(%esp)     ; Push midpoint address
-	fldt	336(%esp)         ; Load cos(angle_offset)
-	fstpt	8(%esp)           ; Push cos(angle_offset) as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(midpoint, cos(angle_offset))
+	leal		368(%esp), %ebx   ; Load address for intersection1
+	movl		%ebx, (%esp)      ; Push intersection1 address
+	leal		128(%esp), %eax   ; Load midpoint address
+	movl		%eax, 4(%esp)     ; Push midpoint address
+	fldt		336(%esp)         ; Load cos(angle_offset)
+	fstpt		8(%esp)           ; Push cos(angle_offset) as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(midpoint, cos(angle_offset))
 	
-	leal	416(%esp), %eax   ; Load address for temp result
-	movl	%eax, (%esp)      ; Push temp result address
-	leal	320(%esp), %edi   ; Load perpendicular address
-	movl	%edi, 4(%esp)     ; Push perpendicular address
-	fldt	352(%esp)         ; Load sin(angle_offset)
-	fstpt	8(%esp)           ; Push sin(angle_offset) as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(perpendicular, sin(angle_offset))
+	leal		416(%esp), %eax   ; Load address for temp result
+	movl		%eax, (%esp)      ; Push temp result address
+	leal		320(%esp), %edi   ; Load perpendicular address
+	movl		%edi, 4(%esp)     ; Push perpendicular address
+	fldt		352(%esp)         ; Load sin(angle_offset)
+	fstpt		8(%esp)           ; Push sin(angle_offset) as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(perpendicular, sin(angle_offset))
 	
-	movl	%ebx, (%esp)      ; Push intersection1 address
-	movl	%ebx, 4(%esp)     ; Push first operand (cos * midpoint)
-	leal	416(%esp), %eax   ; Load second operand address
-	movl	%eax, 8(%esp)     ; Push second operand (sin * perpendicular)
-	call	__ZplRK5PointS1_  ; Call operator+(cos*midpoint, sin*perpendicular)
+	movl		%ebx, (%esp)      ; Push intersection1 address
+	movl		%ebx, 4(%esp)     ; Push first operand (cos * midpoint)
+	leal		416(%esp), %eax   ; Load second operand address
+	movl		%eax, 8(%esp)     ; Push second operand (sin * perpendicular)
+	call		__ZplRK5PointS1_  ; Call operator+(cos*midpoint, sin*perpendicular)
 	
 	; Add intersection1 to result vector
-	movl	496(%esp), %eax   ; Load result vector address
-	movl	%eax, (%esp)      ; Push vector address
-	movl	%ebx, 4(%esp)     ; Push intersection1 address
-	call	__ZNSt6vectorI5PointSaIS0_EE9push_backERKS0_ ; Call vector.push_back(intersection1)
+	movl		496(%esp), %eax   ; Load result vector address
+	movl		%eax, (%esp)      ; Push vector address
+	movl		%ebx, 4(%esp)     ; Push intersection1 address
+	call		__ZNSt6vectorI5PointSaIS0_EE9push_backERKS0_ ; Call vector.push_back(intersection1)
 	
 	; Calculate intersection2 = cos(angle_offset) * midpoint - sin(angle_offset) * perpendicular
-	leal	464(%esp), %ebx   ; Load address for intersection2
-	movl	%ebx, (%esp)      ; Push intersection2 address
-	leal	128(%esp), %eax   ; Load midpoint address
-	movl	%eax, 4(%esp)     ; Push midpoint address
-	fldt	336(%esp)         ; Load cos(angle_offset)
-	fstpt	8(%esp)           ; Push cos(angle_offset) as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(midpoint, cos(angle_offset))
+	leal		464(%esp), %ebx   ; Load address for intersection2
+	movl		%ebx, (%esp)      ; Push intersection2 address
+	leal		128(%esp), %eax   ; Load midpoint address
+	movl		%eax, 4(%esp)     ; Push midpoint address
+	fldt		336(%esp)         ; Load cos(angle_offset)
+	fstpt		8(%esp)           ; Push cos(angle_offset) as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(midpoint, cos(angle_offset))
 	
-	leal	416(%esp), %eax   ; Load address for temp result
-	movl	%eax, (%esp)      ; Push temp result address
-	leal	320(%esp), %edi   ; Load perpendicular address
-	movl	%edi, 4(%esp)     ; Push perpendicular address
-	fldt	352(%esp)         ; Load sin(angle_offset)
-	fstpt	8(%esp)           ; Push sin(angle_offset) as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(perpendicular, sin(angle_offset))
+	leal		416(%esp), %eax   ; Load address for temp result
+	movl		%eax, (%esp)      ; Push temp result address
+	leal		320(%esp), %edi   ; Load perpendicular address
+	movl		%edi, 4(%esp)     ; Push perpendicular address
+	fldt		352(%esp)         ; Load sin(angle_offset)
+	fstpt		8(%esp)           ; Push sin(angle_offset) as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(perpendicular, sin(angle_offset))
 	
-	movl	%ebx, (%esp)      ; Push intersection2 address
-	leal	368(%esp), %eax   ; Load first operand address (cos * midpoint)
-	movl	%eax, 4(%esp)     ; Push first operand
-	leal	416(%esp), %eax   ; Load second operand address (sin * perpendicular)
-	movl	%eax, 8(%esp)     ; Push second operand
-	call	__ZmiRK5PointS1_  ; Call operator-(cos*midpoint, sin*perpendicular)
+	movl		%ebx, (%esp)      ; Push intersection2 address
+	leal		368(%esp), %eax   ; Load first operand address (cos * midpoint)
+	movl		%eax, 4(%esp)     ; Push first operand
+	leal		416(%esp), %eax   ; Load second operand address (sin * perpendicular)
+	movl		%eax, 8(%esp)     ; Push second operand
+	call		__ZmiRK5PointS1_  ; Call operator-(cos*midpoint, sin*perpendicular)
 	
 	; Add intersection2 to result vector
-	movl	496(%esp), %eax   ; Load result vector address
-	movl	%eax, (%esp)      ; Push vector address
-	movl	%ebx, 4(%esp)     ; Push intersection2 address
-	call	__ZNSt6vectorI5PointSaIS0_EE9push_backERKS0_ ; Call vector.push_back(intersection2)
+	movl		496(%esp), %eax   ; Load result vector address
+	movl		%eax, (%esp)      ; Push vector address
+	movl		%ebx, 4(%esp)     ; Push intersection2 address
+	call		__ZNSt6vectorI5PointSaIS0_EE9push_backERKS0_ ; Call vector.push_back(intersection2)
 	
 	; ========================================================================
 	; END OF STEP 3: Finding intersection points using spherical trigonometry
@@ -1288,31 +1288,31 @@ L889:
 	; by scaling them with Earth's radius.
 	
 	; Convert intersection1 from unit sphere to Earth surface coordinates
-	leal	368(%esp), %eax   ; Load intersection1 address
-	movl	%eax, (%esp)      ; Push intersection1 address
-	fldt	LC3               ; Load EARTH_RADIUS (6370.0)
-	fstpt	4(%esp)           ; Push EARTH_RADIUS as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(intersection1, EARTH_RADIUS)
+	leal		368(%esp), %eax   ; Load intersection1 address
+	movl		%eax, (%esp)      ; Push intersection1 address
+	fldt		LC3               ; Load EARTH_RADIUS (6370.0)
+	fstpt		4(%esp)           ; Push EARTH_RADIUS as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(intersection1, EARTH_RADIUS)
 	
 	; Convert intersection2 from unit sphere to Earth surface coordinates  
-	leal	464(%esp), %eax   ; Load intersection2 address
-	movl	%eax, (%esp)      ; Push intersection2 address
-	fldt	LC3               ; Load EARTH_RADIUS (6370.0)
-	fstpt	4(%esp)           ; Push EARTH_RADIUS as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(intersection2, EARTH_RADIUS)
+	leal		464(%esp), %eax   ; Load intersection2 address
+	movl		%eax, (%esp)      ; Push intersection2 address
+	fldt		LC3               ; Load EARTH_RADIUS (6370.0)
+	fstpt		4(%esp)           ; Push EARTH_RADIUS as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(intersection2, EARTH_RADIUS)
 	
 	; ========================================================================
 	; END OF STEP 4: Converting back to Cartesian coordinates
 	; ========================================================================
 
 	; FUNCTION EXIT: Clean up and return vector with intersection points
-	movl	496(%esp), %eax   ; Load result vector address (return value)
-	addl	$476, %esp        ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	popl	%edi              ; Restore EDI register
-	popl	%ebp              ; Restore EBP register
-	ret                       ; Return from function
+	movl		496(%esp), %eax   ; Load result vector address (return value)
+	addl		$476, %esp        ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	popl		%edi              ; Restore EDI register
+	popl		%ebp              ; Restore EBP register
+	ret                      	  ; Return from function
 
 ;===============================================================================
 ; SECTION 9: INTERVAL COVERAGE ANALYSIS
@@ -1326,121 +1326,121 @@ L889:
 ; 3. Test intervals between critical points for coverage
 ; 4. Return list of covered intervals
 
-	.p2align 4,,15
-	.globl	__Z20get_covered_intervalsRK5PointS1_S1_e
-	.def	__Z20get_covered_intervalsRK5PointS1_S1_e;	.scl	2;	.type	32;	.endef
+	.p2align 	4,,15
+	.globl		__Z20get_covered_intervalsRK5PointS1_S1_e
+	.def		__Z20get_covered_intervalsRK5PointS1_S1_e;	.scl	2;	.type	32;	.endef
 
 __Z20get_covered_intervalsRK5PointS1_S1_e:
-	pushl	%ebp              ; Save EBP register
-	pushl	%edi              ; Save EDI register
-	pushl	%esi              ; Save ESI register
-	pushl	%ebx              ; Save EBX register
-	subl	$512, %esp        ; Allocate 512 bytes of local stack space
+	pushl		%ebp              ; Save EBP register
+	pushl		%edi              ; Save EDI register
+	pushl		%esi              ; Save ESI register
+	pushl		%ebx              ; Save EBX register
+	subl		$512, %esp        ; Allocate 512 bytes of local stack space
 	
 	; Load function parameters
-	movl	532(%esp), %eax   ; Load address of u
-	movl	536(%esp), %ebx   ; Load address of v
-	movl	540(%esp), %esi   ; Load address of k_center
-	movl	528(%esp), %edi   ; Load address of result vector
+	movl		532(%esp), %eax   ; Load address of u
+	movl		536(%esp), %ebx   ; Load address of v
+	movl		540(%esp), %esi   ; Load address of k_center
+	movl		528(%esp), %edi   ; Load address of result vector
 	
 	; ========================================================================
 	; STEP 1: Find intersection points of great circle with R-sphere boundaries
 	; ========================================================================
 	
 	; C++ EQUIVALENT: long double r_ang = R_sphere / R_EARTH;
-	fldt	544(%esp)         ; Load R_sphere parameter
-	fldt	LC3               ; Load R_EARTH constant (6370.0)
-	fdivp	%st, %st(1)      ; Calculate r_ang = R_sphere / R_EARTH
-	fstpt	32(%esp)          ; Store r_ang on stack
+	fldt		544(%esp)         ; Load R_sphere parameter
+	fldt		LC3               ; Load R_EARTH constant (6370.0)
+	fdivp		%st, %st(1)       ; Calculate r_ang = R_sphere / R_EARTH
+	fstpt		32(%esp)          ; Store r_ang on stack
 	
 	; C++ EQUIVALENT: Point u_norm = normalize(u);
-	leal	48(%esp), %ecx    ; Load address for u_norm
-	movl	%ecx, (%esp)      ; Push result address
-	movl	%eax, 4(%esp)     ; Push u address
-	call	__Z9normalizeRK5Point ; Call normalize(u)
+	leal		48(%esp), %ecx    ; Load address for u_norm
+	movl		%ecx, (%esp)      ; Push result address
+	movl		%eax, 4(%esp)     ; Push u address
+	call		__Z9normalizeRK5Point ; Call normalize(u)
 	
 	; C++ EQUIVALENT: Point v_norm = normalize(v);
-	leal	96(%esp), %ecx    ; Load address for v_norm
-	movl	%ecx, (%esp)      ; Push result address
-	movl	%ebx, 4(%esp)     ; Push v address
-	call	__Z9normalizeRK5Point ; Call normalize(v)
+	leal		96(%esp), %ecx    ; Load address for v_norm
+	movl		%ecx, (%esp)      ; Push result address
+	movl		%ebx, 4(%esp)     ; Push v address
+	call		__Z9normalizeRK5Point ; Call normalize(v)
 	
 	; C++ EQUIVALENT: Point k_norm = normalize(k_center);
-	leal	144(%esp), %ecx   ; Load address for k_norm
-	movl	%ecx, (%esp)      ; Push result address
-	movl	%esi, 4(%esp)     ; Push k_center address
-	call	__Z9normalizeRK5Point ; Call normalize(k_center)
+	leal		144(%esp), %ecx   ; Load address for k_norm
+	movl		%ecx, (%esp)      ; Push result address
+	movl		%esi, 4(%esp)     ; Push k_center address
+	call		__Z9normalizeRK5Point ; Call normalize(k_center)
 	
 	; C++ EQUIVALENT: long double angle_uv = acos(max(-1.0, min(1.0, dot(u_norm, v_norm))));
-	leal	48(%esp), %eax    ; Load u_norm address
-	leal	96(%esp), %ebx    ; Load v_norm address
-	movl	%eax, (%esp)      ; Push u_norm address
-	movl	%ebx, 4(%esp)     ; Push v_norm address
-	call	__Z3dotRK5PointS1_ ; Call dot(u_norm, v_norm)
+	leal		48(%esp), %eax    ; Load u_norm address
+	leal		96(%esp), %ebx    ; Load v_norm address
+	movl		%eax, (%esp)      ; Push u_norm address
+	movl		%ebx, 4(%esp)     ; Push v_norm address
+	call		__Z3dotRK5PointS1_ ; Call dot(u_norm, v_norm)
 	
 	; Clamp dot product to [-1.0, 1.0] to avoid numerical errors
-	fldt	LC9               ; Load -1.0 (lower bound)
-	fxch	%st(1)            ; Swap stack elements
-	fucom	%st(1)            ; Compare dot_product with -1.0
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		LC9               ; Load -1.0 (lower bound)
+	fxch		%st(1)            ; Swap stack elements
+	fucom		%st(1)            ; Compare dot_product with -1.0
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	jbe		L1900             ; Jump if dot_product <= -1.0
 	
-	fldt	LC10              ; Load 1.0 (upper bound)
-	fxch	%st(1)            ; Swap stack elements
-	fucom	%st(1)            ; Compare dot_product with 1.0
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		LC10              ; Load 1.0 (upper bound)
+	fxch		%st(1)            ; Swap stack elements
+	fucom		%st(1)            ; Compare dot_product with 1.0
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	jae		L1901             ; Jump if dot_product >= 1.0
 	
 	; dot_product is in valid range [-1.0, 1.0]
-	fstp	%st(1)            ; Pop upper bound
-	fstp	%st(1)            ; Pop lower bound
+	fstp		%st(1)            ; Pop upper bound
+	fstp		%st(1)            ; Pop lower bound
 	jmp		L1902             ; Continue to acos calculation
 	
 L1900:
 	; Clamp to -1.0
-	fstp	%st(0)            ; Pop dot_product
-	fstp	%st(0)            ; Pop lower bound (keep -1.0)
+	fstp		%st(0)            ; Pop dot_product
+	fstp		%st(0)            ; Pop lower bound (keep -1.0)
 	jmp		L1902             ; Continue to acos calculation
 	
 L1901:
 	; Clamp to 1.0
-	fstp	%st(0)            ; Pop dot_product
-	fxch	%st(1)            ; Swap to get 1.0 on top
-	fstp	%st(1)            ; Pop lower bound (keep 1.0)
+	fstp		%st(0)            ; Pop dot_product
+	fxch		%st(1)            ; Swap to get 1.0 on top
+	fstp		%st(1)            ; Pop lower bound (keep 1.0)
 	
 L1902:
 	; C++ EQUIVALENT: long double angle_uv = acos(clamped_dot_product);
-	call	__acosl           ; Call acos function
-	fstpt	192(%esp)         ; Store angle_uv on stack
+	call		__acosl           ; Call acos function
+	fstpt		192(%esp)         ; Store angle_uv on stack
 	
 	; C++ EQUIVALENT: if (angle_uv < EPS) { // U and V are the same or very close
-	fldt	192(%esp)         ; Load angle_uv
-	fldt	LC5               ; Load EPS constant
-	fucom	%st(1)            ; Compare angle_uv with EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		192(%esp)         ; Load angle_uv
+	fldt		LC5               ; Load EPS constant
+	fucom		%st(1)            ; Compare angle_uv with EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	jb		L1903             ; Jump if angle_uv < EPS (points are nearly identical)
 	
-	fstp	%st(0)            ; Pop EPS
-	fstp	%st(0)            ; Pop angle_uv
+	fstp		%st(0)            ; Pop EPS
+	fstp		%st(0)            ; Pop angle_uv
 	
 	; Points are different, continue with great circle calculations
 	; C++ EQUIVALENT: Point gc_normal = normalize(cross(u_norm, v_norm));
-	leal	240(%esp), %ecx   ; Load address for cross product result
-	movl	%ecx, (%esp)      ; Push cross product address
-	leal	48(%esp), %eax    ; Load u_norm address
-	movl	%eax, 4(%esp)     ; Push u_norm address
-	leal	96(%esp), %ebx    ; Load v_norm address
-	movl	%ebx, 8(%esp)     ; Push v_norm address
-	call	__Z5crossRK5PointS1_ ; Call cross(u_norm, v_norm)
+	leal		240(%esp), %ecx   ; Load address for cross product result
+	movl		%ecx, (%esp)      ; Push cross product address
+	leal		48(%esp), %eax    ; Load u_norm address
+	movl		%eax, 4(%esp)     ; Push u_norm address
+	leal		96(%esp), %ebx    ; Load v_norm address
+	movl		%ebx, 8(%esp)     ; Push v_norm address
+	call		__Z5crossRK5PointS1_ ; Call cross(u_norm, v_norm)
 	
-	leal	288(%esp), %ecx   ; Load address for normalized gc_normal
-	movl	%ecx, (%esp)      ; Push result address
-	leal	240(%esp), %eax   ; Load cross product address
-	movl	%eax, 4(%esp)     ; Push cross product address
-	call	__Z9normalizeRK5Point ; Call normalize(cross_product)
+	leal		288(%esp), %ecx   ; Load address for normalized gc_normal
+	movl		%ecx, (%esp)      ; Push result address
+	leal		240(%esp), %eax   ; Load cross product address
+	movl		%eax, 4(%esp)     ; Push cross product address
+	call		__Z9normalizeRK5Point ; Call normalize(cross_product)
 	
 	; ========================================================================
 	; END OF STEP 1: Find intersection points of great circle with R-sphere boundaries
@@ -1452,210 +1452,210 @@ L1902:
 	
 	; C++ EQUIVALENT: Point k_proj_norm = k_norm - gc_normal * dot(k_norm, gc_normal);
 	; Project k_norm onto the plane of the great circle
-	leal	144(%esp), %eax   ; Load k_norm address
-	leal	288(%esp), %ebx   ; Load gc_normal address
-	movl	%eax, (%esp)      ; Push k_norm address
-	movl	%ebx, 4(%esp)     ; Push gc_normal address
-	call	__Z3dotRK5PointS1_ ; Call dot(k_norm, gc_normal)
-	fstpt	336(%esp)         ; Store dot product on stack
+	leal		144(%esp), %eax   ; Load k_norm address
+	leal		288(%esp), %ebx   ; Load gc_normal address
+	movl		%eax, (%esp)      ; Push k_norm address
+	movl		%ebx, 4(%esp)     ; Push gc_normal address
+	call		__Z3dotRK5PointS1_ ; Call dot(k_norm, gc_normal)
+	fstpt		336(%esp)         ; Store dot product on stack
 	
 	; C++ EQUIVALENT: gc_normal * dot(k_norm, gc_normal)
-	leal	352(%esp), %ecx   ; Load address for temp result
-	movl	%ecx, (%esp)      ; Push result address
-	leal	288(%esp), %ebx   ; Load gc_normal address
-	movl	%ebx, 4(%esp)     ; Push gc_normal address
-	fldt	336(%esp)         ; Load dot product
-	fstpt	8(%esp)           ; Push dot product as scalar parameter
-	call	__ZmlRK5Pointe    ; Call operator*(gc_normal, dot_product)
+	leal		352(%esp), %ecx   ; Load address for temp result
+	movl		%ecx, (%esp)      ; Push result address
+	leal		288(%esp), %ebx   ; Load gc_normal address
+	movl		%ebx, 4(%esp)     ; Push gc_normal address
+	fldt		336(%esp)         ; Load dot product
+	fstpt		8(%esp)           ; Push dot product as scalar parameter
+	call		__ZmlRK5Pointe    ; Call operator*(gc_normal, dot_product)
 	
 	; C++ EQUIVALENT: k_norm - gc_normal * dot(k_norm, gc_normal)
-	leal	400(%esp), %ecx   ; Load address for k_proj (before normalization)
-	movl	%ecx, (%esp)      ; Push result address
-	leal	144(%esp), %eax   ; Load k_norm address
-	movl	%eax, 4(%esp)     ; Push k_norm address
-	leal	352(%esp), %ebx   ; Load temp result address
-	movl	%ebx, 8(%esp)     ; Push temp result address
-	call	__ZmiRK5PointS1_  ; Call operator-(k_norm, gc_normal * dot_product)
+	leal		400(%esp), %ecx   ; Load address for k_proj (before normalization)
+	movl		%ecx, (%esp)      ; Push result address
+	leal		144(%esp), %eax   ; Load k_norm address
+	movl		%eax, 4(%esp)     ; Push k_norm address
+	leal		352(%esp), %ebx   ; Load temp result address
+	movl		%ebx, 8(%esp)     ; Push temp result address
+	call		__ZmiRK5PointS1_  ; Call operator-(k_norm, gc_normal * dot_product)
 	
 	; C++ EQUIVALENT: k_proj_norm = normalize(k_proj);
-	leal	448(%esp), %ecx   ; Load address for k_proj_norm
-	movl	%ecx, (%esp)      ; Push result address
-	leal	400(%esp), %eax   ; Load k_proj address
-	movl	%eax, 4(%esp)     ; Push k_proj address
-	call	__Z9normalizeRK5Point ; Call normalize(k_proj)
+	leal		448(%esp), %ecx   ; Load address for k_proj_norm
+	movl		%ecx, (%esp)      ; Push result address
+	leal		400(%esp), %eax   ; Load k_proj address
+	movl		%eax, 4(%esp)     ; Push k_proj address
+	call		__Z9normalizeRK5Point ; Call normalize(k_proj)
 	
 	; C++ EQUIVALENT: long double d_k_to_plane_ang = acos(max(-1.0, min(1.0, abs(dot(k_norm, gc_normal)))));
-	fldt	336(%esp)         ; Load dot(k_norm, gc_normal)
-	fabs                      ; Take absolute value
+	fldt		336(%esp)         ; Load dot(k_norm, gc_normal)
+	fabs                      	  ; Take absolute value
 	
 	; Clamp to [-1.0, 1.0] range
-	fldt	LC9               ; Load -1.0 (lower bound)
-	fxch	%st(1)            ; Swap stack elements
-	fucom	%st(1)            ; Compare abs(dot) with -1.0
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	jbe	L1910             ; Jump if abs(dot) <= -1.0
+	fldt		LC9               ; Load -1.0 (lower bound)
+	fxch		%st(1)            ; Swap stack elements
+	fucom		%st(1)            ; Compare abs(dot) with -1.0
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
+	jbe		L1910             ; Jump if abs(dot) <= -1.0
 	
-	fldt	LC10              ; Load 1.0 (upper bound)
-	fxch	%st(1)            ; Swap stack elements
-	fucom	%st(1)            ; Compare abs(dot) with 1.0
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	jae	L1911             ; Jump if abs(dot) >= 1.0
+	fldt		LC10              ; Load 1.0 (upper bound)
+	fxch		%st(1)            ; Swap stack elements
+	fucom		%st(1)            ; Compare abs(dot) with 1.0
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
+	jae		L1911             ; Jump if abs(dot) >= 1.0
 	
 	; abs(dot) is in valid range [-1.0, 1.0]
-	fstp	%st(1)            ; Pop upper bound
-	fstp	%st(1)            ; Pop lower bound
-	jmp	L1912             ; Continue to acos calculation
+	fstp		%st(1)            ; Pop upper bound
+	fstp		%st(1)            ; Pop lower bound
+	jmp		L1912             ; Continue to acos calculation
 	
 L1910:
 	; Clamp to -1.0 (though abs value should never be < -1.0)
-	fstp	%st(0)            ; Pop abs(dot)
-	fstp	%st(0)            ; Pop lower bound (keep -1.0)
-	jmp	L1912             ; Continue to acos calculation
+	fstp		%st(0)            ; Pop abs(dot)
+	fstp		%st(0)            ; Pop lower bound (keep -1.0)
+	jmp		L1912             ; Continue to acos calculation
 	
 L1911:
 	; Clamp to 1.0
-	fstp	%st(0)            ; Pop abs(dot)
-	fxch	%st(1)            ; Swap to get 1.0 on top
-	fstp	%st(1)            ; Pop lower bound (keep 1.0)
+	fstp		%st(0)            ; Pop abs(dot)
+	fxch		%st(1)            ; Swap to get 1.0 on top
+	fstp		%st(1)            ; Pop lower bound (keep 1.0)
 	
 L1912:
 	; C++ EQUIVALENT: long double d_k_to_plane_ang = acos(clamped_abs_dot);
-	call	__acosl           ; Call acos function
-	fstpt	464(%esp)         ; Store d_k_to_plane_ang on stack
+	call		__acosl           ; Call acos function
+	fstpt		464(%esp)         ; Store d_k_to_plane_ang on stack
 	
 	; C++ EQUIVALENT: vector<long double> critical_params;
 	; C++ EQUIVALENT: critical_params.push_back(0.0); // Arc start
 	; C++ EQUIVALENT: critical_params.push_back(1.0); // Arc end
 	; Initialize critical parameters array (simplified for assembly)
-	fldz                      ; Load 0.0
-	fstpt	480(%esp)         ; Store 0.0 as first critical parameter
-	fld1                      ; Load 1.0
-	fstpt	492(%esp)         ; Store 1.0 as second critical parameter
-	movl	$2, 504(%esp)     ; Store count of critical parameters
+	fldz                      	  ; Load 0.0
+	fstpt		480(%esp)         ; Store 0.0 as first critical parameter
+	fld1                      	  ; Load 1.0
+	fstpt		492(%esp)         ; Store 1.0 as second critical parameter
+	movl		$2, 504(%esp)     ; Store count of critical parameters
 	
 	; C++ EQUIVALENT: if (d_k_to_plane_ang <= r_ang + EPS)
 	; Check if small circle boundary intersects or is tangent to or contains the great circle
-	fldt	464(%esp)         ; Load d_k_to_plane_ang
-	fldt	32(%esp)          ; Load r_ang
-	fldt	LC5               ; Load EPS
-	faddp	%st, %st(1)      ; Calculate r_ang + EPS
-	fucom	%st(1)            ; Compare d_k_to_plane_ang with r_ang + EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		464(%esp)         ; Load d_k_to_plane_ang
+	fldt		32(%esp)          ; Load r_ang
+	fldt		LC5               ; Load EPS
+	faddp		%st, %st(1)       ; Calculate r_ang + EPS
+	fucom		%st(1)            ; Compare d_k_to_plane_ang with r_ang + EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	ja		L1913             ; Jump if d_k_to_plane_ang > r_ang + EPS (no intersection)
 	
 	; Small circle boundary intersects or is tangent to or contains the great circle
-	fstp	%st(0)            ; Pop r_ang + EPS
-	fstp	%st(0)            ; Pop d_k_to_plane_ang
+	fstp		%st(0)            ; Pop r_ang + EPS
+	fstp		%st(0)            ; Pop d_k_to_plane_ang
 	
 	; C++ EQUIVALENT: long double alpha; // Angle on the great circle from k_proj_norm to intersection points
 	; C++ EQUIVALENT: if (abs(d_k_to_plane_ang - r_ang) < EPS) { alpha = 0; // Tangent case
-	fldt	464(%esp)         ; Load d_k_to_plane_ang
-	fldt	32(%esp)          ; Load r_ang
-	fsubp	%st, %st(1)      ; Calculate d_k_to_plane_ang - r_ang
-	fabs                      ; Take absolute value
-	fldt	LC5               ; Load EPS
-	fucom	%st(1)            ; Compare abs(difference) with EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		464(%esp)         ; Load d_k_to_plane_ang
+	fldt		32(%esp)          ; Load r_ang
+	fsubp		%st, %st(1)       ; Calculate d_k_to_plane_ang - r_ang
+	fabs                      	  ; Take absolute value
+	fldt		LC5               ; Load EPS
+	fucom		%st(1)            ; Compare abs(difference) with EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	ja		L1914             ; Jump if abs(difference) > EPS (not tangent)
 	
 	; Tangent case: alpha = 0
-	fstp	%st(0)            ; Pop abs(difference)
-	fstp	%st(0)            ; Pop EPS
-	fldz                      ; Load 0.0
-	fstpt	508(%esp)         ; Store alpha = 0.0
+	fstp		%st(0)            ; Pop abs(difference)
+	fstp		%st(0)            ; Pop EPS
+	fldz                      	  ; Load 0.0
+	fstpt		508(%esp)         ; Store alpha = 0.0
 	jmp		L1915             ; Jump to intersection point calculation
 	
 L1914:
 	; Non-tangent case: calculate alpha using law of cosines
-	fstp	%st(0)            ; Pop abs(difference)
-	fstp	%st(0)            ; Pop EPS
+	fstp		%st(0)            ; Pop abs(difference)
+	fstp		%st(0)            ; Pop EPS
 	
 	; C++ EQUIVALENT: long double cos_alpha_arg = cos(r_ang) / cos(d_k_to_plane_ang);
-	fldt	32(%esp)          ; Load r_ang
-	call	__cosl            ; Call cos(r_ang)
-	fstpt	520(%esp)         ; Store cos(r_ang)
+	fldt		32(%esp)          ; Load r_ang
+	call		__cosl            ; Call cos(r_ang)
+	fstpt		520(%esp)         ; Store cos(r_ang)
 	
-	fldt	464(%esp)         ; Load d_k_to_plane_ang
-	call	__cosl            ; Call cos(d_k_to_plane_ang)
-	fldt	520(%esp)         ; Load cos(r_ang)
-	fdivp	%st, %st(1)      ; Calculate cos(r_ang) / cos(d_k_to_plane_ang)
-	fstpt	532(%esp)         ; Store cos_alpha_arg
+	fldt		464(%esp)         ; Load d_k_to_plane_ang
+	call		__cosl            ; Call cos(d_k_to_plane_ang)
+	fldt		520(%esp)         ; Load cos(r_ang)
+	fdivp		%st, %st(1)       ; Calculate cos(r_ang) / cos(d_k_to_plane_ang)
+	fstpt		532(%esp)         ; Store cos_alpha_arg
 	
 	; C++ EQUIVALENT: if (cos_alpha_arg >= -1.0 - EPS && cos_alpha_arg <= 1.0 + EPS)
 	; Check if cos_alpha_arg is in valid range for acos
-	fldt	532(%esp)         ; Load cos_alpha_arg
-	fldt	LC9               ; Load -1.0
-	fldt	LC5               ; Load EPS
-	fsubp	%st, %st(1)      ; Calculate -1.0 - EPS
-	fxch	%st(1)            ; Swap stack elements
-	fucom	%st(1)            ; Compare cos_alpha_arg with -1.0 - EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		532(%esp)         ; Load cos_alpha_arg
+	fldt		LC9               ; Load -1.0
+	fldt		LC5               ; Load EPS
+	fsubp		%st, %st(1)       ; Calculate -1.0 - EPS
+	fxch		%st(1)            ; Swap stack elements
+	fucom		%st(1)            ; Compare cos_alpha_arg with -1.0 - EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	jb		L1916             ; Jump if cos_alpha_arg < -1.0 - EPS (invalid)
 	
-	fldt	LC10              ; Load 1.0
-	fldt	LC5               ; Load EPS
-	faddp	%st, %st(1)      ; Calculate 1.0 + EPS
-	fxch	%st(2)            ; Bring cos_alpha_arg to top
-	fucom	%st(1)            ; Compare cos_alpha_arg with 1.0 + EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		LC10              ; Load 1.0
+	fldt		LC5               ; Load EPS
+	faddp		%st, %st(1)       ; Calculate 1.0 + EPS
+	fxch		%st(2)            ; Bring cos_alpha_arg to top
+	fucom		%st(1)            ; Compare cos_alpha_arg with 1.0 + EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	ja		L1916             ; Jump if cos_alpha_arg > 1.0 + EPS (invalid)
 	
 	; cos_alpha_arg is in valid range, calculate alpha
-	fstp	%st(0)            ; Pop 1.0 + EPS
-	fstp	%st(0)            ; Pop -1.0 - EPS
-	fstp	%st(0)            ; Pop cos_alpha_arg (reload it)
+	fstp		%st(0)            ; Pop 1.0 + EPS
+	fstp		%st(0)            ; Pop -1.0 - EPS
+	fstp		%st(0)            ; Pop cos_alpha_arg (reload it)
 	
 	; Clamp cos_alpha_arg to [-1.0, 1.0] for acos
-	fldt	532(%esp)         ; Reload cos_alpha_arg
-	fldt	LC9               ; Load -1.0
-	fldt	LC10              ; Load 1.0
+	fldt		532(%esp)         ; Reload cos_alpha_arg
+	fldt		LC9               ; Load -1.0
+	fldt		LC10              ; Load 1.0
 	; Apply max(-1.0, min(1.0, cos_alpha_arg))
-	fxch	%st(2)            ; Bring cos_alpha_arg to top
-	fucom	%st(1)            ; Compare with 1.0
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fxch		%st(2)            ; Bring cos_alpha_arg to top
+	fucom		%st(1)            ; Compare with 1.0
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	jae		L1917             ; Jump if cos_alpha_arg >= 1.0
 	
-	fxch	%st(1)            ; Swap to compare with -1.0
-	fucom	%st(2)            ; Compare cos_alpha_arg with -1.0
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fxch		%st(1)            ; Swap to compare with -1.0
+	fucom		%st(2)            ; Compare cos_alpha_arg with -1.0
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	jbe		L1918             ; Jump if cos_alpha_arg <= -1.0
 	
 	; cos_alpha_arg is in valid range [-1.0, 1.0]
-	fstp	%st(0)            ; Pop -1.0
-	fstp	%st(0)            ; Pop 1.0
+	fstp		%st(0)            ; Pop -1.0
+	fstp		%st(0)            ; Pop 1.0
 	jmp		L1919             ; Continue to acos calculation
 	
 L1917:
 	; Clamp to 1.0
-	fstp	%st(0)            ; Pop cos_alpha_arg
-	fstp	%st(0)            ; Pop -1.0
+	fstp		%st(0)            ; Pop cos_alpha_arg
+	fstp		%st(0)            ; Pop -1.0
 	jmp		L1919             ; Continue to acos calculation
 	
 L1918:
 	; Clamp to -1.0
-	fstp	%st(0)            ; Pop cos_alpha_arg
-	fxch	%st(1)            ; Swap to get -1.0 on top
-	fstp	%st(1)            ; Pop 1.0
+	fstp		%st(0)            ; Pop cos_alpha_arg
+	fxch		%st(1)            ; Swap to get -1.0 on top
+	fstp		%st(1)            ; Pop 1.0
 	
 L1919:
 	; C++ EQUIVALENT: alpha = acos(max(-1.0, min(1.0, cos_alpha_arg)));
-	call	__acosl           ; Call acos function
-	fstpt	508(%esp)         ; Store alpha on stack
+	call		__acosl           ; Call acos function
+	fstpt		508(%esp)         ; Store alpha on stack
 	jmp		L1915             ; Jump to intersection point calculation
 	
 L1916:
 	; cos_alpha_arg is out of valid range - no intersection
-	fstp	%st(0)            ; Pop 1.0 + EPS
-	fstp	%st(0)            ; Pop -1.0 - EPS
-	fstp	%st(0)            ; Pop cos_alpha_arg
+	fstp		%st(0)            ; Pop 1.0 + EPS
+	fstp		%st(0)            ; Pop -1.0 - EPS
+	fstp		%st(0)            ; Pop cos_alpha_arg
 	jmp		L1920             ; Jump to check midpoint case
 	
 L1915:
@@ -1670,87 +1670,87 @@ L1915:
 	;                                  gc_normal.x * k_proj_norm.y - gc_normal.y * k_proj_norm.x)
 	
 	; Calculate x component: gc_normal.y * k_proj_norm.z - gc_normal.z * k_proj_norm.y
-	fldt	28(%esp)          ; Load gc_normal.y
-	fldt	124(%esp)         ; Load k_proj_norm.z
-	fmulp	%st, %st(1)      ; gc_normal.y * k_proj_norm.z
-	fldt	40(%esp)          ; Load gc_normal.z
-	fldt	120(%esp)         ; Load k_proj_norm.y
-	fmulp	%st, %st(1)      ; gc_normal.z * k_proj_norm.y
-	fsubp	%st, %st(1)      ; Subtract to get x component
-	fstpt	544(%esp)         ; Store ortho_k_proj_norm.x
+	fldt		28(%esp)          ; Load gc_normal.y
+	fldt		124(%esp)         ; Load k_proj_norm.z
+	fmulp		%st, %st(1)       ; gc_normal.y * k_proj_norm.z
+	fldt		40(%esp)          ; Load gc_normal.z
+	fldt		120(%esp)         ; Load k_proj_norm.y
+	fmulp		%st, %st(1)       ; gc_normal.z * k_proj_norm.y
+	fsubp		%st, %st(1)       ; Subtract to get x component
+	fstpt		544(%esp)         ; Store ortho_k_proj_norm.x
 	
 	; Calculate y component: gc_normal.z * k_proj_norm.x - gc_normal.x * k_proj_norm.z
-	fldt	40(%esp)          ; Load gc_normal.z
-	fldt	112(%esp)         ; Load k_proj_norm.x
-	fmulp	%st, %st(1)      ; gc_normal.z * k_proj_norm.x
-	fldt	16(%esp)          ; Load gc_normal.x
-	fldt	124(%esp)         ; Load k_proj_norm.z
-	fmulp	%st, %st(1)      ; gc_normal.x * k_proj_norm.z
-	fsubp	%st, %st(1)      ; Subtract to get y component
-	fstpt	556(%esp)         ; Store ortho_k_proj_norm.y
+	fldt		40(%esp)          ; Load gc_normal.z
+	fldt		112(%esp)         ; Load k_proj_norm.x
+	fmulp		%st, %st(1)       ; gc_normal.z * k_proj_norm.x
+	fldt		16(%esp)          ; Load gc_normal.x
+	fldt		124(%esp)         ; Load k_proj_norm.z
+	fmulp		%st, %st(1)       ; gc_normal.x * k_proj_norm.z
+	fsubp		%st, %st(1)       ; Subtract to get y component
+	fstpt		556(%esp)         ; Store ortho_k_proj_norm.y
 	
 	; Calculate z component: gc_normal.x * k_proj_norm.y - gc_normal.y * k_proj_norm.x
-	fldt	16(%esp)          ; Load gc_normal.x
-	fldt	120(%esp)         ; Load k_proj_norm.y
-	fmulp	%st, %st(1)      ; gc_normal.x * k_proj_norm.y
-	fldt	28(%esp)          ; Load gc_normal.y
-	fldt	112(%esp)         ; Load k_proj_norm.x
-	fmulp	%st, %st(1)      ; gc_normal.y * k_proj_norm.x
-	fsubp	%st, %st(1)      ; Subtract to get z component
-	fstpt	568(%esp)         ; Store ortho_k_proj_norm.z
+	fldt		16(%esp)          ; Load gc_normal.x
+	fldt		120(%esp)         ; Load k_proj_norm.y
+	fmulp		%st, %st(1)       ; gc_normal.x * k_proj_norm.y
+	fldt		28(%esp)          ; Load gc_normal.y
+	fldt		112(%esp)         ; Load k_proj_norm.x
+	fmulp		%st, %st(1)       ; gc_normal.y * k_proj_norm.x
+	fsubp		%st, %st(1)       ; Subtract to get z component
+	fstpt		568(%esp)         ; Store ortho_k_proj_norm.z
 	
 	; Normalize ortho_k_proj_norm
 	; Calculate magnitude: sqrt(x^2 + y^2 + z^2)
-	fldt	544(%esp)         ; Load ortho_k_proj_norm.x
-	fldt	544(%esp)         ; Load ortho_k_proj_norm.x again
-	fmulp	%st, %st(1)      ; x^2
-	fldt	556(%esp)         ; Load ortho_k_proj_norm.y
-	fldt	556(%esp)         ; Load ortho_k_proj_norm.y again
-	fmulp	%st, %st(1)      ; y^2
-	faddp	%st, %st(1)      ; x^2 + y^2
-	fldt	568(%esp)         ; Load ortho_k_proj_norm.z
-	fldt	568(%esp)         ; Load ortho_k_proj_norm.z again
-	fmulp	%st, %st(1)      ; z^2
-	faddp	%st, %st(1)      ; x^2 + y^2 + z^2
-	fsqrt                     ; sqrt(x^2 + y^2 + z^2)
-	fstpt	580(%esp)         ; Store magnitude
+	fldt		544(%esp)         ; Load ortho_k_proj_norm.x
+	fldt		544(%esp)         ; Load ortho_k_proj_norm.x again
+	fmulp		%st, %st(1)       ; x^2
+	fldt		556(%esp)         ; Load ortho_k_proj_norm.y
+	fldt		556(%esp)         ; Load ortho_k_proj_norm.y again
+	fmulp		%st, %st(1)       ; y^2
+	faddp		%st, %st(1)       ; x^2 + y^2
+	fldt		568(%esp)         ; Load ortho_k_proj_norm.z
+	fldt		568(%esp)         ; Load ortho_k_proj_norm.z again
+	fmulp		%st, %st(1)       ; z^2
+	faddp		%st, %st(1)       ; x^2 + y^2 + z^2
+	fsqrt                     	  ; sqrt(x^2 + y^2 + z^2)
+	fstpt		580(%esp)         ; Store magnitude
 	
 	; Check if magnitude is too small
-	fldt	580(%esp)         ; Load magnitude
-	fldt	LC5               ; Load EPS
-	fucom	%st(1)            ; Compare magnitude with EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		580(%esp)         ; Load magnitude
+	fldt		LC5               ; Load EPS
+	fucom		%st(1)            ; Compare magnitude with EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	jae		L1922             ; Jump if magnitude >= EPS (safe to normalize)
 	
 	; Magnitude too small, use a default orthogonal vector
-	fstp	%st(0)            ; Pop EPS
-	fstp	%st(0)            ; Pop magnitude
-	fld1                      ; Load 1.0
-	fstpt	544(%esp)         ; Store ortho_k_proj_norm.x = 1.0
-	fldz                      ; Load 0.0
-	fstpt	556(%esp)         ; Store ortho_k_proj_norm.y = 0.0
-	fldz                      ; Load 0.0
-	fstpt	568(%esp)         ; Store ortho_k_proj_norm.z = 0.0
+	fstp		%st(0)            ; Pop EPS
+	fstp		%st(0)            ; Pop magnitude
+	fld1                      	  ; Load 1.0
+	fstpt		544(%esp)         ; Store ortho_k_proj_norm.x = 1.0
+	fldz                      	  ; Load 0.0
+	fstpt		556(%esp)         ; Store ortho_k_proj_norm.y = 0.0
+	fldz                      	  ; Load 0.0
+	fstpt		568(%esp)         ; Store ortho_k_proj_norm.z = 0.0
 	jmp		L1923             ; Jump to intersection point calculation
 	
 L1922:
 	; Normalize by dividing by magnitude
-	fstp	%st(0)            ; Pop EPS
-	fldt	544(%esp)         ; Load ortho_k_proj_norm.x
-	fldt	580(%esp)         ; Load magnitude
-	fdivp	%st, %st(1)      ; x / magnitude
-	fstpt	544(%esp)         ; Store normalized x
+	fstp		%st(0)            ; Pop EPS
+	fldt		544(%esp)         ; Load ortho_k_proj_norm.x
+	fldt		580(%esp)         ; Load magnitude
+	fdivp		%st, %st(1)       ; x / magnitude
+	fstpt		544(%esp)         ; Store normalized x
 	
-	fldt	556(%esp)         ; Load ortho_k_proj_norm.y
-	fldt	580(%esp)         ; Load magnitude
-	fdivp	%st, %st(1)      ; y / magnitude
-	fstpt	556(%esp)         ; Store normalized y
+	fldt		556(%esp)         ; Load ortho_k_proj_norm.y
+	fldt		580(%esp)         ; Load magnitude
+	fdivp		%st, %st(1)       ; y / magnitude
+	fstpt		556(%esp)         ; Store normalized y
 	
-	fldt	568(%esp)         ; Load ortho_k_proj_norm.z
-	fldt	580(%esp)         ; Load magnitude
-	fdivp	%st, %st(1)      ; z / magnitude
-	fstpt	568(%esp)         ; Store normalized z
+	fldt		568(%esp)         ; Load ortho_k_proj_norm.z
+	fldt		580(%esp)         ; Load magnitude
+	fdivp		%st, %st(1)       ; z / magnitude
+	fstpt		568(%esp)         ; Store normalized z
 	
 L1923:
 	; Calculate intersection points
@@ -1758,190 +1758,190 @@ L1923:
 	; C++ EQUIVALENT: Point p2_norm_gc = k_proj_norm * cos(alpha) - ortho_k_proj_norm * sin(alpha);
 	
 	; Calculate cos(alpha) and sin(alpha)
-	fldt	508(%esp)         ; Load alpha
-	fsincos                   ; Calculate sin(alpha) (ST(0)) and cos(alpha) (ST(1))
-	fstpt	592(%esp)         ; Store cos(alpha)
-	fstpt	604(%esp)         ; Store sin(alpha)
+	fldt		508(%esp)         ; Load alpha
+	fsincos                   	  ; Calculate sin(alpha) (ST(0)) and cos(alpha) (ST(1))
+	fstpt		592(%esp)         ; Store cos(alpha)
+	fstpt		604(%esp)         ; Store sin(alpha)
 	
 	; Calculate p1_norm_gc = k_proj_norm * cos(alpha) + ortho_k_proj_norm * sin(alpha)
 	; p1_norm_gc.x = k_proj_norm.x * cos(alpha) + ortho_k_proj_norm.x * sin(alpha)
-	fldt	112(%esp)         ; Load k_proj_norm.x
-	fldt	592(%esp)         ; Load cos(alpha)
-	fmulp	%st, %st(1)      ; k_proj_norm.x * cos(alpha)
-	fldt	544(%esp)         ; Load ortho_k_proj_norm.x
-	fldt	604(%esp)         ; Load sin(alpha)
-	fmulp	%st, %st(1)      ; ortho_k_proj_norm.x * sin(alpha)
-	faddp	%st, %st(1)      ; Add to get p1_norm_gc.x
-	fstpt	616(%esp)         ; Store p1_norm_gc.x
+	fldt		112(%esp)         ; Load k_proj_norm.x
+	fldt		592(%esp)         ; Load cos(alpha)
+	fmulp		%st, %st(1)       ; k_proj_norm.x * cos(alpha)
+	fldt		544(%esp)         ; Load ortho_k_proj_norm.x
+	fldt		604(%esp)         ; Load sin(alpha)
+	fmulp		%st, %st(1)       ; ortho_k_proj_norm.x * sin(alpha)
+	faddp		%st, %st(1)       ; Add to get p1_norm_gc.x
+	fstpt		616(%esp)         ; Store p1_norm_gc.x
 	
 	; p1_norm_gc.y = k_proj_norm.y * cos(alpha) + ortho_k_proj_norm.y * sin(alpha)
-	fldt	120(%esp)         ; Load k_proj_norm.y
-	fldt	592(%esp)         ; Load cos(alpha)
-	fmulp	%st, %st(1)      ; k_proj_norm.y * cos(alpha)
-	fldt	556(%esp)         ; Load ortho_k_proj_norm.y
-	fldt	604(%esp)         ; Load sin(alpha)
-	fmulp	%st, %st(1)      ; ortho_k_proj_norm.y * sin(alpha)
-	faddp	%st, %st(1)      ; Add to get p1_norm_gc.y
-	fstpt	628(%esp)         ; Store p1_norm_gc.y
+	fldt		120(%esp)         ; Load k_proj_norm.y
+	fldt		592(%esp)         ; Load cos(alpha)
+	fmulp		%st, %st(1)       ; k_proj_norm.y * cos(alpha)
+	fldt		556(%esp)         ; Load ortho_k_proj_norm.y
+	fldt		604(%esp)         ; Load sin(alpha)
+	fmulp		%st, %st(1)       ; ortho_k_proj_norm.y * sin(alpha)
+	faddp		%st, %st(1)       ; Add to get p1_norm_gc.y
+	fstpt		628(%esp)         ; Store p1_norm_gc.y
 	
 	; p1_norm_gc.z = k_proj_norm.z * cos(alpha) + ortho_k_proj_norm.z * sin(alpha)
-	fldt	124(%esp)         ; Load k_proj_norm.z
-	fldt	592(%esp)         ; Load cos(alpha)
-	fmulp	%st, %st(1)      ; k_proj_norm.z * cos(alpha)
-	fldt	568(%esp)         ; Load ortho_k_proj_norm.z
-	fldt	604(%esp)         ; Load sin(alpha)
-	fmulp	%st, %st(1)      ; ortho_k_proj_norm.z * sin(alpha)
-	faddp	%st, %st(1)      ; Add to get p1_norm_gc.z
-	fstpt	640(%esp)         ; Store p1_norm_gc.z
+	fldt		124(%esp)         ; Load k_proj_norm.z
+	fldt		592(%esp)         ; Load cos(alpha)
+	fmulp		%st, %st(1)       ; k_proj_norm.z * cos(alpha)
+	fldt		568(%esp)         ; Load ortho_k_proj_norm.z
+	fldt		604(%esp)         ; Load sin(alpha)
+	fmulp		%st, %st(1)       ; ortho_k_proj_norm.z * sin(alpha)
+	faddp		%st, %st(1)       ; Add to get p1_norm_gc.z
+	fstpt		640(%esp)         ; Store p1_norm_gc.z
 	
 	; Calculate p2_norm_gc = k_proj_norm * cos(alpha) - ortho_k_proj_norm * sin(alpha)
 	; p2_norm_gc.x = k_proj_norm.x * cos(alpha) - ortho_k_proj_norm.x * sin(alpha)
-	fldt	112(%esp)         ; Load k_proj_norm.x
-	fldt	592(%esp)         ; Load cos(alpha)
-	fmulp	%st, %st(1)      ; k_proj_norm.x * cos(alpha)
-	fldt	544(%esp)         ; Load ortho_k_proj_norm.x
-	fldt	604(%esp)         ; Load sin(alpha)
-	fmulp	%st, %st(1)      ; ortho_k_proj_norm.x * sin(alpha)
-	fsubp	%st, %st(1)      ; Subtract to get p2_norm_gc.x
-	fstpt	652(%esp)         ; Store p2_norm_gc.x
+	fldt		112(%esp)         ; Load k_proj_norm.x
+	fldt		592(%esp)         ; Load cos(alpha)
+	fmulp		%st, %st(1)       ; k_proj_norm.x * cos(alpha)
+	fldt		544(%esp)         ; Load ortho_k_proj_norm.x
+	fldt		604(%esp)         ; Load sin(alpha)
+	fmulp		%st, %st(1)       ; ortho_k_proj_norm.x * sin(alpha)
+	fsubp		%st, %st(1)       ; Subtract to get p2_norm_gc.x
+	fstpt		652(%esp)         ; Store p2_norm_gc.x
 	
 	; p2_norm_gc.y = k_proj_norm.y * cos(alpha) - ortho_k_proj_norm.y * sin(alpha)
-	fldt	120(%esp)         ; Load k_proj_norm.y
-	fldt	592(%esp)         ; Load cos(alpha)
-	fmulp	%st, %st(1)      ; k_proj_norm.y * cos(alpha)
-	fldt	556(%esp)         ; Load ortho_k_proj_norm.y
-	fldt	604(%esp)         ; Load sin(alpha)
-	fmulp	%st, %st(1)      ; ortho_k_proj_norm.y * sin(alpha)
-	fsubp	%st, %st(1)      ; Subtract to get p2_norm_gc.y
-	fstpt	664(%esp)         ; Store p2_norm_gc.y
+	fldt		120(%esp)         ; Load k_proj_norm.y
+	fldt		592(%esp)         ; Load cos(alpha)
+	fmulp		%st, %st(1)       ; k_proj_norm.y * cos(alpha)
+	fldt		556(%esp)         ; Load ortho_k_proj_norm.y
+	fldt		604(%esp)         ; Load sin(alpha)
+	fmulp		%st, %st(1)       ; ortho_k_proj_norm.y * sin(alpha)
+	fsubp		%st, %st(1)       ; Subtract to get p2_norm_gc.y
+	fstpt		664(%esp)         ; Store p2_norm_gc.y
 	
 	; p2_norm_gc.z = k_proj_norm.z * cos(alpha) - ortho_k_proj_norm.z * sin(alpha)
-	fldt	124(%esp)         ; Load k_proj_norm.z
-	fldt	592(%esp)         ; Load cos(alpha)
-	fmulp	%st, %st(1)      ; k_proj_norm.z * cos(alpha)
-	fldt	568(%esp)         ; Load ortho_k_proj_norm.z
-	fldt	604(%esp)         ; Load sin(alpha)
-	fmulp	%st, %st(1)      ; ortho_k_proj_norm.z * sin(alpha)
-	fsubp	%st, %st(1)      ; Subtract to get p2_norm_gc.z
-	fstpt	676(%esp)         ; Store p2_norm_gc.z
+	fldt		124(%esp)         ; Load k_proj_norm.z
+	fldt		592(%esp)         ; Load cos(alpha)
+	fmulp		%st, %st(1)       ; k_proj_norm.z * cos(alpha)
+	fldt		568(%esp)         ; Load ortho_k_proj_norm.z
+	fldt		604(%esp)         ; Load sin(alpha)
+	fmulp		%st, %st(1)       ; ortho_k_proj_norm.z * sin(alpha)
+	fsubp		%st, %st(1)       ; Subtract to get p2_norm_gc.z
+	fstpt		676(%esp)         ; Store p2_norm_gc.z
 	
 	; STEP 4c: Scale intersection points to earth radius
 	; C++ EQUIVALENT: Point p1_gc = {p1_norm_gc.x * R_EARTH, p1_norm_gc.y * R_EARTH, p1_norm_gc.z * R_EARTH};
 	; C++ EQUIVALENT: Point p2_gc = {p2_norm_gc.x * R_EARTH, p2_norm_gc.y * R_EARTH, p2_norm_gc.z * R_EARTH};
 	
 	; Calculate p1_gc
-	fldt	616(%esp)         ; Load p1_norm_gc.x
-	fldt	LC1               ; Load R_EARTH
-	fmulp	%st, %st(1)      ; p1_norm_gc.x * R_EARTH
-	fstpt	688(%esp)         ; Store p1_gc.x
+	fldt		616(%esp)         ; Load p1_norm_gc.x
+	fldt		LC1               ; Load R_EARTH
+	fmulp		%st, %st(1)       ; p1_norm_gc.x * R_EARTH
+	fstpt		688(%esp)         ; Store p1_gc.x
 	
-	fldt	628(%esp)         ; Load p1_norm_gc.y
-	fldt	LC1               ; Load R_EARTH
-	fmulp	%st, %st(1)      ; p1_norm_gc.y * R_EARTH
-	fstpt	700(%esp)         ; Store p1_gc.y
+	fldt		628(%esp)         ; Load p1_norm_gc.y
+	fldt		LC1               ; Load R_EARTH
+	fmulp		%st, %st(1)       ; p1_norm_gc.y * R_EARTH
+	fstpt		700(%esp)         ; Store p1_gc.y
 	
-	fldt	640(%esp)         ; Load p1_norm_gc.z
-	fldt	LC1               ; Load R_EARTH
-	fmulp	%st, %st(1)      ; p1_norm_gc.z * R_EARTH
-	fstpt	712(%esp)         ; Store p1_gc.z
+	fldt		640(%esp)         ; Load p1_norm_gc.z
+	fldt		LC1               ; Load R_EARTH
+	fmulp		%st, %st(1)       ; p1_norm_gc.z * R_EARTH
+	fstpt		712(%esp)         ; Store p1_gc.z
 	
 	; Calculate p2_gc
-	fldt	652(%esp)         ; Load p2_norm_gc.x
-	fldt	LC1               ; Load R_EARTH
-	fmulp	%st, %st(1)      ; p2_norm_gc.x * R_EARTH
-	fstpt	724(%esp)         ; Store p2_gc.x
+	fldt		652(%esp)         ; Load p2_norm_gc.x
+	fldt		LC1               ; Load R_EARTH
+	fmulp		%st, %st(1)       ; p2_norm_gc.x * R_EARTH
+	fstpt		724(%esp)         ; Store p2_gc.x
 	
-	fldt	664(%esp)         ; Load p2_norm_gc.y
-	fldt	LC1               ; Load R_EARTH
-	fmulp	%st, %st(1)      ; p2_norm_gc.y * R_EARTH
-	fstpt	736(%esp)         ; Store p2_gc.y
+	fldt		664(%esp)         ; Load p2_norm_gc.y
+	fldt		LC1               ; Load R_EARTH
+	fmulp		%st, %st(1)       ; p2_norm_gc.y * R_EARTH
+	fstpt		736(%esp)         ; Store p2_gc.y
 	
-	fldt	676(%esp)         ; Load p2_norm_gc.z
-	fldt	LC1               ; Load R_EARTH
-	fmulp	%st, %st(1)      ; p2_norm_gc.z * R_EARTH
-	fstpt	748(%esp)         ; Store p2_gc.z
+	fldt		676(%esp)         ; Load p2_norm_gc.z
+	fldt		LC1               ; Load R_EARTH
+	fmulp		%st, %st(1)       ; p2_norm_gc.z * R_EARTH
+	fstpt		748(%esp)         ; Store p2_gc.z
 	
 	; STEP 4d: Check if intersection points lie on the arc and add their parameters
 	; C++ EQUIVALENT: if (is_on_arc(u, v, p1_gc)) { critical_params.push_back(get_arc_parameter(u, v, p1_gc)); }
 	
 	; Call is_on_arc(u, v, p1_gc)
 	; Parameters: u (at 136(%esp)), v (at 148(%esp)), p1_gc (at 688(%esp))
-	leal	136(%esp), %eax   ; Address of u
-	pushl	%eax              ; Push u parameter
-	leal	152(%esp), %eax   ; Address of v (adjusted for push)
-	pushl	%eax              ; Push v parameter
-	leal	696(%esp), %eax   ; Address of p1_gc (adjusted for pushes)
-	pushl	%eax              ; Push p1_gc parameter
-	call	is_on_arc         ; Call is_on_arc function
-	addl	$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
+	leal		136(%esp), %eax   ; Address of u
+	pushl		%eax              ; Push u parameter
+	leal		152(%esp), %eax   ; Address of v (adjusted for push)
+	pushl		%eax              ; Push v parameter
+	leal		696(%esp), %eax   ; Address of p1_gc (adjusted for pushes)
+	pushl		%eax              ; Push p1_gc parameter
+	call		is_on_arc         ; Call is_on_arc function
+	addl		$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
 	
 	; Check return value (in EAX)
-	testl	%eax, %eax        ; Test if is_on_arc returned true
+	testl		%eax, %eax        ; Test if is_on_arc returned true
 	jz		L1924             ; Jump if false (p1_gc is not on arc)
 	
 	; p1_gc is on arc, get its parameter
-	leal	136(%esp), %eax   ; Address of u
-	pushl	%eax              ; Push u parameter
-	leal	152(%esp), %eax   ; Address of v (adjusted for push)
-	pushl	%eax              ; Push v parameter
-	leal	696(%esp), %eax   ; Address of p1_gc (adjusted for pushes)
-	pushl	%eax              ; Push p1_gc parameter
-	call	get_arc_parameter ; Call get_arc_parameter function
-	addl	$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
+	leal		136(%esp), %eax   ; Address of u
+	pushl		%eax              ; Push u parameter
+	leal		152(%esp), %eax   ; Address of v (adjusted for push)
+	pushl		%eax              ; Push v parameter
+	leal		696(%esp), %eax   ; Address of p1_gc (adjusted for pushes)
+	pushl		%eax              ; Push p1_gc parameter
+	call		get_arc_parameter ; Call get_arc_parameter function
+	addl		$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
 	
 	; Add parameter to critical_params array
-	movl	504(%esp), %eax   ; Load current count of critical parameters
-	fstpt	760(%esp,%eax,12) ; Store parameter in array (12 bytes per long double)
-	incl	%eax              ; Increment count
-	movl	%eax, 504(%esp)   ; Store updated count
+	movl		504(%esp), %eax   ; Load current count of critical parameters
+	fstpt		760(%esp,%eax,12) ; Store parameter in array (12 bytes per long double)
+	incl		%eax              ; Increment count
+	movl		%eax, 504(%esp)   ; Store updated count
 	
 L1924:
 	; C++ EQUIVALENT: if (alpha > EPS && is_on_arc(u, v, p2_gc)) { critical_params.push_back(get_arc_parameter(u, v, p2_gc)); }
 	; Check if alpha > EPS (avoid adding duplicate point if tangent)
-	fldt	508(%esp)         ; Load alpha
-	fldt	LC5               ; Load EPS
-	fucom	%st(1)            ; Compare alpha with EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	fstp	%st(0)            ; Pop EPS
-	fstp	%st(0)            ; Pop alpha
+	fldt		508(%esp)         ; Load alpha
+	fldt		LC5               ; Load EPS
+	fucom		%st(1)            ; Compare alpha with EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
+	fstp		%st(0)            ; Pop EPS
+	fstp		%st(0)            ; Pop alpha
 	jbe		L1921             ; Jump if alpha <= EPS (tangent case, skip p2)
 	
 	; Call is_on_arc(u, v, p2_gc)
-	leal	136(%esp), %eax   ; Address of u
-	pushl	%eax              ; Push u parameter
-	leal	152(%esp), %eax   ; Address of v (adjusted for push)
-	pushl	%eax              ; Push v parameter
-	leal	732(%esp), %eax   ; Address of p2_gc (adjusted for pushes)
-	pushl	%eax              ; Push p2_gc parameter
-	call	is_on_arc         ; Call is_on_arc function
-	addl	$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
+	leal		136(%esp), %eax   ; Address of u
+	pushl		%eax              ; Push u parameter
+	leal		152(%esp), %eax   ; Address of v (adjusted for push)
+	pushl		%eax              ; Push v parameter
+	leal		732(%esp), %eax   ; Address of p2_gc (adjusted for pushes)
+	pushl		%eax              ; Push p2_gc parameter
+	call		is_on_arc         ; Call is_on_arc function
+	addl		$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
 	
 	; Check return value (in EAX)
-	testl	%eax, %eax        ; Test if is_on_arc returned true
+	testl		%eax, %eax        ; Test if is_on_arc returned true
 	jz		L1921             ; Jump if false (p2_gc is not on arc)
 	
 	; p2_gc is on arc, get its parameter
-	leal	136(%esp), %eax   ; Address of u
-	pushl	%eax              ; Push u parameter
-	leal	152(%esp), %eax   ; Address of v (adjusted for push)
-	pushl	%eax              ; Push v parameter
-	leal	732(%esp), %eax   ; Address of p2_gc (adjusted for pushes)
-	pushl	%eax              ; Push p2_gc parameter
-	call	get_arc_parameter ; Call get_arc_parameter function
-	addl	$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
+	leal		136(%esp), %eax   ; Address of u
+	pushl		%eax              ; Push u parameter
+	leal		152(%esp), %eax   ; Address of v (adjusted for push)
+	pushl		%eax              ; Push v parameter
+	leal		732(%esp), %eax   ; Address of p2_gc (adjusted for pushes)
+	pushl		%eax              ; Push p2_gc parameter
+	call		get_arc_parameter ; Call get_arc_parameter function
+	addl		$12, %esp         ; Clean up stack (3 parameters * 4 bytes)
 	
 	; Add parameter to critical_params array
-	movl	504(%esp), %eax   ; Load current count of critical parameters
-	fstpt	760(%esp,%eax,12) ; Store parameter in array (12 bytes per long double)
-	incl	%eax              ; Increment count
-	movl	%eax, 504(%esp)   ; Store updated count
+	movl		504(%esp), %eax   ; Load current count of critical parameters
+	fstpt		760(%esp,%eax,12) ; Store parameter in array (12 bytes per long double)
+	incl		%eax              ; Increment count
+	movl		%eax, 504(%esp)   ; Store updated count
 	jmp		L1921             ; Jump to next step
 	
 L1913:
 	; No intersection between great circle and small circle boundary
-	fstp	%st(0)            ; Pop r_ang + EPS
-	fstp	%st(0)            ; Pop d_k_to_plane_ang
+	fstp		%st(0)            ; Pop r_ang + EPS
+	fstp		%st(0)            ; Pop d_k_to_plane_ang
 	
 L1920:
 	; C++ EQUIVALENT: Check midpoint case - arc is either entirely inside or entirely outside
@@ -1959,210 +1959,210 @@ L1921:
 	
 	; C++ EQUIVALENT: Vector in great circle plane orthogonal to k_proj_norm
 	; Point ortho_k_proj_norm = normalize(cross(gc_normal, k_proj_norm));
-	leal	544(%esp), %ecx   ; Load address for cross product result
-	movl	%ecx, (%esp)      ; Push cross product address
-	leal	288(%esp), %eax   ; Load gc_normal address
-	movl	%eax, 4(%esp)     ; Push gc_normal address
-	leal	448(%esp), %ebx   ; Load k_proj_norm address
-	movl	%ebx, 8(%esp)     ; Push k_proj_norm address
-	call	__Z5crossRK5PointS1_ ; Call cross(gc_normal, k_proj_norm)
+	leal		544(%esp), %ecx   ; Load address for cross product result
+	movl		%ecx, (%esp)      ; Push cross product address
+	leal		288(%esp), %eax   ; Load gc_normal address
+	movl		%eax, 4(%esp)     ; Push gc_normal address
+	leal		448(%esp), %ebx   ; Load k_proj_norm address
+	movl		%ebx, 8(%esp)     ; Push k_proj_norm address
+	call		__Z5crossRK5PointS1_ ; Call cross(gc_normal, k_proj_norm)
 	
-	leal	592(%esp), %ecx   ; Load address for normalized ortho_k_proj_norm
-	movl	%ecx, (%esp)      ; Push result address
-	leal	544(%esp), %eax   ; Load cross product address
-	movl	%eax, 4(%esp)     ; Push cross product address
-	call	__Z9normalizeRK5Point ; Call normalize(cross_product)
+	leal		592(%esp), %ecx   ; Load address for normalized ortho_k_proj_norm
+	movl		%ecx, (%esp)      ; Push result address
+	leal		544(%esp), %eax   ; Load cross product address
+	movl		%eax, 4(%esp)     ; Push cross product address
+	call		__Z9normalizeRK5Point ; Call normalize(cross_product)
 	
 	; C++ EQUIVALENT: Calculate cos(alpha) and sin(alpha) for intersection points
-	fldt	508(%esp)         ; Load alpha
-	fsincos                   ; Calculate both sin and cos (cos on top, sin below)
-	fstpt	640(%esp)         ; Store cos(alpha)
-	fstpt	652(%esp)         ; Store sin(alpha)
+	fldt		508(%esp)         ; Load alpha
+	fsincos                   	  ; Calculate both sin and cos (cos on top, sin below)
+	fstpt		640(%esp)         ; Store cos(alpha)
+	fstpt		652(%esp)         ; Store sin(alpha)
 	
 	; C++ EQUIVALENT: Point p1_norm_gc = k_proj_norm * cos(alpha) + ortho_k_proj_norm * sin(alpha);
 	; Calculate k_proj_norm * cos(alpha)
-	leal	664(%esp), %ecx   ; Load address for temp result 1
-	movl	%ecx, (%esp)      ; Push result address
-	leal	448(%esp), %eax   ; Load k_proj_norm address
-	movl	%eax, 4(%esp)     ; Push k_proj_norm address
-	fldt	640(%esp)         ; Load cos(alpha)
-	fstpt	8(%esp)           ; Push cos(alpha) as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(k_proj_norm, cos(alpha))
+	leal		664(%esp), %ecx   ; Load address for temp result 1
+	movl		%ecx, (%esp)      ; Push result address
+	leal		448(%esp), %eax   ; Load k_proj_norm address
+	movl		%eax, 4(%esp)     ; Push k_proj_norm address
+	fldt		640(%esp)         ; Load cos(alpha)
+	fstpt		8(%esp)           ; Push cos(alpha) as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(k_proj_norm, cos(alpha))
 	
 	; Calculate ortho_k_proj_norm * sin(alpha)
-	leal	712(%esp), %ecx   ; Load address for temp result 2
-	movl	%ecx, (%esp)      ; Push result address
-	leal	592(%esp), %eax   ; Load ortho_k_proj_norm address
-	movl	%eax, 4(%esp)     ; Push ortho_k_proj_norm address
-	fldt	652(%esp)         ; Load sin(alpha)
-	fstpt	8(%esp)           ; Push sin(alpha) as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(ortho_k_proj_norm, sin(alpha))
+	leal		712(%esp), %ecx   ; Load address for temp result 2
+	movl		%ecx, (%esp)      ; Push result address
+	leal		592(%esp), %eax   ; Load ortho_k_proj_norm address
+	movl		%eax, 4(%esp)     ; Push ortho_k_proj_norm address
+	fldt		652(%esp)         ; Load sin(alpha)
+	fstpt		8(%esp)           ; Push sin(alpha) as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(ortho_k_proj_norm, sin(alpha))
 	
 	; Add the two results: p1_norm_gc = temp1 + temp2
-	leal	760(%esp), %ecx   ; Load address for p1_norm_gc
-	movl	%ecx, (%esp)      ; Push result address
-	leal	664(%esp), %eax   ; Load temp1 address
-	movl	%eax, 4(%esp)     ; Push temp1 address
-	leal	712(%esp), %ebx   ; Load temp2 address
-	movl	%ebx, 8(%esp)     ; Push temp2 address
-	call	__ZplRK5PointS1_  ; Call operator+(temp1, temp2)
+	leal		760(%esp), %ecx   ; Load address for p1_norm_gc
+	movl		%ecx, (%esp)      ; Push result address
+	leal		664(%esp), %eax   ; Load temp1 address
+	movl		%eax, 4(%esp)     ; Push temp1 address
+	leal		712(%esp), %ebx   ; Load temp2 address
+	movl		%ebx, 8(%esp)     ; Push temp2 address
+	call		__ZplRK5PointS1_  ; Call operator+(temp1, temp2)
 	
 	; C++ EQUIVALENT: Point p2_norm_gc = k_proj_norm * cos(alpha) - ortho_k_proj_norm * sin(alpha);
 	; Subtract the two results: p2_norm_gc = temp1 - temp2
-	leal	808(%esp), %ecx   ; Load address for p2_norm_gc
-	movl	%ecx, (%esp)      ; Push result address
-	leal	664(%esp), %eax   ; Load temp1 address (k_proj_norm * cos(alpha))
-	movl	%eax, 4(%esp)     ; Push temp1 address
-	leal	712(%esp), %ebx   ; Load temp2 address (ortho_k_proj_norm * sin(alpha))
-	movl	%ebx, 8(%esp)     ; Push temp2 address
-	call	__ZmiRK5PointS1_  ; Call operator-(temp1, temp2)
+	leal		808(%esp), %ecx   ; Load address for p2_norm_gc
+	movl		%ecx, (%esp)      ; Push result address
+	leal		664(%esp), %eax   ; Load temp1 address (k_proj_norm * cos(alpha))
+	movl		%eax, 4(%esp)     ; Push temp1 address
+	leal		712(%esp), %ebx   ; Load temp2 address (ortho_k_proj_norm * sin(alpha))
+	movl		%ebx, 8(%esp)     ; Push temp2 address
+	call		__ZmiRK5PointS1_  ; Call operator-(temp1, temp2)
 	
 	; C++ EQUIVALENT: Point p1_gc = {p1_norm_gc.x * R_EARTH, p1_norm_gc.y * R_EARTH, p1_norm_gc.z * R_EARTH};
 	; Scale p1_norm_gc by R_EARTH
-	leal	856(%esp), %ecx   ; Load address for p1_gc
-	movl	%ecx, (%esp)      ; Push result address
-	leal	760(%esp), %eax   ; Load p1_norm_gc address
-	movl	%eax, 4(%esp)     ; Push p1_norm_gc address
-	fldt	LC3               ; Load R_EARTH (6370.0)
-	fstpt	8(%esp)           ; Push R_EARTH as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(p1_norm_gc, R_EARTH)
+	leal		856(%esp), %ecx   ; Load address for p1_gc
+	movl		%ecx, (%esp)      ; Push result address
+	leal		760(%esp), %eax   ; Load p1_norm_gc address
+	movl		%eax, 4(%esp)     ; Push p1_norm_gc address
+	fldt		LC3               ; Load R_EARTH (6370.0)
+	fstpt		8(%esp)           ; Push R_EARTH as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(p1_norm_gc, R_EARTH)
 	
 	; C++ EQUIVALENT: Point p2_gc = {p2_norm_gc.x * R_EARTH, p2_norm_gc.y * R_EARTH, p2_norm_gc.z * R_EARTH};
 	; Scale p2_norm_gc by R_EARTH
-	leal	904(%esp), %ecx   ; Load address for p2_gc
-	movl	%ecx, (%esp)      ; Push result address
-	leal	808(%esp), %eax   ; Load p2_norm_gc address
-	movl	%eax, 4(%esp)     ; Push p2_norm_gc address
-	fldt	LC3               ; Load R_EARTH (6370.0)
-	fstpt	8(%esp)           ; Push R_EARTH as parameter
-	call	__ZmlRK5Pointe    ; Call operator*(p2_norm_gc, R_EARTH)
+	leal		904(%esp), %ecx   ; Load address for p2_gc
+	movl		%ecx, (%esp)      ; Push result address
+	leal		808(%esp), %eax   ; Load p2_norm_gc address
+	movl		%eax, 4(%esp)     ; Push p2_norm_gc address
+	fldt		LC3               ; Load R_EARTH (6370.0)
+	fstpt		8(%esp)           ; Push R_EARTH as parameter
+	call		__ZmlRK5Pointe    ; Call operator*(p2_norm_gc, R_EARTH)
 	
 	; C++ EQUIVALENT: if (is_on_arc(u, v, p1_gc)) {
 	; Check if p1_gc lies on the arc U-V
-	movl	532(%esp), %eax   ; Load u address
-	movl	536(%esp), %ebx   ; Load v address
-	leal	856(%esp), %ecx   ; Load p1_gc address
-	movl	%eax, (%esp)      ; Push u address
-	movl	%ebx, 4(%esp)     ; Push v address
-	movl	%ecx, 8(%esp)     ; Push p1_gc address
-	call	__Z9is_on_arcRK5PointS1_S1_ ; Call is_on_arc(u, v, p1_gc)
-	testb	%al, %al          ; Test if p1_gc is on arc
+	movl		532(%esp), %eax   ; Load u address
+	movl		536(%esp), %ebx   ; Load v address
+	leal		856(%esp), %ecx   ; Load p1_gc address
+	movl		%eax, (%esp)      ; Push u address
+	movl		%ebx, 4(%esp)     ; Push v address
+	movl		%ecx, 8(%esp)     ; Push p1_gc address
+	call		__Z9is_on_arcRK5PointS1_S1_ ; Call is_on_arc(u, v, p1_gc)
+	testb		%al, %al          ; Test if p1_gc is on arc
 	je		L1925             ; Jump if p1_gc is NOT on arc
 	
 	; C++ EQUIVALENT: critical_params.push_back(get_arc_parameter(u, v, p1_gc));
 	; p1_gc is on arc, get its parameter and add to critical_params
-	movl	532(%esp), %eax   ; Load u address
-	movl	536(%esp), %ebx   ; Load v address
-	leal	856(%esp), %ecx   ; Load p1_gc address
-	movl	%eax, (%esp)      ; Push u address
-	movl	%ebx, 4(%esp)     ; Push v address
-	movl	%ecx, 8(%esp)     ; Push p1_gc address
-	call	__Z17get_arc_parameterRK5PointS1_S1_ ; Call get_arc_parameter(u, v, p1_gc)
+	movl		532(%esp), %eax   ; Load u address
+	movl		536(%esp), %ebx   ; Load v address
+	leal		856(%esp), %ecx   ; Load p1_gc address
+	movl		%eax, (%esp)      ; Push u address
+	movl		%ebx, 4(%esp)     ; Push v address
+	movl		%ecx, 8(%esp)     ; Push p1_gc address
+	call		__Z17get_arc_parameterRK5PointS1_S1_ ; Call get_arc_parameter(u, v, p1_gc)
 	
 	; Store the parameter in critical_params array (simplified implementation)
-	movl	504(%esp), %eax   ; Load current count of critical parameters
-	fstpt	480(%esp,%eax,12) ; Store parameter at offset (count * 12)
-	incl	%eax              ; Increment count
-	movl	%eax, 504(%esp)   ; Store new count
+	movl		504(%esp), %eax   ; Load current count of critical parameters
+	fstpt		480(%esp,%eax,12) ; Store parameter at offset (count * 12)
+	incl		%eax              ; Increment count
+	movl		%eax, 504(%esp)   ; Store new count
 	
 L1925:
 	; C++ EQUIVALENT: if (alpha > EPS && is_on_arc(u, v, p2_gc)) {
 	; Check if alpha > EPS (avoid adding duplicate point if tangent)
-	fldt	508(%esp)         ; Load alpha
-	fldt	LC5               ; Load EPS
-	fucom	%st(1)            ; Compare alpha with EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	jbe	L1926             ; Jump if alpha <= EPS (tangent case)
+	fldt		508(%esp)         ; Load alpha
+	fldt		LC5               ; Load EPS
+	fucom		%st(1)            ; Compare alpha with EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
+	jbe		L1926             ; Jump if alpha <= EPS (tangent case)
 	
-	fstp	%st(0)            ; Pop EPS
-	fstp	%st(0)            ; Pop alpha
+	fstp		%st(0)            ; Pop EPS
+	fstp		%st(0)            ; Pop alpha
 	
 	; Check if p2_gc lies on the arc U-V
-	movl	532(%esp), %eax   ; Load u address
-	movl	536(%esp), %ebx   ; Load v address
-	leal	904(%esp), %ecx   ; Load p2_gc address
-	movl	%eax, (%esp)      ; Push u address
-	movl	%ebx, 4(%esp)     ; Push v address
-	movl	%ecx, 8(%esp)     ; Push p2_gc address
-	call	__Z9is_on_arcRK5PointS1_S1_ ; Call is_on_arc(u, v, p2_gc)
-	testb	%al, %al          ; Test if p2_gc is on arc
-	je	L1926             ; Jump if p2_gc is NOT on arc
+	movl		532(%esp), %eax   ; Load u address
+	movl		536(%esp), %ebx   ; Load v address
+	leal		904(%esp), %ecx   ; Load p2_gc address
+	movl		%eax, (%esp)      ; Push u address
+	movl		%ebx, 4(%esp)     ; Push v address
+	movl		%ecx, 8(%esp)     ; Push p2_gc address
+	call		__Z9is_on_arcRK5PointS1_S1_ ; Call is_on_arc(u, v, p2_gc)
+	testb		%al, %al          ; Test if p2_gc is on arc
+	je		L1926             ; Jump if p2_gc is NOT on arc
 	
 	; C++ EQUIVALENT: critical_params.push_back(get_arc_parameter(u, v, p2_gc));
 	; p2_gc is on arc, get its parameter and add to critical_params
-	movl	532(%esp), %eax   ; Load u address
-	movl	536(%esp), %ebx   ; Load v address
-	leal	904(%esp), %ecx   ; Load p2_gc address
-	movl	%eax, (%esp)      ; Push u address
-	movl	%ebx, 4(%esp)     ; Push v address
-	movl	%ecx, 8(%esp)     ; Push p2_gc address
-	call	__Z17get_arc_parameterRK5PointS1_S1_ ; Call get_arc_parameter(u, v, p2_gc)
+	movl		532(%esp), %eax   ; Load u address
+	movl		536(%esp), %ebx   ; Load v address
+	leal		904(%esp), %ecx   ; Load p2_gc address
+	movl		%eax, (%esp)      ; Push u address
+	movl		%ebx, 4(%esp)     ; Push v address
+	movl		%ecx, 8(%esp)     ; Push p2_gc address
+	call		__Z17get_arc_parameterRK5PointS1_S1_ ; Call get_arc_parameter(u, v, p2_gc)
 	
 	; Store the parameter in critical_params array
-	movl	504(%esp), %eax   ; Load current count of critical parameters
-	fstpt	480(%esp,%eax,12) ; Store parameter at offset (count * 12)
-	incl	%eax              ; Increment count
-	movl	%eax, 504(%esp)   ; Store new count
+	movl		504(%esp), %eax   ; Load current count of critical parameters
+	fstpt		480(%esp,%eax,12) ; Store parameter at offset (count * 12)
+	incl		%eax              ; Increment count
+	movl		%eax, 504(%esp)   ; Store new count
 	jmp		L1927             ; Jump to interval testing
 	
 L1926:
 	; Clean up stack if alpha <= EPS
-	fstp	%st(0)            ; Pop EPS
-	fstp	%st(0)            ; Pop alpha
+	fstp		%st(0)            ; Pop EPS
+	fstp		%st(0)            ; Pop alpha
 	jmp		L1927             ; Jump to interval testing
 	
 L1927:
 	; C++ EQUIVALENT: Test intervals between critical points for coverage
 	; Sort critical_params (simplified bubble sort for assembly)
-	movl	504(%esp), %ecx   ; Load count of critical parameters
-	cmpl	$2, %ecx          ; Check if count > 1
+	movl		504(%esp), %ecx   ; Load count of critical parameters
+	cmpl		$2, %ecx          ; Check if count > 1
 	jle		L1930             ; Skip sorting if count <= 1
 	
 	; Simple bubble sort implementation for critical_params
-	movl	$0, %edi          ; Initialize i = 0
+	movl		$0, %edi          ; Initialize i = 0
 L1928:
-	movl	%edi, %esi        ; Initialize j = i
-	incl	%esi              ; j = i + 1
+	movl		%edi, %esi        ; Initialize j = i
+	incl		%esi              ; j = i + 1
 L1929:
-	cmpl	%ecx, %esi        ; Compare j with count
+	cmpl		%ecx, %esi        ; Compare j with count
 	jge		L1932             ; Jump if j >= count (inner loop done)
 	
 	; Compare critical_params[i] with critical_params[j]
-	fldt	480(%esp,%edi,12) ; Load critical_params[i]
-	fldt	480(%esp,%esi,12) ; Load critical_params[j]
-	fucom	%st(1)            ; Compare critical_params[i] with critical_params[j]
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		480(%esp,%edi,12) ; Load critical_params[i]
+	fldt		480(%esp,%esi,12) ; Load critical_params[j]
+	fucom		%st(1)            ; Compare critical_params[i] with critical_params[j]
+	fnstsw		%ax               ; Store FPU status
+	sahf                     	  ; Load flags
 	jbe		L1931             ; Jump if critical_params[i] <= critical_params[j]
 	
 	; Swap critical_params[i] and critical_params[j]
-	fstpt	952(%esp)         ; Store critical_params[j] in temp
-	fstpt	480(%esp,%esi,12) ; Store critical_params[i] in position j
-	fldt	952(%esp)         ; Load temp
-	fstpt	480(%esp,%edi,12) ; Store temp in position i
+	fstpt		952(%esp)         ; Store critical_params[j] in temp
+	fstpt		480(%esp,%esi,12) ; Store critical_params[i] in position j
+	fldt		952(%esp)         ; Load temp
+	fstpt		480(%esp,%edi,12) ; Store temp in position i
 	jmp		L1933             ; Jump to next iteration
 	
 L1931:
 	; No swap needed, clean up FPU stack
-	fstp	%st(0)            ; Pop critical_params[j]
-	fstp	%st(0)            ; Pop critical_params[i]
+	fstp		%st(0)            ; Pop critical_params[j]
+	fstp		%st(0)            ; Pop critical_params[i]
 	
 L1933:
-	incl	%esi              ; j++
+	incl		%esi              ; j++
 	jmp		L1929             ; Continue inner loop
 	
 L1932:
-	incl	%edi              ; i++
-	cmpl	%ecx, %edi        ; Compare i with count-1
+	incl		%edi              ; i++
+	cmpl		%ecx, %edi        ; Compare i with count-1
 	jl		L1928             ; Continue outer loop if i < count-1
 	
 L1930:
 	; Now test intervals between critical points
 	; C++ EQUIVALENT: for(size_t i = 0; i + 1 < critical_params.size(); ++i)
-	movl	$0, %edi          ; Initialize i = 0
-	movl	504(%esp), %ecx   ; Load count of critical parameters
-	decl	%ecx              ; count - 1
+	movl		$0, %edi          ; Initialize i = 0
+	movl		504(%esp), %ecx   ; Load count of critical parameters
+	decl		%ecx              ; count - 1
 	
 L1934:
 	cmpl	%ecx, %edi        ; Compare i with count-1
@@ -2170,89 +2170,89 @@ L1934:
 	
 	; C++ EQUIVALENT: long double t_start = critical_params[i];
 	; C++ EQUIVALENT: long double t_end = critical_params[i+1];
-	fldt	480(%esp,%edi,12) ; Load critical_params[i] (t_start)
-	movl	%edi, %esi        ; Copy i
-	incl	%esi              ; i + 1
-	fldt	480(%esp,%esi,12) ; Load critical_params[i+1] (t_end)
+	fldt		480(%esp,%edi,12) ; Load critical_params[i] (t_start)
+	movl		%edi, %esi        ; Copy i
+	incl		%esi              ; i + 1
+	fldt		480(%esp,%esi,12) ; Load critical_params[i+1] (t_end)
 	
 	; C++ EQUIVALENT: if (t_end - t_start < EPS) continue;
 	fld		%st(0)            ; Duplicate t_end
-	fsub	%st(2), %st       ; Calculate t_end - t_start
-	fldt	LC5               ; Load EPS
-	fucom	%st(1)            ; Compare t_end - t_start with EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fsub		%st(2), %st       ; Calculate t_end - t_start
+	fldt		LC5               ; Load EPS
+	fucom		%st(1)            ; Compare t_end - t_start with EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	ja		L1935             ; Jump if t_end - t_start > EPS (valid interval)
 	
 	; Interval too small, skip it
-	fstp	%st(0)            ; Pop EPS
-	fstp	%st(0)            ; Pop t_end - t_start
-	fstp	%st(0)            ; Pop t_end
-	fstp	%st(0)            ; Pop t_start
+	fstp		%st(0)            ; Pop EPS
+	fstp		%st(0)            ; Pop t_end - t_start
+	fstp		%st(0)            ; Pop t_end
+	fstp		%st(0)            ; Pop t_start
 	jmp		L1936             ; Jump to next iteration
 	
 L1935:
 	; Valid interval, test coverage
-	fstp	%st(0)            ; Pop EPS
-	fstp	%st(0)            ; Pop t_end - t_start
+	fstp		%st(0)            ; Pop EPS
+	fstp		%st(0)            ; Pop t_end - t_start
 	
 	; C++ EQUIVALENT: long double t_mid = (t_start + t_end) / 2.0;
 	fld		%st(1)            ; Duplicate t_start
-	fadd	%st(1), %st       ; Calculate t_start + t_end
-	fldt	LC8               ; Load 0.5
-	fmulp	%st, %st(1)      ; Calculate (t_start + t_end) / 2.0
-	fstpt	964(%esp)         ; Store t_mid
+	fadd		%st(1), %st       ; Calculate t_start + t_end
+	fldt		LC8               ; Load 0.5
+	fmulp		%st, %st(1)       ; Calculate (t_start + t_end) / 2.0
+	fstpt		964(%esp)         ; Store t_mid
 	
 	; C++ EQUIVALENT: Point p_mid = point_at_angle_on_great_circle(u, v, t_mid * angle_uv);
-	leal	976(%esp), %eax   ; Load address for p_mid
-	movl	%eax, (%esp)      ; Push p_mid address
-	movl	532(%esp), %eax   ; Load u address
-	movl	%eax, 4(%esp)     ; Push u address
-	movl	536(%esp), %ebx   ; Load v address
-	movl	%ebx, 8(%esp)     ; Push v address
-	fldt	964(%esp)         ; Load t_mid
-	fldt	192(%esp)         ; Load angle_uv
-	fmulp	%st, %st(1)      ; Calculate t_mid * angle_uv
-	fstpt	12(%esp)          ; Push t_mid * angle_uv as parameter
-	call	__Z30point_at_angle_on_great_circleRK5PointS1_e ; Call point_at_angle_on_great_circle
+	leal		976(%esp), %eax   ; Load address for p_mid
+	movl		%eax, (%esp)      ; Push p_mid address
+	movl		532(%esp), %eax   ; Load u address
+	movl		%eax, 4(%esp)     ; Push u address
+	movl		536(%esp), %ebx   ; Load v address
+	movl		%ebx, 8(%esp)     ; Push v address
+	fldt		964(%esp)         ; Load t_mid
+	fldt		192(%esp)         ; Load angle_uv
+	fmulp		%st, %st(1)      ; Calculate t_mid * angle_uv
+	fstpt		12(%esp)          ; Push t_mid * angle_uv as parameter
+	call		__Z30point_at_angle_on_great_circleRK5PointS1_e ; Call point_at_angle_on_great_circle
 	
 	; C++ EQUIVALENT: if (dist_xyz(p_mid, k_center) <= R_sphere + EPS) {
-	leal	976(%esp), %eax   ; Load p_mid address
-	movl	540(%esp), %ebx   ; Load k_center address
-	movl	%eax, (%esp)      ; Push p_mid address
-	movl	%ebx, 4(%esp)     ; Push k_center address
-	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(p_mid, k_center)
+	leal		976(%esp), %eax   ; Load p_mid address
+	movl		540(%esp), %ebx   ; Load k_center address
+	movl		%eax, (%esp)      ; Push p_mid address
+	movl		%ebx, 4(%esp)     ; Push k_center address
+	call		__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(p_mid, k_center)
 	
-	fldt	544(%esp)         ; Load R_sphere
-	fldt	LC5               ; Load EPS
-	faddp	%st, %st(1)      ; Calculate R_sphere + EPS
-	fucom	%st(1)            ; Compare distance with R_sphere + EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		544(%esp)         ; Load R_sphere
+	fldt		LC5               ; Load EPS
+	faddp		%st, %st(1)       ; Calculate R_sphere + EPS
+	fucom		%st(1)            ; Compare distance with R_sphere + EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	jae		L1937             ; Jump if distance <= R_sphere + EPS (covered)
 	
 	; Interval not covered, skip it
-	fstp	%st(0)            ; Pop distance
-	fstp	%st(0)            ; Pop R_sphere + EPS
-	fstp	%st(0)            ; Pop t_end
-	fstp	%st(0)            ; Pop t_start
+	fstp		%st(0)            ; Pop distance
+	fstp		%st(0)            ; Pop R_sphere + EPS
+	fstp		%st(0)            ; Pop t_end
+	fstp		%st(0)            ; Pop t_start
 	jmp		L1936             ; Jump to next iteration
 	
 L1937:
 	; C++ EQUIVALENT: intervals.push_back({t_start, t_end});
 	; Interval is covered, add it to result vector
-	fstp	%st(0)            ; Pop distance
-	fstp	%st(0)            ; Pop R_sphere + EPS
+	fstp		%st(0)            ; Pop distance
+	fstp		%st(0)            ; Pop R_sphere + EPS
 	
 	; Add interval [t_start, t_end] to result vector
 	; Create interval struct with t_start and t_end values
 	; The interval represents a covered portion of the arc
 	; This covered interval will be added to the result vector
-	fstp	%st(0)            ; Pop t_end
-	fstp	%st(0)            ; Pop t_start
+	fstp		%st(0)            ; Pop t_end
+	fstp		%st(0)            ; Pop t_start
 	
 L1936:
-	incl	%edi              ; i++
+	incl		%edi              ; i++
 	jmp		L1934             ; Continue loop
 	
 L1940:
@@ -2270,13 +2270,13 @@ L1940:
 	; This step represents the final return of the constructed interval list
 	
 	; Function exit: return the result vector containing covered intervals
-	movl	528(%esp), %eax   ; Load result vector address (return value)
-	addl	$512, %esp        ; Deallocate local stack space (matches initial allocation)
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	popl	%edi              ; Restore EDI register
-	popl	%ebp              ; Restore EBP register
-	ret                       ; Return from function with interval list
+	movl		528(%esp), %eax   ; Load result vector address (return value)
+	addl		$512, %esp        ; Deallocate local stack space (matches initial allocation)
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	popl		%edi              ; Restore EDI register
+	popl		%ebp              ; Restore EBP register
+	ret                       	  ; Return from function with interval list
 	
 	; ========================================================================
 	; END OF STEP 4: Return list of covered intervals
@@ -2285,29 +2285,29 @@ L1940:
 L1903:
 	; Handle case where U and V are nearly identical
 	; C++ EQUIVALENT: if (dist_xyz(u, k_center) <= R_sphere + EPS) return {{0.0, 1.0}};
-	movl	532(%esp), %eax   ; Load u address
-	movl	540(%esp), %ebx   ; Load k_center address
-	movl	%eax, (%esp)      ; Push u address
-	movl	%ebx, 4(%esp)     ; Push k_center address
-	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, k_center)
+	movl		532(%esp), %eax   ; Load u address
+	movl		540(%esp), %ebx   ; Load k_center address
+	movl		%eax, (%esp)      ; Push u address
+	movl		%ebx, 4(%esp)     ; Push k_center address
+	call		__Z8dist_xyzRK5PointS1_ ; Call dist_xyz(u, k_center)
 	
-	fldt	544(%esp)         ; Load R_sphere
-	fldt	LC5               ; Load EPS
-	faddp	%st, %st(1)      ; Calculate R_sphere + EPS
-	fucom	%st(1)            ; Compare distance with R_sphere + EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
+	fldt		544(%esp)         ; Load R_sphere
+	fldt		LC5               ; Load EPS
+	faddp		%st, %st(1)       ; Calculate R_sphere + EPS
+	fucom		%st(1)            ; Compare distance with R_sphere + EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
 	jae		L1905             ; Jump if distance <= R_sphere + EPS
 	
 	; Point is outside R-sphere, return empty vector
-	fstp	%st(0)            ; Pop distance
-	fstp	%st(0)            ; Pop R_sphere + EPS
+	fstp		%st(0)            ; Pop distance
+	fstp		%st(0)            ; Pop R_sphere + EPS
 	jmp		L1906             ; Jump to return empty vector
 	
 L1905:
 	; Point is inside R-sphere, return {{0.0, 1.0}}
-	fstp	%st(0)            ; Pop distance
-	fstp	%st(0)            ; Pop R_sphere + EPS
+	fstp		%st(0)            ; Pop distance
+	fstp		%st(0)            ; Pop R_sphere + EPS
 	; Add interval [0.0, 1.0] to result vector
 	; Create interval struct and add to result vector
 	; This would add the complete interval [0.0, 1.0] to the result
@@ -2317,111 +2317,111 @@ L1906:
 	; Return empty vector (no coverage)
 	; C++ EQUIVALENT: return vector<pair<long double, long double>>{}; // empty vector
 	; Ensure result vector is properly initialized as empty
-	movl	528(%esp), %eax   ; Load result vector address
-	movl	$0, (%eax)        ; Set vector.begin() = nullptr
-	movl	$0, 4(%eax)       ; Set vector.end() = nullptr  
-	movl	$0, 8(%eax)       ; Set vector.capacity_end() = nullptr
+	movl		528(%esp), %eax   ; Load result vector address
+	movl		$0, (%eax)        ; Set vector.begin() = nullptr
+	movl		$0, 4(%eax)       ; Set vector.end() = nullptr  
+	movl		$0, 8(%eax)       ; Set vector.capacity_end() = nullptr
 	jmp		L1940             ; Jump to STEP 4 (return function)
 
 ; C++ EQUIVALENT: vector<pair<long double, long double>> merge_intervals(...)
 ; Merges overlapping intervals to create consolidated coverage map
 ; Uses standard interval merging algorithm with tolerance handling
 
-	.align 2
-	.p2align 4,,15
-	.globl	__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE
-	.def	__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE;	.scl	2;	.type	32;	.endef
+	.align		2
+	.p2align 	4,,15
+	.globl		__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE
+	.def		__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE;	.scl	2;	.type	32;	.endef
 
 __Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE:
-	pushl	%ebp              ; Save EBP register
-	pushl	%edi              ; Save EDI register
-	pushl	%esi              ; Save ESI register
-	pushl	%ebx              ; Save EBX register
-	subl	$64, %esp         ; Allocate local stack space
+	pushl		%ebp              ; Save EBP register
+	pushl		%edi              ; Save EDI register
+	pushl		%esi              ; Save ESI register
+	pushl		%ebx              ; Save EBX register
+	subl		$64, %esp         ; Allocate local stack space
 	
 	; Load function parameters
-	movl	84(%esp), %edi    ; Load address of result vector
-	movl	88(%esp), %esi    ; Load address of input intervals vector
+	movl		84(%esp), %edi    ; Load address of result vector
+	movl		88(%esp), %esi    ; Load address of input intervals vector
 	
 	; C++ EQUIVALENT: if (intervals.empty()) return vector<pair<long double, long double>>{};
-	movl	(%esi), %eax      ; Load intervals.begin()
-	movl	4(%esi), %ebx     ; Load intervals.end()
-	cmpl	%eax, %ebx        ; Compare begin vs end
-	je	L1950             ; Jump if empty (return empty vector)
+	movl		(%esi), %eax      ; Load intervals.begin()
+	movl		4(%esi), %ebx     ; Load intervals.end()
+	cmpl		%eax, %ebx        ; Compare begin vs end
+	je		L1950             ; Jump if empty (return empty vector)
 	
 	; Initialize result vector as empty
-	movl	$0, (%edi)        ; Set result.begin() = nullptr
-	movl	$0, 4(%edi)       ; Set result.end() = nullptr
-	movl	$0, 8(%edi)       ; Set result.capacity_end() = nullptr
+	movl		$0, (%edi)        ; Set result.begin() = nullptr
+	movl		$0, 4(%edi)       ; Set result.end() = nullptr
+	movl		$0, 8(%edi)       ; Set result.capacity_end() = nullptr
 	
 	; C++ EQUIVALENT: merged.push_back(intervals[0]);
 	; Add first interval to merged result using existing vector functions
-	movl	%edi, (%esp)      ; Push result vector address
-	movl	%eax, 4(%esp)     ; Push first interval address
-	call	__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_
+	movl		%edi, (%esp)      ; Push result vector address
+	movl		%eax, 4(%esp)     ; Push first interval address
+	call		__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_
 	
 	; C++ EQUIVALENT: for (size_t i = 1; i < intervals.size(); ++i)
-	addl	$24, %eax         ; Move to second interval (24 bytes = sizeof(pair<long double, long double>))
+	addl		$24, %eax         ; Move to second interval (24 bytes = sizeof(pair<long double, long double>))
 	
 L1951:
-	cmpl	%eax, %ebx        ; Compare current vs end
-	je	L1950             ; Jump if done
+	cmpl		%eax, %ebx        ; Compare current vs end
+	je		L1950             ; Jump if done
 	
 	; Get last interval in merged vector
-	movl	(%edi), %ecx      ; Load merged.begin()
-	movl	4(%edi), %edx     ; Load merged.end()
-	subl	$24, %edx         ; Point to last interval
+	movl		(%edi), %ecx      ; Load merged.begin()
+	movl		4(%edi), %edx     ; Load merged.end()
+	subl		$24, %edx         ; Point to last interval
 	
 	; C++ EQUIVALENT: if (intervals[i].first <= merged.back().second + EPS)
-	fldt	(%eax)            ; Load intervals[i].first
-	fldt	12(%edx)          ; Load merged.back().second
-	fldt	LC5               ; Load EPS
-	faddp	%st, %st(1)      ; Calculate merged.back().second + EPS
-	fucom	%st(1)            ; Compare intervals[i].first with merged.back().second + EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	ja	L1952             ; Jump if intervals[i].first > merged.back().second + EPS (no overlap)
+	fldt		(%eax)            ; Load intervals[i].first
+	fldt		12(%edx)          ; Load merged.back().second
+	fldt		LC5               ; Load EPS
+	faddp		%st, %st(1)       ; Calculate merged.back().second + EPS
+	fucom		%st(1)            ; Compare intervals[i].first with merged.back().second + EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                    	  ; Load flags
+	ja		L1952             ; Jump if intervals[i].first > merged.back().second + EPS (no overlap)
 	
 	; Merge intervals: merged.back().second = max(merged.back().second, intervals[i].second)
-	fstp	%st(0)            ; Pop intervals[i].first
-	fldt	12(%eax)          ; Load intervals[i].second
-	fucom	%st(1)            ; Compare intervals[i].second with merged.back().second
-	fnstsw	%cx               ; Store FPU status
-	sahf                      ; Load flags
-	jbe	L1953             ; Jump if intervals[i].second <= merged.back().second
+	fstp		%st(0)            ; Pop intervals[i].first
+	fldt		12(%eax)          ; Load intervals[i].second
+	fucom		%st(1)            ; Compare intervals[i].second with merged.back().second
+	fnstsw		%cx               ; Store FPU status
+	sahf                    	  ; Load flags
+	jbe		L1953             ; Jump if intervals[i].second <= merged.back().second
 	
 	; Update merged.back().second = intervals[i].second
-	fstpt	12(%edx)          ; Store intervals[i].second as new merged.back().second
-	fstp	%st(0)            ; Pop old merged.back().second
-	jmp	L1954             ; Jump to next iteration
+	fstpt		12(%edx)          ; Store intervals[i].second as new merged.back().second
+	fstp		%st(0)            ; Pop old merged.back().second
+	jmp		L1954             ; Jump to next iteration
 	
 L1953:
 	; Keep old merged.back().second
-	fstp	%st(0)            ; Pop intervals[i].second
-	fstp	%st(0)            ; Pop merged.back().second
-	jmp	L1954             ; Jump to next iteration
+	fstp		%st(0)            ; Pop intervals[i].second
+	fstp		%st(0)            ; Pop merged.back().second
+	jmp		L1954             ; Jump to next iteration
 	
 L1952:
 	; No overlap, add new interval using existing vector functions
-	fstp	%st(0)            ; Pop intervals[i].first
-	fstp	%st(0)            ; Pop merged.back().second + EPS
-	movl	%edi, (%esp)      ; Push result vector address
-	movl	%eax, 4(%esp)     ; Push current interval address
-	call	__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_
+	fstp		%st(0)            ; Pop intervals[i].first
+	fstp		%st(0)            ; Pop merged.back().second + EPS
+	movl		%edi, (%esp)      ; Push result vector address
+	movl		%eax, 4(%esp)     ; Push current interval address
+	call		__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_
 	
 L1954:
-	addl	$24, %eax         ; Move to next interval
-	jmp	L1951             ; Continue loop
+	addl		$24, %eax         ; Move to next interval
+	jmp		L1951             ; Continue loop
 	
 L1950:
 	; Function exit: return merged intervals vector
-	movl	84(%esp), %eax    ; Load result vector address (return value)
-	addl	$64, %esp         ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	popl	%edi              ; Restore EDI register
-	popl	%ebp              ; Restore EBP register
-	ret                       ; Return from function
+	movl		84(%esp), %eax    ; Load result vector address (return value)
+	addl		$64, %esp         ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	popl		%edi              ; Restore EDI register
+	popl		%ebp              ; Restore EBP register
+	ret                       	  ; Return from function
 
 ; C++ EQUIVALENT: bool is_arc_safe(const Point& u, const Point& v, ...)
 ; Checks if entire arc is safe by verifying complete coverage
@@ -2430,22 +2430,22 @@ L1950:
 ; 2. Merge overlapping intervals
 ; 3. Check if merged intervals cover [0,1] completely
 
-	.align 2
-	.p2align 4,,15
-	.globl	__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe
-	.def	__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe;	.scl	2;	.type	32;	.endef
+	.align 		2
+	.p2align 	4,,15
+	.globl		__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe
+	.def		__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe;	.scl	2;	.type	32;	.endef
 
 __Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe:
-	pushl	%ebp              ; Save EBP register
-	pushl	%edi              ; Save EDI register
-	pushl	%esi              ; Save ESI register
-	pushl	%ebx              ; Save EBX register
-	subl	$128, %esp        ; Allocate local stack space for intervals vector
+	pushl		%ebp              ; Save EBP register
+	pushl		%edi              ; Save EDI register
+	pushl		%esi              ; Save ESI register
+	pushl		%ebx              ; Save EBX register
+	subl		$128, %esp        ; Allocate local stack space for intervals vector
 	
 	; Load function parameters
-	movl	148(%esp), %edi   ; Load address of u
-	movl	152(%esp), %esi   ; Load address of v
-	movl	156(%esp), %ebx   ; Load address of k_centers vector
+	movl		148(%esp), %edi   ; Load address of u
+	movl		152(%esp), %esi   ; Load address of v
+	movl		156(%esp), %ebx   ; Load address of k_centers vector
 	; R_sphere is loaded from 160(%esp) when needed
 	
 	; ========================================================================
@@ -2454,65 +2454,65 @@ __Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe:
 	
 	; C++ EQUIVALENT: vector<pair<long double, long double>> all_intervals;
 	; Initialize temporary intervals vector
-	leal	32(%esp), %eax    ; Load address for all_intervals vector
-	movl	$0, 32(%esp)      ; Set all_intervals.begin() = nullptr
-	movl	$0, 36(%esp)      ; Set all_intervals.end() = nullptr
-	movl	$0, 40(%esp)      ; Set all_intervals.capacity_end() = nullptr
+	leal		32(%esp), %eax    ; Load address for all_intervals vector
+	movl		$0, 32(%esp)      ; Set all_intervals.begin() = nullptr
+	movl		$0, 36(%esp)      ; Set all_intervals.end() = nullptr
+	movl		$0, 40(%esp)      ; Set all_intervals.capacity_end() = nullptr
 	
 	; C++ EQUIVALENT: for (const auto& k_center : k_centers) {
 	;                     auto intervals = get_covered_intervals(u, v, k_center, R_sphere);
 	;                     all_intervals.insert(all_intervals.end(), intervals.begin(), intervals.end());
 	;                 }
-	movl	(%ebx), %eax      ; Load k_centers.begin()
-	movl	4(%ebx), %ecx     ; Load k_centers.end()
+	movl		(%ebx), %eax      ; Load k_centers.begin()
+	movl		4(%ebx), %ecx     ; Load k_centers.end()
 	
 L2001:
-	cmpl	%eax, %ecx        ; Compare current vs end
-	je	L2002             ; Jump if done with all k_centers
+	cmpl		%eax, %ecx        ; Compare current vs end
+	je		L2002             ; Jump if done with all k_centers
 	
 	; Call get_covered_intervals(u, v, k_center, R_sphere) using existing function
-	leal	64(%esp), %edx    ; Load address for temp intervals vector
-	movl	%edx, (%esp)      ; Push temp vector address
-	movl	%edi, 4(%esp)     ; Push u address
-	movl	%esi, 8(%esp)     ; Push v address
-	movl	%eax, 12(%esp)    ; Push k_center address
-	fldt	160(%esp)         ; Load R_sphere
-	fstpt	16(%esp)          ; Push R_sphere as parameter
-	call	__Z20get_covered_intervalsRK5PointS1_S1_e ; Call existing function
+	leal		64(%esp), %edx    ; Load address for temp intervals vector
+	movl		%edx, (%esp)      ; Push temp vector address
+	movl		%edi, 4(%esp)     ; Push u address
+	movl		%esi, 8(%esp)     ; Push v address
+	movl		%eax, 12(%esp)    ; Push k_center address
+	fldt		160(%esp)         ; Load R_sphere
+	fstpt		16(%esp)          ; Push R_sphere as parameter
+	call		__Z20get_covered_intervalsRK5PointS1_S1_e ; Call existing function
 	
 	; C++ EQUIVALENT: all_intervals.insert(all_intervals.end(), intervals.begin(), intervals.end());
 	; Append temp intervals to all_intervals using existing vector functions
-	movl	64(%esp), %edx    ; Load temp intervals.begin()
-	movl	68(%esp), %ecx    ; Load temp intervals.end()
+	movl		64(%esp), %edx    ; Load temp intervals.begin()
+	movl		68(%esp), %ecx    ; Load temp intervals.end()
 	
 L2003:
-	cmpl	%edx, %ecx        ; Compare current vs end
-	je	L2004             ; Jump if done with temp intervals
+	cmpl		%edx, %ecx        ; Compare current vs end
+	je		L2004             ; Jump if done with temp intervals
 	
 	; Add current interval to all_intervals using existing push_back
-	leal	32(%esp), %ebx    ; Load all_intervals vector address
-	movl	%ebx, (%esp)      ; Push all_intervals vector address
-	movl	%edx, 4(%esp)     ; Push current interval address
-	call	__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_ ; Use existing push_back
+	leal		32(%esp), %ebx    ; Load all_intervals vector address
+	movl		%ebx, (%esp)      ; Push all_intervals vector address
+	movl		%edx, 4(%esp)     ; Push current interval address
+	call		__ZNSt6vectorISt4pairIeeESaIS2_EE9push_backERKS2_ ; Use existing push_back
 	
-	addl	$24, %edx         ; Move to next interval (24 bytes = sizeof(pair<long double, long double>))
-	jmp	L2003             ; Continue copying intervals
+	addl		$24, %edx         ; Move to next interval (24 bytes = sizeof(pair<long double, long double>))
+	jmp		L2003             ; Continue copying intervals
 	
 L2004:
 	; Clean up temp intervals vector if needed
-	movl	64(%esp), %edx    ; Load temp intervals.begin()
-	testl	%edx, %edx        ; Check if allocated
-	je	L2005             ; Skip if not allocated
-	movl	%edx, (%esp)      ; Push temp intervals data
-	call	__ZdlPv           ; Free temp intervals memory
+	movl		64(%esp), %edx    ; Load temp intervals.begin()
+	testl		%edx, %edx        ; Check if allocated
+	je		L2005             ; Skip if not allocated
+	movl		%edx, (%esp)      ; Push temp intervals data
+	call		__ZdlPv           ; Free temp intervals memory
 	
 L2005:
 	; Move to next k_center
-	movl	156(%esp), %ebx   ; Reload k_centers vector address
-	addl	$36, %eax         ; Move to next k_center (sizeof(Point) = 36)
-	movl	(%ebx), %edx      ; Reload k_centers.begin()
-	movl	4(%ebx), %ecx     ; Reload k_centers.end()
-	jmp	L2001             ; Continue loop
+	movl		156(%esp), %ebx   ; Reload k_centers vector address
+	addl		$36, %eax         ; Move to next k_center (sizeof(Point) = 36)
+	movl		(%ebx), %edx      ; Reload k_centers.begin()
+	movl		4(%ebx), %ecx     ; Reload k_centers.end()
+	jmp		L2001             ; Continue loop
 	
 L2002:
 	; ========================================================================
@@ -2525,11 +2525,11 @@ L2002:
 	
 	; C++ EQUIVALENT: auto merged = merge_intervals(all_intervals);
 	; Use existing merge_intervals function to consolidate overlapping intervals
-	leal	96(%esp), %eax    ; Load address for merged vector
-	movl	%eax, (%esp)      ; Push merged vector address
-	leal	32(%esp), %eax    ; Load all_intervals address
-	movl	%eax, 4(%esp)     ; Push all_intervals address
-	call	__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE ; Call existing merge_intervals function
+	leal		96(%esp), %eax    ; Load address for merged vector
+	movl		%eax, (%esp)      ; Push merged vector address
+	leal		32(%esp), %eax    ; Load all_intervals address
+	movl		%eax, 4(%esp)     ; Push all_intervals address
+	call		__Z14merge_intervalsRSt6vectorISt4pairIeeESaIS2_EE ; Call existing merge_intervals function
 	
 	; ========================================================================
 	; END OF STEP 2: Merge overlapping intervals
@@ -2541,48 +2541,48 @@ L2002:
 	
 	; C++ EQUIVALENT: return merged.size() == 1 && merged[0].first <= EPS && merged[0].second >= 1.0 - EPS;
 	; Check if merged intervals completely cover [0,1] with tolerance
-	movl	96(%esp), %eax    ; Load merged.begin()
-	movl	100(%esp), %ebx   ; Load merged.end()
-	subl	%eax, %ebx        ; Calculate size in bytes
-	cmpl	$24, %ebx         ; Check if size == 1 interval (24 bytes = 2 * 12 bytes for long double pair)
-	jne	L2006             ; Jump if not exactly one interval (arc not safe)
+	movl		96(%esp), %eax    ; Load merged.begin()
+	movl		100(%esp), %ebx   ; Load merged.end()
+	subl		%eax, %ebx        ; Calculate size in bytes
+	cmpl		$24, %ebx         ; Check if size == 1 interval (24 bytes = 2 * 12 bytes for long double pair)
+	jne		L2006             ; Jump if not exactly one interval (arc not safe)
 	
 	; Check if single interval covers [0,1] with EPS tolerance
 	; Check: merged[0].first <= EPS
-	fldt	(%eax)            ; Load merged[0].first
-	fldt	LC5               ; Load EPS constant
-	fucom	%st(1)            ; Compare EPS with merged[0].first
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	jb	L2007             ; Jump if EPS < merged[0].first (start not covered)
+	fldt		(%eax)            ; Load merged[0].first
+	fldt		LC5               ; Load EPS constant
+	fucom		%st(1)            ; Compare EPS with merged[0].first
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Load flags
+	jb		L2007             ; Jump if EPS < merged[0].first (start not covered)
 	
 	; Check: merged[0].second >= 1.0 - EPS
-	fstp	%st(0)            ; Pop EPS
-	movl	96(%esp), %eax    ; Reload merged.begin()
-	fldt	12(%eax)          ; Load merged[0].second
-	fld1                      ; Load 1.0
-	fldt	LC5               ; Load EPS
-	fsubrp	%st, %st(1)      ; Calculate 1.0 - EPS
-	fucom	%st(1)            ; Compare merged[0].second with 1.0 - EPS
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Load flags
-	fstp	%st(0)            ; Pop 1.0 - EPS
-	fstp	%st(0)            ; Pop merged[0].second
-	jae	L2008             ; Jump if merged[0].second >= 1.0 - EPS (arc is safe)
+	fstp		%st(0)            ; Pop EPS
+	movl		96(%esp), %eax    ; Reload merged.begin()
+	fldt		12(%eax)          ; Load merged[0].second
+	fld1                      	  ; Load 1.0
+	fldt		LC5               ; Load EPS
+	fsubrp		%st, %st(1)       ; Calculate 1.0 - EPS
+	fucom		%st(1)            ; Compare merged[0].second with 1.0 - EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf       	                  ; Load flags
+	fstp		%st(0)            ; Pop 1.0 - EPS
+	fstp		%st(0)            ; Pop merged[0].second
+	jae		L2008             ; Jump if merged[0].second >= 1.0 - EPS (arc is safe)
 	
 L2007:
 	; Clean up FPU stack if needed
-	fstp	%st(0)            ; Pop merged[0].first (if still on stack)
-	fstp	%st(0)            ; Pop EPS (if still on stack)
+	fstp		%st(0)            ; Pop merged[0].first (if still on stack)
+	fstp		%st(0)            ; Pop EPS (if still on stack)
 	
 L2006:
 	; Arc is NOT safe - intervals don't completely cover [0,1]
-	movl	$0, %eax          ; Return false
-	jmp	L2009             ; Jump to function exit
+	movl		$0, %eax          ; Return false
+	jmp		L2009             ; Jump to function exit
 	
 L2008:
 	; Arc is safe - intervals completely cover [0,1]
-	movl	$1, %eax          ; Return true
+	movl		$1, %eax          ; Return true
 	
 L2009:
 	; ========================================================================
@@ -2590,12 +2590,12 @@ L2009:
 	; ========================================================================
 	
 	; Function exit
-	addl	$128, %esp        ; Deallocate local stack space
-	popl	%ebx              ; Restore EBX register
-	popl	%esi              ; Restore ESI register
-	popl	%edi              ; Restore EDI register
-	popl	%ebp              ; Restore EBP register
-	ret                       ; Return from function
+	addl		$128, %esp        ; Deallocate local stack space
+	popl		%ebx              ; Restore EBX register
+	popl		%esi              ; Restore ESI register
+	popl		%edi              ; Restore EDI register
+	popl		%ebp              ; Restore EBP register
+	ret                       	  ; Return from function
 
 ;===============================================================================
 ; SECTION 10: FLOYD-WARSHALL ALGORITHM IMPLEMENTATION
@@ -2615,202 +2615,202 @@ L2009:
 
 ; FLOYD-WARSHALL INITIALIZATION: Set up adjacency matrix with direct distances
 L988:
-	testl	%ebx, %ebx        ; Check if vertex count > 0
+	testl		%ebx, %ebx        ; Check if vertex count > 0
 	jle		L1033             ; Skip if no vertices
-	leal	(%ebx,%ebx,2), %edx ; Calculate 3 * vertex_count
-	movl	-168(%ebp), %ecx  ; Load adjacency matrix pointer
-	fldz                   ; Load 0.0 onto FPU stack
-	xorl	%edi, %edi        ; Clear counter
-	sall	$2, %edx          ; Calculate matrix size = 3 * V * 4 bytes
+	leal		(%ebx,%ebx,2), %edx ; Calculate 3 * vertex_count
+	movl		-168(%ebp), %ecx  ; Load adjacency matrix pointer
+	fldz                   		  ; Load 0.0 onto FPU stack
+	xorl		%edi, %edi        ; Clear counter
+	sall		$2, %edx          ; Calculate matrix size = 3 * V * 4 bytes
 	
 L1035:
 	; INITIALIZE DIAGONAL ELEMENTS: Set dist[i][i] = 0.0
-	movl	(%ecx,%edi), %eax ; Load matrix row pointer
-	fstpt	(%eax,%edi)       ; Store 0.0 at matrix[i][i]
-	fldt	(%eax,%edi)       ; Reload for next iteration
-	addl	$12, %edi         ; Move to next diagonal element
-	cmpl	%edi, %edx        ; Check if all diagonal elements set
+	movl		(%ecx,%edi), %eax ; Load matrix row pointer
+	fstpt		(%eax,%edi)       ; Store 0.0 at matrix[i][i]
+	fldt		(%eax,%edi)       ; Reload for next iteration
+	addl		$12, %edi         ; Move to next diagonal element
+	cmpl		%edi, %edx        ; Check if all diagonal elements set
 	jne		L1035             ; Continue if not done
-	fstp	%st(0)            ; Pop 0.0 from FPU stack
+	fstp		%st(0)            ; Pop 0.0 from FPU stack
 	
 	; DIRECT DISTANCE CALCULATION: Fill matrix with direct arc distances
-	movl	-180(%ebp), %eax  ; Load vertex array pointer
-	movl	$12, -164(%ebp)   ; Initialize offset counter
-	movl	%edi, -160(%ebp)  ; Store matrix size
-	movl	-168(%ebp), %esi  ; Load matrix pointer
-	addl	$36, %eax         ; Move to second vertex
-	movl	%eax, -208(%ebp)  ; Store current vertex pointer
-	movl	-164(%ebp), %eax  ; Load offset
-	cmpl	%eax, -160(%ebp)  ; Compare offset with matrix size
+	movl		-180(%ebp), %eax  ; Load vertex array pointer
+	movl		$12, -164(%ebp)   ; Initialize offset counter
+	movl		%edi, -160(%ebp)  ; Store matrix size
+	movl		-168(%ebp), %esi  ; Load matrix pointer
+	addl		$36, %eax         ; Move to second vertex
+	movl		%eax, -208(%ebp)  ; Store current vertex pointer
+	movl		-164(%ebp), %eax  ; Load offset
+	cmpl		%eax, -160(%ebp)  ; Compare offset with matrix size
 	je		L1038             ; Jump if done with initialization
 	
 L1244:
 	; NESTED LOOP: Calculate distances between all vertex pairs
-	movl	-208(%ebp), %edi  ; Load current vertex j
-	leal	-36(%edi), %ebx   ; Calculate previous vertex i
-	movl	%ebx, -156(%ebp)  ; Store vertex i pointer
-	leal	-12(%eax), %ebx   ; Calculate matrix offset
-	movl	%ebx, -172(%ebp)  ; Store offset
-	movl	%eax, %ebx        ; Copy offset to EBX
+	movl		-208(%ebp), %edi  ; Load current vertex j
+	leal		-36(%edi), %ebx   ; Calculate previous vertex i
+	movl		%ebx, -156(%ebp)  ; Store vertex i pointer
+	leal		-12(%eax), %ebx   ; Calculate matrix offset
+	movl		%ebx, -172(%ebp)  ; Store offset
+	movl		%eax, %ebx        ; Copy offset to EBX
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        ; Align for performance
 L1046:
 	; DISTANCE CALCULATION: dist_xyz(vertex_i, vertex_j)
-	movl	-156(%ebp), %eax  ; Load vertex i
-	movl	%edi, 4(%esp)     ; Push vertex j as parameter
-	movl	%eax, (%esp)      ; Push vertex i as parameter
-	call	__Z8dist_xyzRK5PointS1_ ; Call great circle distance function
+	movl		-156(%ebp), %eax  ; Load vertex i
+	movl		%edi, 4(%esp)     ; Push vertex j as parameter
+	movl		%eax, (%esp)      ; Push vertex i as parameter
+	call		__Z8dist_xyzRK5PointS1_ ; Call great circle distance function
 	
 	; EPSILON COMPARISON: Check if distance is valid (> EPS)
-	fldt	LC5               ; Load EPS constant
-	fucomp	%st(1)            ; Compare EPS with distance
-	fnstsw	%ax              ; Store FPU status
-	sahf                      ; Transfer to CPU flags
+	fldt		LC5               ; Load EPS constant
+	fucomp		%st(1)            ; Compare EPS with distance
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
 	ja		L1045             ; Jump if distance > EPS (valid distance)
 	
 	; STORE TEMPORARY DISTANCE: Save distance for arc safety check
-	fstpt	-200(%ebp)        ; Store distance temporarily
+	fstpt		-200(%ebp)        ; Store distance temporarily
 	
 	; ARC SAFETY CHECK: is_arc_safe(vertex_i, vertex_j, airports, R)
-	leal	-100(%ebp), %eax  ; Load address for result
-	movl	%edi, 4(%esp)     ; Push vertex j
-	movl	%eax, 8(%esp)     ; Push airports array
-	movl	-156(%ebp), %eax  ; Load vertex i
-	movl	%eax, (%esp)      ; Push vertex i
-	fldt	-136(%ebp)        ; Load R (fuel range)
-	fstpt	12(%esp)          ; Push R as parameter
-	call	__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe
-	testb	%al, %al          ; Test if arc is safe
-	fldt	-200(%ebp)        ; Reload distance
+	leal		-100(%ebp), %eax  ; Load address for result
+	movl		%edi, 4(%esp)     ; Push vertex j
+	movl		%eax, 8(%esp)     ; Push airports array
+	movl		-156(%ebp), %eax  ; Load vertex i
+	movl		%eax, (%esp)      ; Push vertex i
+	fldt		-136(%ebp)        ; Load R (fuel range)
+	fstpt		12(%esp)          ; Push R as parameter
+	call		__Z11is_arc_safeRK5PointS1_RKSt6vectorIS_SaIS_EEe
+	testb		%al, %al          ; Test if arc is safe
+	fldt		-200(%ebp)        ; Reload distance
 	je		L1251             ; Jump if arc is NOT safe
 	
 L1045:
 	; STORE VALID DISTANCE: Add distance to adjacency matrix
-	movl	-164(%ebp), %ecx  ; Load matrix row offset
-	movl	-172(%ebp), %edx  ; Load matrix column offset
-	movl	-12(%esi,%ecx), %eax ; Load matrix[i] row pointer
-	movl	(%esi,%ebx), %ecx ; Load matrix[j] row pointer
-	addl	%ebx, %eax        ; Calculate matrix[i][j] address
+	movl		-164(%ebp), %ecx  ; Load matrix row offset
+	movl		-172(%ebp), %edx  ; Load matrix column offset
+	movl		-12(%esi,%ecx), %eax ; Load matrix[i] row pointer
+	movl		(%esi,%ebx), %ecx ; Load matrix[j] row pointer
+	addl		%ebx, %eax        ; Calculate matrix[i][j] address
 	fld		%st(0)            ; Duplicate distance on FPU stack
-	fstpt	(%ecx,%edx)       ; Store distance at matrix[j][i]
-	fstpt	(%eax)            ; Store distance at matrix[i][j]
-	jmp	L1041             ; Jump to next iteration
+	fstpt		(%ecx,%edx)       ; Store distance at matrix[j][i]
+	fstpt		(%eax)            ; Store distance at matrix[i][j]
+	jmp		L1041             ; Jump to next iteration
 	
 L1251:
 	; INVALID ARC: Arc is not safe, don't store distance (keep as infinity)
-	fstp	%st(0)            ; Pop invalid distance from FPU stack
+	fstp		%st(0)            ; Pop invalid distance from FPU stack
 	
 L1041:
 	; INNER LOOP INCREMENT: Move to next vertex pair
-	addl	$36, %edi         ; Move to next vertex j
-	addl	$12, %ebx         ; Move to next matrix column
-	cmpl	%ebx, -160(%ebp)  ; Check if finished with current row
-	jne	L1046             ; Continue inner loop if not done
+	addl		$36, %edi         ; Move to next vertex j
+	addl		$12, %ebx         ; Move to next matrix column
+	cmpl		%ebx, -160(%ebp)  ; Check if finished with current row
+	jne		L1046             ; Continue inner loop if not done
 	
 	; OUTER LOOP INCREMENT: Move to next row
-	addl	$12, -164(%ebp)   ; Move to next matrix row
-	addl	$36, -208(%ebp)   ; Move to next vertex i
-	movl	-164(%ebp), %eax  ; Load new row offset
-	cmpl	%eax, -160(%ebp)  ; Check if finished with all rows
-	jne	L1244             ; Continue outer loop if not done
+	addl		$12, -164(%ebp)   ; Move to next matrix row
+	addl		$36, -208(%ebp)   ; Move to next vertex i
+	movl		-164(%ebp), %eax  ; Load new row offset
+	cmpl		%eax, -160(%ebp)  ; Check if finished with all rows
+	jne		L1244             ; Continue outer loop if not done
 	
 L1038:
 	; FLOYD-WARSHALL MAIN ALGORITHM: Triple nested loop for shortest paths
 	; INITIALIZATION: Set up for k-i-j nested loops
-	fldt	LC17              ; Load -INF constant (large negative number)
-	movl	-160(%ebp), %edi  ; Load matrix size
-	movl	-168(%ebp), %eax  ; Load matrix pointer
-	leal	(%eax,%edi), %esi ; Calculate matrix end pointer
-	movl	%edi, -156(%ebp)  ; Store matrix size
-	movl	%eax, %edi        ; Move matrix pointer to EDI
-	movl	%esi, -164(%ebp)  ; Store matrix end pointer
-	xorl	%esi, %esi        ; Clear k counter (outer loop)
+	fldt		LC17              ; Load -INF constant (large negative number)
+	movl		-160(%ebp), %edi  ; Load matrix size
+	movl		-168(%ebp), %eax  ; Load matrix pointer
+	leal		(%eax,%edi), %esi ; Calculate matrix end pointer
+	movl		%edi, -156(%ebp)  ; Store matrix size
+	movl		%eax, %edi        ; Move matrix pointer to EDI
+	movl		%esi, -164(%ebp)  ; Store matrix end pointer
+	xorl		%esi, %esi        ; Clear k counter (outer loop)
 	
 L1052:
 	; FLOYD-WARSHALL OUTER LOOP: for (k = 0; k < V; k++)
-	movl	%edi, -160(%ebp)  ; Store current matrix row pointer
+	movl		%edi, -160(%ebp)  ; Store current matrix row pointer
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        ; Align for performance
 L1051:
 	; FLOYD-WARSHALL MIDDLE LOOP: for (i = 0; i < V; i++)
-	movl	-160(%ebp), %eax  ; Load matrix row i pointer
-	xorl	%edx, %edx        ; Clear j counter (inner loop)
-	movl	(%eax), %ecx      ; Load matrix[i] row pointer
-	leal	(%ecx,%esi), %ebx ; Calculate &matrix[i][k] address
+	movl		-160(%ebp), %eax  ; Load matrix row i pointer
+	xorl		%edx, %edx        ; Clear j counter (inner loop)
+	movl		(%eax), %ecx      ; Load matrix[i] row pointer
+	leal		(%ecx,%esi), %ebx ; Calculate &matrix[i][k] address
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        ; Align for performance
 L1050:
 	; FLOYD-WARSHALL INNER LOOP: for (j = 0; j < V; j++)
 	; ALGORITHM: if (dist[i][k] + dist[k][j] < dist[i][j]) dist[i][j] = dist[i][k] + dist[k][j]
 	
 	; CHECK matrix[i][j] != INF
-	fldt	(%ebx)            ; Load matrix[i][k]
-	fucom	%st(1)            ; Compare with -INF
-	fnstsw	%ax              ; Store FPU status
-	sahf                      ; Transfer to CPU flags
+	fldt		(%ebx)            ; Load matrix[i][k]
+	fucom		%st(1)            ; Compare with -INF
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
 	ja		L1252             ; Jump if matrix[i][k] == INF (skip this triplet)
 	
 	; CHECK matrix[k][j] != INF
-	movl	(%edi,%esi), %eax ; Load matrix[k] row pointer
-	fldt	(%eax,%edx)       ; Load matrix[k][j]
-	fucom	%st(2)            ; Compare with -INF
-	fnstsw	%ax              ; Store FPU status
-	sahf                      ; Transfer to CPU flags
+	movl		(%edi,%esi), %eax ; Load matrix[k] row pointer
+	fldt		(%eax,%edx)       ; Load matrix[k][j]
+	fucom		%st(2)            ; Compare with -INF
+	fnstsw		%ax               ; Store FPU status
+	sahf    	                  ; Transfer to CPU flags
 	ja		L1253             ; Jump if matrix[k][j] == INF (skip this triplet)
 	
 	; CALCULATE matrix[i][k] + matrix[k][j]
-	faddp	%st, %st(1)       ; Add: matrix[i][k] + matrix[k][j]
-	fldt	(%ecx,%edx)       ; Load current matrix[i][j]
-	fucom	%st(1)            ; Compare matrix[i][j] with (matrix[i][k] + matrix[k][j])
-	fnstsw	%ax              ; Store FPU status
-	sahf                      ; Transfer to CPU flags
+	faddp		%st, %st(1)       ; Add: matrix[i][k] + matrix[k][j]
+	fldt		(%ecx,%edx)       ; Load current matrix[i][j]
+	fucom		%st(1)            ; Compare matrix[i][j] with (matrix[i][k] + matrix[k][j])
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
 	jbe		L1254             ; Jump if current distance <= new distance
 	
 	; UPDATE matrix[i][j]: Found shorter path through k
-	fstp	%st(0)            ; Pop old matrix[i][j]
+	fstp		%st(0)            ; Pop old matrix[i][j]
 	jmp		L1104             ; Jump to store new distance
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10       	  ; Align for performance
 L1254:
 	; KEEP OLD DISTANCE: Current distance is shorter
-	fstp	%st(1)            ; Pop the sum, keep old distance
+	fstp		%st(1)            ; Pop the sum, keep old distance
 	
 L1104:
 	; STORE RESULT: Update matrix[i][j] with minimum distance
-	fstpt	(%ecx,%edx)       ; Store minimum distance at matrix[i][j]
-	jmp	L1048             ; Jump to next j iteration
-	
-	.p2align 4,,10        ; Align for performance
-L1252:
-	; SKIP: matrix[i][k] == INF, no path through k
-	fstp	%st(0)            ; Pop matrix[i][k]
+	fstpt		(%ecx,%edx)       ; Store minimum distance at matrix[i][j]
 	jmp		L1048             ; Jump to next j iteration
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        ; Align for performance
+L1252:
+	; SKIP: matrix[i][k] == INF, no path through k
+	fstp		%st(0)            ; Pop matrix[i][k]
+	jmp		L1048             ; Jump to next j iteration
+	
+	.p2align 	4,,10        ; Align for performance
 L1253:
 	; SKIP: matrix[k][j] == INF, no path through k
-	fstp	%st(0)            ; Pop matrix[k][j]
-	fstp	%st(0)            ; Pop matrix[i][k]
+	fstp		%st(0)            ; Pop matrix[k][j]
+	fstp		%st(0)            ; Pop matrix[i][k]
 	
 L1048:
 	; INNER LOOP INCREMENT: j++
-	addl	$12, %edx         ; Move to next column (j++)
-	cmpl	%edx, -156(%ebp)  ; Check if j < V
+	addl		$12, %edx         ; Move to next column (j++)
+	cmpl		%edx, -156(%ebp)  ; Check if j < V
 	jne		L1050             ; Continue inner loop if j < V
 	
 	; MIDDLE LOOP INCREMENT: i++
-	addl	$12, -160(%ebp)   ; Move to next row (i++)
-	movl	-160(%ebp), %eax  ; Load new row pointer
-	cmpl	%eax, -164(%ebp)  ; Check if i < V
+	addl		$12, -160(%ebp)   ; Move to next row (i++)
+	movl		-160(%ebp), %eax  ; Load new row pointer
+	cmpl		%eax, -164(%ebp)  ; Check if i < V
 	jne		L1051             ; Continue middle loop if i < V
 	
 	; OUTER LOOP INCREMENT: k++
-	addl	$12, %esi         ; Move to next k (k++)
-	cmpl	%esi, -156(%ebp)  ; Check if k < V
+	addl		$12, %esi         ; Move to next k (k++)
+	cmpl		%esi, -156(%ebp)  ; Check if k < V
 	jne		L1052             ; Continue outer loop if k < V
 	
 	; FLOYD-WARSHALL COMPLETE: All-pairs shortest paths computed
-	fstp	%st(0)            ; Pop -INF constant from FPU stack
+	fstp		%st(0)            ; Pop -INF constant from FPU stack
 
 ;===============================================================================
 ; SECTION 11: QUERY PROCESSING AND OUTPUT
@@ -2818,58 +2818,58 @@ L1048:
 
 L1033:
 	; QUERY INPUT: Read number of queries Q
-	leal	-148(%ebp), %eax  ; Load address of Q variable
-	movl	$__ZSt3cin, %ecx  ; Load cin object
-	movl	%eax, (%esp)      ; Push Q address
-	call	__ZNSirsERi       ; Call cin >> Q
+	leal		-148(%ebp), %eax  ; Load address of Q variable
+	movl		$__ZSt3cin, %ecx  ; Load cin object
+	movl		%eax, (%esp)      ; Push Q address
+	call		__ZNSirsERi       ; Call cin >> Q
 	
 	; OUTPUT TEST CASE HEADER: "Case #N:"
-	movl	-204(%ebp), %edi  ; Load current case number
-	subl	$4, %esp          ; Adjust stack
-	movl	$5, 8(%esp)       ; String length for "Case "
-	movl	$LC14, 4(%esp)    ; Push "Case " string literal
-	movl	$__ZSt4cout, (%esp) ; Push cout object
-	movl	%edi, %eax        ; Copy case number
-	addl	$1, %eax          ; Increment case number for next iteration
-	movl	%eax, -204(%ebp)  ; Store incremented case number
-	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "Case "
+	movl		-204(%ebp), %edi  ; Load current case number
+	subl		$4, %esp          ; Adjust stack
+	movl		$5, 8(%esp)       ; String length for "Case "
+	movl		$LC14, 4(%esp)    ; Push "Case " string literal
+	movl		$__ZSt4cout, (%esp) ; Push cout object
+	movl		%edi, %eax        ; Copy case number
+	addl		$1, %eax          ; Increment case number for next iteration
+	movl		%eax, -204(%ebp)  ; Store incremented case number
+	call		__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "Case "
 	
 	; OUTPUT CASE NUMBER
-	movl	$__ZSt4cout, %ecx ; Load cout object
-	movl	%edi, (%esp)      ; Push case number
-	call	__ZNSolsEi        ; Call cout << case_number
-	subl	$4, %esp          ; Adjust stack
-	movl	%eax, %ebx        ; Store cout result
+	movl		$__ZSt4cout, %ecx ; Load cout object
+	movl		%edi, (%esp)      ; Push case number
+	call		__ZNSolsEi        ; Call cout << case_number
+	subl		$4, %esp          ; Adjust stack
+	movl		%eax, %ebx        ; Store cout result
 	
 	; OUTPUT COLON AND NEWLINE
-	movl	$1, 8(%esp)       ; String length for ":"
-	movl	$LC15, 4(%esp)    ; Push ":" string literal
-	movl	%eax, (%esp)      ; Push cout object
-	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print ":"
+	movl		$1, 8(%esp)       ; String length for ":"
+	movl		$LC15, 4(%esp)    ; Push ":" string literal
+	movl		%eax, (%esp)      ; Push cout object
+	call		__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print ":"
 	
 	; FLUSH OUTPUT BUFFER
-	movl	(%ebx), %eax      ; Load cout vtable
-	movl	-12(%eax), %eax   ; Get vtable offset
-	movl	124(%ebx,%eax), %esi ; Load ctype facet
-	testl	%esi, %esi        ; Check if facet exists
-	je	L1036             ; Jump to error if null
-	cmpb	$0, 28(%esi)      ; Check if facet is initialized
-	je	L1053             ; Jump to initialization if needed
-	movsbl	39(%esi), %eax   ; Load newline character
+	movl		(%ebx), %eax      ; Load cout vtable
+	movl		-12(%eax), %eax   ; Get vtable offset
+	movl		124(%ebx,%eax), %esi ; Load ctype facet
+	testl		%esi, %esi        ; Check if facet exists
+	je		L1036             ; Jump to error if null
+	cmpb		$0, 28(%esi)      ; Check if facet is initialized
+	je		L1053             ; Jump to initialization if needed
+	movsbl		39(%esi), %eax    ; Load newline character
 	
 L1054:
-	movl	%ebx, %ecx        ; Load cout object
-	movl	%eax, (%esp)      ; Push newline character
-	call	__ZNSo3putEc      ; Call cout.put('\n')
-	subl	$4, %esp          ; Adjust stack
-	movl	%eax, %ecx        ; Load cout result
-	call	__ZNSo5flushEv    ; Call cout.flush()
+	movl		%ebx, %ecx        ; Load cout object
+	movl		%eax, (%esp)      ; Push newline character
+	call		__ZNSo3putEc      ; Call cout.put('\n')
+	subl		$4, %esp          ; Adjust stack
+	movl		%eax, %ecx        ; Load cout result
+	call		__ZNSo5flushEv    ; Call cout.flush()
 	
 	; QUERY PROCESSING LOOP: Process each query
-	movl	-148(%ebp), %ebx  ; Load Q (number of queries)
-	testl	%ebx, %ebx        ; Check if Q > 0
-	jle	L1092             ; Skip if no queries
-	movl	$0, -200(%ebp)    ; Initialize query counter
+	movl		-148(%ebp), %ebx  ; Load Q (number of queries)
+	testl		%ebx, %ebx        ; Check if Q > 0
+	jle		L1092             ; Skip if no queries
+	movl		$0, -200(%ebp)    ; Initialize query counter
 	
 L1093:
 	; ========================================================================
@@ -2882,81 +2882,81 @@ L1093:
 	;                 }
 	
 	; QUERY INPUT: Read source, destination, and fuel capacity
-	leal	-144(%ebp), %eax  ; Load address of source variable
-	movl	$__ZSt3cin, %ecx  ; Load cin object
-	movl	%eax, (%esp)      ; Push source address
-	call	__ZNSirsERi       ; Call cin >> source
-	addl	$4, %esp          ; Adjust stack
-	leal	-140(%ebp), %edi  ; Load address of destination variable
-	movl	%eax, %ecx        ; Move result to ECX
-	movl	%edi, (%esp)      ; Push destination address
-	call	__ZNSirsERi       ; Call cin >> destination
-	addl	$4, %esp          ; Adjust stack
-	leal	-210(%ebp), %edi  ; Load address of fuel_capacity variable
-	movl	%eax, %ecx        ; Move result to ECX
-	movl	%edi, (%esp)      ; Push fuel_capacity address
-	call	__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> fuel_capacity
-	addl	$4, %esp          ; Adjust stack
+	leal		-144(%ebp), %eax  ; Load address of source variable
+	movl		$__ZSt3cin, %ecx  ; Load cin object
+	movl		%eax, (%esp)      ; Push source address
+	call		__ZNSirsERi       ; Call cin >> source
+	addl		$4, %esp          ; Adjust stack
+	leal		-140(%ebp), %edi  ; Load address of destination variable
+	movl		%eax, %ecx        ; Move result to ECX
+	movl		%edi, (%esp)      ; Push destination address
+	call		__ZNSirsERi       ; Call cin >> destination
+	addl		$4, %esp          ; Adjust stack
+	leal		-210(%ebp), %edi  ; Load address of fuel_capacity variable
+	movl		%eax, %ecx        ; Move result to ECX
+	movl		%edi, (%esp)      ; Push fuel_capacity address
+	call		__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> fuel_capacity
+	addl		$4, %esp          ; Adjust stack
 	
 	; CONVERT TO 0-BASED INDEXING
-	subl	$1, -144(%ebp)    ; source = source - 1 (0-based)
-	subl	$1, -140(%ebp)    ; destination = destination - 1 (0-based)
+	subl		$1, -144(%ebp)    ; source = source - 1 (0-based)
+	subl		$1, -140(%ebp)    ; destination = destination - 1 (0-based)
 	
 	; ========================================================================
 	; BUILD REFUELING GRAPH: Create airport-to-airport graph with fuel constraints
 	; ========================================================================
 	; C++ EQUIVALENT: vector<vector<long double>> current_adj_refuel(N, vector<long double>(N, INF));
 	;                 for(int i = 0; i < N; ++i) current_adj_refuel[i][i] = 0;
-	movl	-152(%ebp), %ebx  ; Load N (number of airports)
-	testl	%ebx, %ebx        ; Check if N > 0
-	je	L1245             ; Jump if no airports
+	movl		-152(%ebp), %ebx  ; Load N (number of airports)
+	testl		%ebx, %ebx        ; Check if N > 0
+	je		L1245             ; Jump if no airports
 	
 	; ALLOCATE REFUELING MATRIX: Create N x N matrix for airport distances
-	cmpl	$46340, %ebx      ; Check for overflow
-	ja	L983              ; Jump to error if too large
-	movl	%ebx, %eax        ; Copy N
-	imull	%ebx, %eax        ; Calculate N * N
-	leal	(%eax,%eax,2), %eax ; Calculate N * N * 3 (for long double)
-	sall	$2, %eax          ; Calculate N * N * 12 (sizeof(long double))
-	movl	%eax, (%esp)      ; Push size argument
-	call	__Znwj            ; Allocate memory: new long double[N*N]
-	movl	%eax, -214(%ebp)  ; Store current_adj_refuel matrix pointer
+	cmpl		$46340, %ebx      ; Check for overflow
+	ja		L983              ; Jump to error if too large
+	movl		%ebx, %eax        ; Copy N
+	imull		%ebx, %eax        ; Calculate N * N
+	leal		(%eax,%eax,2), %eax ; Calculate N * N * 3 (for long double)
+	sall		$2, %eax          ; Calculate N * N * 12 (sizeof(long double))
+	movl		%eax, (%esp)      ; Push size argument
+	call		__Znwj            ; Allocate memory: new long double[N*N]
+	movl		%eax, -214(%ebp)  ; Store current_adj_refuel matrix pointer
 	
 	; INITIALIZE REFUELING MATRIX: Set all distances to INF and diagonal to 0
-	fldt	LC7               ; Load INF constant
-	movl	%ebx, %ecx        ; Copy N for loop counter
-	movl	%eax, %edi        ; Copy matrix pointer
+	fldt		LC7               ; Load INF constant
+	movl		%ebx, %ecx        ; Copy N for loop counter
+	movl		%eax, %edi        ; Copy matrix pointer
 	
 L1094_init_refuel:
 	; Initialize row with INF
-	movl	%ebx, %edx        ; Inner loop counter
+	movl		%ebx, %edx        ; Inner loop counter
 L1095_init_refuel_row:
-	fstpt	(%edi)            ; Store INF
-	fldt	(%edi)            ; Reload for next iteration
-	addl	$12, %edi         ; Move to next matrix element
-	subl	$1, %edx          ; Decrement inner counter
-	jne	L1095_init_refuel_row ; Continue inner loop
-	subl	$1, %ecx          ; Decrement outer counter
-	jne	L1094_init_refuel ; Continue outer loop
-	fstp	%st(0)            ; Pop INF from FPU stack
+	fstpt		(%edi)            ; Store INF
+	fldt		(%edi)            ; Reload for next iteration
+	addl		$12, %edi         ; Move to next matrix element
+	subl		$1, %edx          ; Decrement inner counter
+	jne		L1095_init_refuel_row ; Continue inner loop
+	subl		$1, %ecx          ; Decrement outer counter
+	jne		L1094_init_refuel ; Continue outer loop
+	fstp		%st(0)            ; Pop INF from FPU stack
 	
 	; Set diagonal elements to 0: current_adj_refuel[i][i] = 0
-	movl	-214(%ebp), %edi  ; Load matrix pointer
-	xorl	%ecx, %ecx        ; Clear i counter
-	fldz                      ; Load 0.0
+	movl		-214(%ebp), %edi  ; Load matrix pointer
+	xorl		%ecx, %ecx        ; Clear i counter
+	fldz                      	  ; Load 0.0
 	
 L1096_set_refuel_diagonal:
 	; Calculate offset for current_adj_refuel[i][i] = base + (i * N + i) * 12
-	movl	%ecx, %eax        ; Copy i
-	imull	%ebx, %eax        ; Calculate i * N
-	addl	%ecx, %eax        ; Calculate i * N + i
-	leal	(%eax,%eax,2), %eax ; Calculate (i * N + i) * 3
-	fstpt	(%edi,%eax,4)     ; Store 0.0 at current_adj_refuel[i][i]
-	fldt	(%edi,%eax,4)     ; Reload for next iteration
-	addl	$1, %ecx          ; Increment i
-	cmpl	%ecx, %ebx        ; Check if i < N
-	jne	L1096_set_refuel_diagonal ; Continue diagonal loop
-	fstp	%st(0)            ; Pop 0.0 from FPU stack
+	movl		%ecx, %eax        ; Copy i
+	imull		%ebx, %eax        ; Calculate i * N
+	addl		%ecx, %eax        ; Calculate i * N + i
+	leal		(%eax,%eax,2), %eax ; Calculate (i * N + i) * 3
+	fstpt		(%edi,%eax,4)     ; Store 0.0 at current_adj_refuel[i][i]
+	fldt		(%edi,%eax,4)     ; Reload for next iteration
+	addl		$1, %ecx          ; Increment i
+	cmpl		%ecx, %ebx        ; Check if i < N
+	jne		L1096_set_refuel_diagonal ; Continue diagonal loop
+	fstp		%st(0)            ; Pop 0.0 from FPU stack
 	
 	; ========================================================================
 	; FILL REFUELING MATRIX: Check if airports can reach each other with current fuel capacity
@@ -2971,67 +2971,67 @@ L1096_set_refuel_diagonal:
 	;                     }
 	;                   }
 	;                 }
-	xorl	%ecx, %ecx        ; Clear i counter
-	fldt	LC5               ; Load EPS constant
+	xorl		%ecx, %ecx        ; Clear i counter
+	fldt		LC5               ; Load EPS constant
 	
 L1097_refuel_outer:
 	; OUTER LOOP: for (int i = 0; i < N; ++i)
-	xorl	%esi, %esi        ; Clear j counter
+	xorl		%esi, %esi        ; Clear j counter
 	
 L1098_refuel_inner:
 	; INNER LOOP: for (int j = 0; j < N; ++j)
-	cmpl	%esi, %ecx        ; Check if i == j (diagonal)
-	je	L1101_next_refuel_j ; Skip diagonal elements
+	cmpl		%esi, %ecx        ; Check if i == j (diagonal)
+	je		L1101_next_refuel_j ; Skip diagonal elements
 	
 	; Get vertex indices for airports i and j
-	movl	-192(%ebp), %edi  ; Load airport_to_vertex_idx array
-	movl	(%edi,%ecx,4), %eax ; Load u_idx = airport_to_vertex_idx[i]
-	movl	(%edi,%esi,4), %edx ; Load v_idx = airport_to_vertex_idx[j]
+	movl		-192(%ebp), %edi  ; Load airport_to_vertex_idx array
+	movl		(%edi,%ecx,4), %eax ; Load u_idx = airport_to_vertex_idx[i]
+	movl		(%edi,%esi,4), %edx ; Load v_idx = airport_to_vertex_idx[j]
 	
 	; Calculate &adj_aux[u_idx][v_idx]
-	movl	-196(%ebp), %edi  ; Load adj_aux matrix
-	movl	-184(%ebp), %ebx  ; Load V (vertex count)
-	imull	%ebx, %eax        ; Calculate u_idx * V
-	addl	%edx, %eax        ; Calculate u_idx * V + v_idx
-	leal	(%eax,%eax,2), %eax ; Calculate (u_idx * V + v_idx) * 3
-	fldt	(%edi,%eax,4)     ; Load adj_aux[u_idx][v_idx]
+	movl		-196(%ebp), %edi  ; Load adj_aux matrix
+	movl		-184(%ebp), %ebx  ; Load V (vertex count)
+	imull		%ebx, %eax        ; Calculate u_idx * V
+	addl		%edx, %eax        ; Calculate u_idx * V + v_idx
+	leal		(%eax,%eax,2), %eax ; Calculate (u_idx * V + v_idx) * 3
+	fldt		(%edi,%eax,4)     ; Load adj_aux[u_idx][v_idx]
 	
 	; Check if adj_aux[u_idx][v_idx] <= fuel_capacity + EPS
-	fldt	-210(%ebp)        ; Load fuel_capacity
-	fadd	%st(2), %st       ; Add fuel_capacity + EPS
-	fucom	%st(1)            ; Compare with adj_aux[u_idx][v_idx]
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jb	L1100_skip_refuel ; Skip if adj_aux[u_idx][v_idx] > fuel_capacity + EPS
+	fldt		-210(%ebp)        ; Load fuel_capacity
+	fadd		%st(2), %st       ; Add fuel_capacity + EPS
+	fucom		%st(1)            ; Compare with adj_aux[u_idx][v_idx]
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	jb		L1100_skip_refuel ; Skip if adj_aux[u_idx][v_idx] > fuel_capacity + EPS
 	
 	; REACHABLE: Set current_adj_refuel[i][j] = adj_aux[u_idx][v_idx]
-	fstp	%st(0)            ; Pop fuel_capacity + EPS
-	movl	-214(%ebp), %edi  ; Load current_adj_refuel matrix
-	movl	-152(%ebp), %ebx  ; Load N
-	movl	%ecx, %eax        ; Copy i
-	imull	%ebx, %eax        ; Calculate i * N
-	addl	%esi, %eax        ; Calculate i * N + j
-	leal	(%eax,%eax,2), %eax ; Calculate (i * N + j) * 3
-	fstpt	(%edi,%eax,4)     ; Store distance at current_adj_refuel[i][j]
-	jmp	L1101_next_refuel_j ; Jump to next iteration
+	fstp		%st(0)            ; Pop fuel_capacity + EPS
+	movl		-214(%ebp), %edi  ; Load current_adj_refuel matrix
+	movl		-152(%ebp), %ebx  ; Load N
+	movl		%ecx, %eax        ; Copy i
+	imull		%ebx, %eax        ; Calculate i * N
+	addl		%esi, %eax        ; Calculate i * N + j
+	leal		(%eax,%eax,2), %eax ; Calculate (i * N + j) * 3
+	fstpt		(%edi,%eax,4)     ; Store distance at current_adj_refuel[i][j]
+	jmp		L1101_next_refuel_j ; Jump to next iteration
 	
 L1100_skip_refuel:
-	fstp	%st(0)            ; Pop fuel_capacity + EPS
-	fstp	%st(0)            ; Pop adj_aux[u_idx][v_idx]
+	fstp		%st(0)            ; Pop fuel_capacity + EPS
+	fstp		%st(0)            ; Pop adj_aux[u_idx][v_idx]
 	
 L1101_next_refuel_j:
 	; INNER LOOP INCREMENT: j++
-	addl	$1, %esi          ; Increment j
-	movl	-152(%ebp), %ebx  ; Reload N
-	cmpl	%esi, %ebx        ; Check if j < N
-	jne	L1098_refuel_inner ; Continue if j < N
+	addl		$1, %esi          ; Increment j
+	movl		-152(%ebp), %ebx  ; Reload N
+	cmpl		%esi, %ebx        ; Check if j < N
+	jne		L1098_refuel_inner ; Continue if j < N
 	
 	; OUTER LOOP INCREMENT: i++
-	addl	$1, %ecx          ; Increment i
-	cmpl	%ecx, %ebx        ; Check if i < N
-	jne	L1097_refuel_outer ; Continue if i < N
+	addl		$1, %ecx          ; Increment i
+	cmpl		%ecx, %ebx        ; Check if i < N
+	jne		L1097_refuel_outer ; Continue if i < N
 	
-	fstp	%st(0)            ; Pop EPS from FPU stack
+	fstp		%st(0)            ; Pop EPS from FPU stack
 	
 	; ========================================================================
 	; FLOYD-WARSHALL ON REFUELING GRAPH: Find shortest paths between airports
@@ -3046,94 +3046,94 @@ L1101_next_refuel_j:
 	;                     }
 	;                   }
 	;                 }
-	xorl	%ecx, %ecx        ; Clear k counter
-	fldt	LC7               ; Load INF for comparisons
+	xorl		%ecx, %ecx        ; Clear k counter
+	fldt		LC7               ; Load INF for comparisons
 	
 L1102_refuel_floyd_k:
 	; FLOYD-WARSHALL OUTER LOOP: for (k = 0; k < N; k++)
-	xorl	%esi, %esi        ; Clear i counter
+	xorl		%esi, %esi        ; Clear i counter
 	
 L1103_refuel_floyd_i:
 	; FLOYD-WARSHALL MIDDLE LOOP: for (i = 0; i < N; i++)
-	xorl	%edi, %edi        ; Clear j counter
+	xorl		%edi, %edi        ; Clear j counter
 	
 L1104_refuel_floyd_j:
 	; FLOYD-WARSHALL INNER LOOP: for (j = 0; j < N; j++)
-	movl	-214(%ebp), %edx  ; Load current_adj_refuel matrix pointer
-	movl	-152(%ebp), %ebx  ; Load N
+	movl		-214(%ebp), %edx  ; Load current_adj_refuel matrix pointer
+	movl		-152(%ebp), %ebx  ; Load N
 	
 	; Calculate &current_adj_refuel[i][k]
-	movl	%esi, %eax        ; Copy i
-	imull	%ebx, %eax        ; Calculate i * N
-	addl	%ecx, %eax        ; Calculate i * N + k
-	leal	(%eax,%eax,2), %eax ; Calculate (i * N + k) * 3
-	fldt	(%edx,%eax,4)     ; Load current_adj_refuel[i][k]
+	movl		%esi, %eax        ; Copy i
+	imull		%ebx, %eax        ; Calculate i * N
+	addl		%ecx, %eax        ; Calculate i * N + k
+	leal		(%eax,%eax,2), %eax ; Calculate (i * N + k) * 3
+	fldt		(%edx,%eax,4)     ; Load current_adj_refuel[i][k]
 	
 	; Check if current_adj_refuel[i][k] != INF
-	fucom	%st(1)            ; Compare with INF
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jae	L1107_skip_refuel_update ; Skip if current_adj_refuel[i][k] >= INF
+	fucom		%st(1)            ; Compare with INF
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	jae		L1107_skip_refuel_update ; Skip if current_adj_refuel[i][k] >= INF
 	
 	; Calculate &current_adj_refuel[k][j]
-	movl	%ecx, %eax        ; Copy k
-	imull	%ebx, %eax        ; Calculate k * N
-	addl	%edi, %eax        ; Calculate k * N + j
-	leal	(%eax,%eax,2), %eax ; Calculate (k * N + j) * 3
-	fldt	(%edx,%eax,4)     ; Load current_adj_refuel[k][j]
+	movl		%ecx, %eax        ; Copy k
+	imull		%ebx, %eax        ; Calculate k * N
+	addl		%edi, %eax        ; Calculate k * N + j
+	leal		(%eax,%eax,2), %eax ; Calculate (k * N + j) * 3
+	fldt		(%edx,%eax,4)     ; Load current_adj_refuel[k][j]
 	
 	; Check if current_adj_refuel[k][j] != INF
-	fucom	%st(2)            ; Compare with INF
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jae	L1108_skip_refuel_update2 ; Skip if current_adj_refuel[k][j] >= INF
+	fucom		%st(2)            ; Compare with INF
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	jae		L1108_skip_refuel_update2 ; Skip if current_adj_refuel[k][j] >= INF
 	
 	; Calculate current_adj_refuel[i][k] + current_adj_refuel[k][j]
-	faddp	%st, %st(1)       ; Add: current_adj_refuel[i][k] + current_adj_refuel[k][j]
+	faddp		%st, %st(1)       ; Add: current_adj_refuel[i][k] + current_adj_refuel[k][j]
 	
 	; Calculate &current_adj_refuel[i][j]
-	movl	%esi, %eax        ; Copy i
-	imull	%ebx, %eax        ; Calculate i * N
-	addl	%edi, %eax        ; Calculate i * N + j
-	leal	(%eax,%eax,2), %eax ; Calculate (i * N + j) * 3
-	fldt	(%edx,%eax,4)     ; Load current_adj_refuel[i][j]
+	movl		%esi, %eax        ; Copy i
+	imull		%ebx, %eax        ; Calculate i * N
+	addl		%edi, %eax        ; Calculate i * N + j
+	leal		(%eax,%eax,2), %eax ; Calculate (i * N + j) * 3
+	fldt		(%edx,%eax,4)     ; Load current_adj_refuel[i][j]
 	
 	; Compare and update: current_adj_refuel[i][j] = min(current_adj_refuel[i][j], new_distance)
-	fucom	%st(1)            ; Compare old vs new distance
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jbe	L1109_keep_refuel_old ; Keep old if old <= new
+	fucom		%st(1)            ; Compare old vs new distance
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	jbe		L1109_keep_refuel_old ; Keep old if old <= new
 	
 	; Update with new shorter distance
-	fstp	%st(0)            ; Pop old distance
-	fstpt	(%edx,%eax,4)     ; Store new distance
-	jmp	L1106_next_refuel_floyd_j ; Jump to next iteration
+	fstp		%st(0)            ; Pop old distance
+	fstpt		(%edx,%eax,4)     ; Store new distance
+	jmp		L1106_next_refuel_floyd_j ; Jump to next iteration
 	
 L1109_keep_refuel_old:
-	fstp	%st(1)            ; Pop new distance, keep old
-	fstp	%st(0)            ; Pop old distance
-	jmp	L1106_next_refuel_floyd_j ; Jump to next iteration
+	fstp		%st(1)            ; Pop new distance, keep old
+	fstp		%st(0)            ; Pop old distance
+	jmp		L1106_next_refuel_floyd_j ; Jump to next iteration
 	
 L1108_skip_refuel_update2:
-	fstp	%st(0)            ; Pop current_adj_refuel[k][j]
+	fstp		%st(0)            ; Pop current_adj_refuel[k][j]
 L1107_skip_refuel_update:
-	fstp	%st(0)            ; Pop current_adj_refuel[i][k]
+	fstp		%st(0)            ; Pop current_adj_refuel[i][k]
 	
 L1106_next_refuel_floyd_j:
 	; FLOYD-WARSHALL INNER LOOP INCREMENT: j++
-	addl	$1, %edi          ; Increment j
-	cmpl	%edi, %ebx        ; Check if j < N
-	jne	L1104_refuel_floyd_j ; Continue if j < N
+	addl		$1, %edi          ; Increment j
+	cmpl		%edi, %ebx        ; Check if j < N
+	jne		L1104_refuel_floyd_j ; Continue if j < N
 	
 	; FLOYD-WARSHALL MIDDLE LOOP INCREMENT: i++
-	addl	$1, %esi          ; Increment i
-	cmpl	%esi, %ebx        ; Check if i < N
-	jne	L1103_refuel_floyd_i ; Continue if i < N
+	addl		$1, %esi          ; Increment i
+	cmpl		%esi, %ebx        ; Check if i < N
+	jne		L1103_refuel_floyd_i ; Continue if i < N
 	
 	; FLOYD-WARSHALL OUTER LOOP INCREMENT: k++
-	addl	$1, %ecx          ; Increment k
-	cmpl	%ecx, %ebx        ; Check if k < N
-	jne	L1102_refuel_floyd_k ; Continue if k < N
+	addl		$1, %ecx          ; Increment k
+	cmpl		%ecx, %ebx        ; Check if k < N
+	jne		L1102_refuel_floyd_k ; Continue if k < N
 	
 	; ========================================================================
 	; OUTPUT RESULT: Print shortest distance or "impossible"
@@ -3145,393 +3145,393 @@ L1106_next_refuel_floyd_j:
 	;                 }
 	
 	; Get shortest distance from source to destination
-	movl	-144(%ebp), %eax  ; Load source index (0-based)
-	movl	-140(%ebp), %esi  ; Load destination index (0-based)
-	movl	-214(%ebp), %edi  ; Load current_adj_refuel matrix
-	imull	%ebx, %eax        ; Calculate source * N
-	addl	%esi, %eax        ; Calculate source * N + destination
-	leal	(%eax,%eax,2), %eax ; Calculate (source * N + destination) * 3
-	fldt	(%edi,%eax,4)     ; Load current_adj_refuel[source][destination]
+	movl		-144(%ebp), %eax  ; Load source index (0-based)
+	movl		-140(%ebp), %esi  ; Load destination index (0-based)
+	movl		-214(%ebp), %edi  ; Load current_adj_refuel matrix
+	imull		%ebx, %eax        ; Calculate source * N
+	addl		%esi, %eax        ; Calculate source * N + destination
+	leal		(%eax,%eax,2), %eax ; Calculate (source * N + destination) * 3
+	fldt		(%edi,%eax,4)     ; Load current_adj_refuel[source][destination]
 	
 	; Compare with INF to check if path exists
-	fucom	%st(1)            ; Compare distance with INF
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jae	L1246             ; Jump if distance >= INF (no path)
+	fucom		%st(1)            ; Compare distance with INF
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	jae		L1246             ; Jump if distance >= INF (no path)
 	
 	; PATH EXISTS: Output the distance
-	fstp	%st(1)            ; Pop INF, keep distance
-	movl	$__ZSt4cout, %ecx ; Load cout object
-	fstpt	(%esp)            ; Push distance as parameter
-	call	__ZNSolsEe        ; Call cout << distance
-	addl	$12, %esp         ; Adjust stack for long double
-	jmp	L1247             ; Jump to newline output
+	fstp		%st(1)            ; Pop INF, keep distance
+	movl		$__ZSt4cout, %ecx ; Load cout object
+	fstpt		(%esp)            ; Push distance as parameter
+	call		__ZNSolsEe        ; Call cout << distance
+	addl		$12, %esp         ; Adjust stack for long double
+	jmp		L1247             ; Jump to newline output
 	
 L1246:
 	; NO PATH: Output "impossible"
-	fstp	%st(0)            ; Pop distance
-	fstp	%st(0)            ; Pop INF
-	movl	$10, 8(%esp)      ; String length for "impossible"
-	movl	$LC18, 4(%esp)    ; Push "impossible" string
-	movl	$__ZSt4cout, (%esp) ; Push cout object
-	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "impossible"
+	fstp		%st(0)            ; Pop distance
+	fstp		%st(0)            ; Pop INF
+	movl		$10, 8(%esp)      ; String length for "impossible"
+	movl		$LC18, 4(%esp)    ; Push "impossible" string
+	movl		$__ZSt4cout, (%esp) ; Push cout object
+	call		__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "impossible"
 	
 L1247:
 	; OUTPUT NEWLINE: Add newline after result
-	movl	$__ZSt4cout, %eax ; Load cout object
-	movl	-12(%eax), %edx   ; Get vtable offset
-	movl	__ZSt4cout+124(%edx), %ebx ; Load ctype facet
-	testl	%ebx, %ebx        ; Check if valid
-	je	L1036             ; Jump to error if null
-	cmpb	$0, 28(%ebx)      ; Check if initialized
-	je	L1081             ; Jump to initialization if needed
-	movsbl	39(%ebx), %eax   ; Load newline character
+	movl		$__ZSt4cout, %eax ; Load cout object
+	movl		-12(%eax), %edx   ; Get vtable offset
+	movl		__ZSt4cout+124(%edx), %ebx ; Load ctype facet
+	testl		%ebx, %ebx        ; Check if valid
+	je		L1036             ; Jump to error if null
+	cmpb		$0, 28(%ebx)      ; Check if initialized
+	je		L1081             ; Jump to initialization if needed
+	movsbl		39(%ebx), %eax   ; Load newline character
 	
 L1082:
-	movl	$__ZSt4cout, %ecx ; Load cout object
-	movl	%eax, (%esp)      ; Push newline
-	call	__ZNSo3putEc      ; Print newline
-	addl	$4, %esp          ; Adjust stack
-	movl	%eax, %ecx        ; Load cout result
-	call	__ZNSo5flushEv    ; Flush output
+	movl		$__ZSt4cout, %ecx ; Load cout object
+	movl		%eax, (%esp)      ; Push newline
+	call		__ZNSo3putEc      ; Print newline
+	addl		$4, %esp          ; Adjust stack
+	movl		%eax, %ecx        ; Load cout result
+	call		__ZNSo5flushEv    ; Flush output
 	
 	; CLEANUP QUERY MATRIX: Free current_adj_refuel matrix
-	movl	-214(%ebp), %eax  ; Load current_adj_refuel matrix
-	testl	%eax, %eax        ; Check if valid
-	je	L1088             ; Skip if null
-	movl	%eax, (%esp)      ; Push matrix pointer
-	call	__ZdlPv           ; Delete matrix
+	movl		-214(%ebp), %eax  ; Load current_adj_refuel matrix
+	testl		%eax, %eax        ; Check if valid
+	je		L1088             ; Skip if null
+	movl		%eax, (%esp)      ; Push matrix pointer
+	call		__ZdlPv           ; Delete matrix
 	
 L1088:
 	; NEXT QUERY: Increment query counter and continue
-	addl	$1, -200(%ebp)    ; Increment query counter
-	movl	-200(%ebp), %eax  ; Load query counter
-	cmpl	%eax, -148(%ebp)  ; Compare with total queries
-	jg	L1093             ; Continue if more queries
-	leal	0(,%edi,4), %eax  ; Calculate 3 * N * 4 bytes
-	movl	%eax, (%esp)      ; Push size
-	movl	%eax, -156(%ebp)  ; Store size
-	call	__Znwj            ; Allocate memory
-	flds	LC13              ; Load infinity constant
-	movl	%eax, -164(%ebp)  ; Store matrix pointer
+	addl		$1, -200(%ebp)    ; Increment query counter
+	movl		-200(%ebp), %eax  ; Load query counter
+	cmpl		%eax, -148(%ebp)  ; Compare with total queries
+	jg		L1093             ; Continue if more queries
+	leal		0(,%edi,4), %eax  ; Calculate 3 * N * 4 bytes
+	movl		%eax, (%esp)      ; Push size
+	movl		%eax, -156(%ebp)  ; Store size
+	call		__Znwj            ; Allocate memory
+	flds		LC13              ; Load infinity constant
+	movl		%eax, -164(%ebp)  ; Store matrix pointer
 	
 L1060:
 	; INITIALIZE TEMP MATRIX: Set all distances to infinity
-	fstpt	(%eax)            ; Store infinity at matrix[i]
-	fldt	(%eax)            ; Reload for next iteration
-	addl	$12, %eax         ; Move to next element
-	subl	$1, %ebx          ; Decrement counter
-	jne	L1060             ; Continue until all initialized
-	fstp	%st(0)            ; Pop infinity from FPU stack
+	fstpt		(%eax)            ; Store infinity at matrix[i]
+	fldt		(%eax)            ; Reload for next iteration
+	addl		$12, %eax         ; Move to next element
+	subl		$1, %ebx          ; Decrement counter
+	jne		L1060             ; Continue until all initialized
+	fstp		%st(0)            ; Pop infinity from FPU stack
 	
 	; COPY ORIGINAL MATRIX: Copy shortest paths to temporary matrix
-	movl	-152(%ebp), %eax  ; Load N
-	testl	%eax, %eax        ; Check if N > 0
-	je	L1118             ; Skip if no airports
-	cmpl	$357913941, %eax  ; Check for overflow
-	ja	L983              ; Jump to error if too large
-	leal	(%eax,%eax,2), %esi ; Calculate 3 * N
-	sall	$2, %esi          ; Calculate 3 * N * 4 bytes
-	movl	%esi, (%esp)      ; Push size
-	call	__Znwj            ; Allocate memory
-	movl	-156(%ebp), %ecx  ; Load size
-	movl	%eax, %edi        ; Store new matrix pointer
-	movl	%edi, -208(%ebp)  ; Store matrix pointer
-	movl	%ecx, %eax        ; Copy size
-	sarl	$2, %eax          ; Convert to element count
-	imull	$-1431655765, %eax, %ebx ; Calculate actual count
-	leal	(%edi,%esi), %eax ; Calculate end address
-	movl	%edi, %esi        ; Copy matrix pointer
-	movl	%eax, -156(%ebp)  ; Store end address
-	movl	%ebx, %edi        ; Store count
-	movl	%ecx, %ebx        ; Copy size
+	movl		-152(%ebp), %eax  ; Load N
+	testl		%eax, %eax        ; Check if N > 0
+	je		L1118             ; Skip if no airports
+	cmpl		$357913941, %eax  ; Check for overflow
+	ja		L983              ; Jump to error if too large
+	leal		(%eax,%eax,2), %esi ; Calculate 3 * N
+	sall		$2, %esi          ; Calculate 3 * N * 4 bytes
+	movl		%esi, (%esp)      ; Push size
+	call		__Znwj            ; Allocate memory
+	movl		-156(%ebp), %ecx  ; Load size
+	movl		%eax, %edi        ; Store new matrix pointer
+	movl		%edi, -208(%ebp)  ; Store matrix pointer
+	movl		%ecx, %eax        ; Copy size
+	sarl		$2, %eax          ; Convert to element count
+	imull		$-1431655765, %eax, %ebx ; Calculate actual count
+	leal		(%edi,%esi), %eax ; Calculate end address
+	movl		%edi, %esi        ; Copy matrix pointer
+	movl		%eax, -156(%ebp)  ; Store end address
+	movl		%ebx, %edi        ; Store count
+	movl		%ecx, %ebx        ; Copy size
 	
 L1066:
 	; MATRIX COPY LOOP: Copy each row of the distance matrix
-	testl	%esi, %esi        ; Check if valid pointer
-	je	L1062             ; Skip if null
-	xorl	%eax, %eax        ; Clear pointer
-	testl	%edi, %edi        ; Check if count > 0
-	movl	$0, (%esi)        ; Initialize row pointer
-	movl	$0, 4(%esi)       ; Initialize row end
-	movl	$0, 8(%esi)       ; Initialize row capacity
-	je	L1064             ; Skip if no elements
-	cmpl	$357913941, %edi  ; Check for overflow
-	ja	L983              ; Jump to error if too large
-	movl	%ebx, (%esp)      ; Push size
-	call	__Znwj            ; Allocate row memory
+	testl		%esi, %esi        ; Check if valid pointer
+	je		L1062             ; Skip if null
+	xorl		%eax, %eax        ; Clear pointer
+	testl		%edi, %edi        ; Check if count > 0
+	movl		$0, (%esi)        ; Initialize row pointer
+	movl		$0, 4(%esi)       ; Initialize row end
+	movl		$0, 8(%esi)       ; Initialize row capacity
+	je		L1064             ; Skip if no elements
+	cmpl		$357913941, %edi  ; Check for overflow
+	ja		L983              ; Jump to error if too large
+	movl		%ebx, (%esp)      ; Push size
+	call		__Znwj            ; Allocate row memory
 	
 L1064:
 	; SETUP ROW POINTERS
-	leal	(%eax,%ebx), %ecx ; Calculate row end
-	testl	%edi, %edi        ; Check if count > 0
-	movl	%eax, (%esi)      ; Store row begin
-	movl	%eax, 4(%esi)     ; Store row current
-	movl	%ecx, 8(%esi)     ; Store row end
-	je	L1065             ; Skip if no elements
+	leal		(%eax,%ebx), %ecx ; Calculate row end
+	testl		%edi, %edi        ; Check if count > 0
+	movl		%eax, (%esi)      ; Store row begin
+	movl		%eax, 4(%esi)     ; Store row current
+	movl		%ecx, 8(%esi)     ; Store row end
+	je		L1065             ; Skip if no elements
 	
 	; COPY ROW DATA: memcpy from original matrix
-	movl	%ecx, -160(%ebp)  ; Store row end
-	movl	-164(%ebp), %ecx  ; Load source matrix
-	movl	%ebx, 8(%esp)     ; Push size
-	movl	%eax, (%esp)      ; Push destination
-	movl	%ecx, 4(%esp)     ; Push source
-	call	_memcpy           ; Copy row data
-	movl	-160(%ebp), %ecx  ; Reload row end
+	movl		%ecx, -160(%ebp)  ; Store row end
+	movl		-164(%ebp), %ecx  ; Load source matrix
+	movl		%ebx, 8(%esp)     ; Push size
+	movl		%eax, (%esp)      ; Push destination
+	movl		%ecx, 4(%esp)     ; Push source
+	call		_memcpy           ; Copy row data
+	movl		-160(%ebp), %ecx  ; Reload row end
 	
 L1065:
-	movl	%ecx, 4(%esi)     ; Update row current pointer
+	movl		%ecx, 4(%esi)     ; Update row current pointer
 	
 L1062:
 	; NEXT ROW: Move to next row in matrix
-	addl	$12, %esi         ; Move to next row
-	cmpl	%esi, -156(%ebp)  ; Check if done
-	jne	L1066             ; Continue if not done
+	addl		$12, %esi         ; Move to next row
+	cmpl		%esi, -156(%ebp)  ; Check if done
+	jne		L1066             ; Continue if not done
 	
 	; CLEANUP ORIGINAL MATRIX
-	movl	-208(%ebp), %edi  ; Load matrix pointer
-	movl	%esi, -172(%ebp)  ; Store end pointer
+	movl		-208(%ebp), %edi  ; Load matrix pointer
+	movl		%esi, -172(%ebp)  ; Store end pointer
 	
 L1061:
-	movl	-164(%ebp), %eax  ; Load original matrix
-	movl	%eax, (%esp)      ; Push matrix pointer
-	call	__ZdlPv           ; Delete original matrix
+	movl		-164(%ebp), %eax  ; Load original matrix
+	movl		%eax, (%esp)      ; Push matrix pointer
+	call		__ZdlPv           ; Delete original matrix
 	
 	; MODIFIED FLOYD-WARSHALL: Add additional fuel to edges and recalculate
-	movl	-152(%ebp), %esi  ; Load N
-	testl	%esi, %esi        ; Check if N > 0
-	jle	L1067             ; Skip if no airports
-	leal	(%esi,%esi,2), %edx ; Calculate 3 * N
-	fldz                   ; Load 0.0 for diagonal initialization
-	xorl	%eax, %eax        ; Clear counter
-	sall	$2, %edx          ; Calculate 3 * N * 4 bytes
+	movl		-152(%ebp), %esi  ; Load N
+	testl		%esi, %esi        ; Check if N > 0
+	jle		L1067             ; Skip if no airports
+	leal		(%esi,%esi,2), %edx ; Calculate 3 * N
+	fldz                   		  ; Load 0.0 for diagonal initialization
+	xorl		%eax, %eax        ; Clear counter
+	sall		$2, %edx          ; Calculate 3 * N * 4 bytes
 	
 L1069:
 	; INITIALIZE DIAGONAL: Set distance[i][i] = 0
-	movl	(%edi,%eax), %ecx ; Load matrix row
-	fstpt	(%ecx,%eax)       ; Store 0.0 at diagonal
-	fldt	(%ecx,%eax)       ; Reload for next iteration
-	addl	$12, %eax         ; Move to next diagonal element
-	cmpl	%eax, %edx        ; Check if done
-	jne	L1069             ; Continue if not done
-	fstp	%st(0)            ; Pop 0.0 from FPU stack
+	movl		(%edi,%eax), %ecx ; Load matrix row
+	fstpt		(%ecx,%eax)       ; Store 0.0 at diagonal
+	fldt		(%ecx,%eax)       ; Reload for next iteration
+	addl		$12, %eax         ; Move to next diagonal element
+	cmpl		%eax, %edx        ; Check if done
+	jne		L1069             ; Continue if not done
+	fstp		%st(0)            ; Pop 0.0 from FPU stack
 	
 	; EDGE MODIFICATION: Add additional fuel to all edges
-	fldt	LC5               ; Load EPS constant
-	movl	%esi, -160(%ebp)  ; Store N
-	movl	-176(%ebp), %ebx  ; Load vertex index mapping
-	xorl	%ecx, %ecx        ; Clear i counter
-	movl	-168(%ebp), %esi  ; Load original distance matrix
-	movl	%eax, -156(%ebp)  ; Store matrix size
-	movl	%edi, -164(%ebp)  ; Store current matrix
-	movl	%edi, -208(%ebp)  ; Store matrix backup
+	fldt		LC5               ; Load EPS constant
+	movl		%esi, -160(%ebp)  ; Store N
+	movl		-176(%ebp), %ebx  ; Load vertex index mapping
+	xorl		%ecx, %ecx        ; Clear i counter
+	movl		-168(%ebp), %esi  ; Load original distance matrix
+	movl		%eax, -156(%ebp)  ; Store matrix size
+	movl		%edi, -164(%ebp)  ; Store current matrix
+	movl		%edi, -208(%ebp)  ; Store matrix backup
 	
 L1075:
 	; OUTER LOOP: For each source vertex i
-	xorl	%edx, %edx        ; Clear j counter
+	xorl		%edx, %edx        ; Clear j counter
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        	  ; Align for performance
 L1074:
 	; INNER LOOP: For each destination vertex j
-	cmpl	%edx, %ecx        ; Check if i == j (diagonal)
-	je	L1072             ; Skip diagonal elements
+	cmpl		%edx, %ecx        ; Check if i == j (diagonal)
+	je		L1072             ; Skip diagonal elements
 	
 	; CALCULATE MODIFIED DISTANCE: distance[i][j] = original[i][j] + additional_fuel
-	movl	(%ebx,%ecx,4), %eax ; Load vertex index for i
-	leal	(%eax,%eax,2), %edi ; Calculate 3 * i
-	movl	(%ebx,%edx,4), %eax ; Load vertex index for j
-	leal	(%eax,%eax,2), %eax ; Calculate 3 * j
-	sall	$2, %eax          ; Calculate 3 * j * 4 bytes
-	addl	(%esi,%edi,4), %eax ; Calculate &original[i][j]
-	fldt	(%eax)            ; Load original distance
-	fldt	-120(%ebp)        ; Load additional fuel
-	fadd	%st(2), %st       ; Add: original + additional_fuel
-	fucomp	%st(1)            ; Compare with EPS
-	fnstsw	%ax              ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jb	L1255             ; Jump if modified distance < EPS (invalid)
+	movl		(%ebx,%ecx,4), %eax ; Load vertex index for i
+	leal		(%eax,%eax,2), %edi ; Calculate 3 * i
+	movl		(%ebx,%edx,4), %eax ; Load vertex index for j
+	leal		(%eax,%eax,2), %eax ; Calculate 3 * j
+	sall		$2, %eax          ; Calculate 3 * j * 4 bytes
+	addl		(%esi,%edi,4), %eax ; Calculate &original[i][j]
+	fldt		(%eax)            ; Load original distance
+	fldt		-120(%ebp)        ; Load additional fuel
+	fadd		%st(2), %st       ; Add: original + additional_fuel
+	fucomp		%st(1)            ; Compare with EPS
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	jb		L1255             ; Jump if modified distance < EPS (invalid)
 	
 	; STORE MODIFIED DISTANCE: Update matrix with new distance
-	movl	-164(%ebp), %edi  ; Load current matrix
-	leal	(%edx,%edx,2), %eax ; Calculate 3 * j
-	sall	$2, %eax          ; Calculate 3 * j * 4 bytes
-	addl	(%edi), %eax      ; Calculate &modified[i][j]
-	fstpt	(%eax)            ; Store modified distance
-	jmp	L1072             ; Jump to next iteration
+	movl		-164(%ebp), %edi  ; Load current matrix
+	leal		(%edx,%edx,2), %eax ; Calculate 3 * j
+	sall		$2, %eax          ; Calculate 3 * j * 4 bytes
+	addl		(%edi), %eax      ; Calculate &modified[i][j]
+	fstpt		(%eax)            ; Store modified distance
+	jmp		L1072             ; Jump to next iteration
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        	  ; Align for performance
 L1255:
 	; INVALID DISTANCE: Don't store invalid distance
-	fstp	%st(0)            ; Pop invalid distance
+	fstp		%st(0)            ; Pop invalid distance
 	
 L1072:
 	; INNER LOOP INCREMENT: j++
-	addl	$1, %edx          ; Increment j
-	cmpl	-160(%ebp), %edx  ; Check if j < N
-	jne	L1074             ; Continue if j < N
+	addl		$1, %edx          ; Increment j
+	cmpl		-160(%ebp), %edx  ; Check if j < N
+	jne		L1074             ; Continue if j < N
 	
-	cmpl	%ecx, %edx        ; Check if i < N
-	jne	L1075             ; Continue if i < N
+	cmpl		%ecx, %edx        ; Check if i < N
+	jne		L1075             ; Continue if i < N
 	
 	; CLEANUP EPS CONSTANT: Pop EPS from FPU stack
-	fstp	%st(0)            ; Pop EPS constant
+	fstp		%st(0)            ; Pop EPS constant
 	
 	; SECOND FLOYD-WARSHALL: Run Floyd-Warshall on modified distances
-	fldt	LC17              ; Load -INF constant
-	movl	-208(%ebp), %edi  ; Load modified matrix
-	movl	-156(%ebp), %eax  ; Load matrix size
-	xorl	%esi, %esi        ; Clear k counter
-	addl	%edi, %eax        ; Calculate matrix end
-	movl	%eax, -164(%ebp)  ; Store matrix end
+	fldt		LC17              ; Load -INF constant
+	movl		-208(%ebp), %edi  ; Load modified matrix
+	movl		-156(%ebp), %eax  ; Load matrix size
+	xorl		%esi, %esi        ; Clear k counter
+	addl		%edi, %eax        ; Calculate matrix end
+	movl		%eax, -164(%ebp)  ; Store matrix end
 	
 L1080:
 	; FLOYD-WARSHALL OUTER LOOP: for (k = 0; k < V; k++)
-	movl	%edi, -160(%ebp)  ; Store current matrix row
+	movl		%edi, -160(%ebp)  ; Store current matrix row
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        ; Align for performance
 L1079:
 	; FLOYD-WARSHALL MIDDLE LOOP: for (i = 0; i < V; i++)
-	movl	-160(%ebp), %eax  ; Load matrix row i
-	xorl	%edx, %edx        ; Clear j counter
-	movl	(%eax), %ecx      ; Load matrix[i] row
-	leal	(%ecx,%esi), %ebx ; Calculate &matrix[i][k]
+	movl		-160(%ebp), %eax  ; Load matrix row i
+	xorl		%edx, %edx        ; Clear j counter
+	movl		(%eax), %ecx      ; Load matrix[i] row
+	leal		(%ecx,%esi), %ebx ; Calculate &matrix[i][k]
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        	  ; Align for performance
 L1078:
 	; FLOYD-WARSHALL INNER LOOP: for (j = 0; j < V; j++)
-	fldt	(%ebx)            ; Load matrix[i][k]
-	fucom	%st(1)            ; Compare with -INF
-	fnstsw	%ax              ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	ja	L1256             ; Jump if matrix[i][k] == INF
+	fldt		(%ebx)            ; Load matrix[i][k]
+	fucom		%st(1)            ; Compare with -INF
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	ja		L1256             ; Jump if matrix[i][k] == INF
 	
 	; CHECK matrix[k][j] != INF
-	movl	(%edi,%esi), %eax ; Load matrix[k] row
-	fldt	(%eax,%edx)       ; Load matrix[k][j]
-	fucom	%st(2)            ; Compare with -INF
-	fnstsw	%ax              ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	ja	L1257             ; Jump if matrix[k][j] == INF
+	movl		(%edi,%esi), %eax ; Load matrix[k] row
+	fldt		(%eax,%edx)       ; Load matrix[k][j]
+	fucom		%st(2)            ; Compare with -INF
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	ja		L1257             ; Jump if matrix[k][j] == INF
 	
 	; CALCULATE AND COMPARE: matrix[i][k] + matrix[k][j] vs matrix[i][j]
-	faddp	%st, %st(1)       ; Add: matrix[i][k] + matrix[k][j]
-	fldt	(%ecx,%edx)       ; Load matrix[i][j]
-	fucom	%st(1)            ; Compare distances
-	fnstsw	%ax              ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jbe	L1258             ; Jump if old <= new
+	faddp		%st, %st(1)       ; Add: matrix[i][k] + matrix[k][j]
+	fldt		(%ecx,%edx)       ; Load matrix[i][j]
+	fucom		%st(1)            ; Compare distances
+	fnstsw		%ax               ; Store FPU status
+	sahf                     	  ; Transfer to CPU flags
+	jbe		L1258             ; Jump if old <= new
 	
 	; UPDATE: Found shorter path through k
-	fstp	%st(0)            ; Pop old distance
-	jmp	L1106             ; Jump to store new distance
+	fstp		%st(0)            ; Pop old distance
+	jmp		L1106             ; Jump to store new distance
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        	  ; Align for performance
 L1258:
-	fstp	%st(1)            ; Pop new distance, keep old
+	fstp		%st(1)            ; Pop new distance, keep old
 	
 L1106:
-	fstpt	(%ecx,%edx)       ; Store minimum distance
-	jmp	L1076             ; Jump to next iteration
+	fstpt		(%ecx,%edx)       ; Store minimum distance
+	jmp		L1076             ; Jump to next iteration
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        	  ; Align for performance
 L1256:
-	fstp	%st(0)            ; Pop invalid distance
-	jmp	L1076             ; Jump to next iteration
+	fstp		%st(0)            ; Pop invalid distance
+	jmp		L1076             ; Jump to next iteration
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        	  ; Align for performance
 L1257:
-	fstp	%st(0)            ; Pop matrix[k][j]
-	fstp	%st(0)            ; Pop matrix[i][k]
+	fstp		%st(0)            ; Pop matrix[k][j]
+	fstp		%st(0)            ; Pop matrix[i][k]
 	
 L1076:
 	; FLOYD-WARSHALL LOOP INCREMENTS
-	addl	$12, %edx         ; j++
-	cmpl	%edx, -156(%ebp)  ; Check if j < V
-	jne	L1078             ; Continue inner loop
-	addl	$12, -160(%ebp)   ; i++
-	movl	-160(%ebp), %eax  ; Load new row pointer
-	cmpl	%eax, -164(%ebp)  ; Check if i < V
-	jne	L1079             ; Continue middle loop
-	addl	$12, %esi         ; k++
-	cmpl	%esi, -156(%ebp)  ; Check if k < V
-	jne	L1080             ; Continue outer loop
-	fstp	%st(0)            ; Pop -INF constant
+	addl		$12, %edx         ; j++
+	cmpl		%edx, -156(%ebp)  ; Check if j < V
+	jne		L1078             ; Continue inner loop
+	addl		$12, -160(%ebp)   ; i++
+	movl		-160(%ebp), %eax  ; Load new row pointer
+	cmpl		%eax, -164(%ebp)  ; Check if i < V
+	jne		L1079             ; Continue middle loop
+	addl		$12, %esi         ; k++
+	cmpl		%esi, -156(%ebp)  ; Check if k < V
+	jne		L1080             ; Continue outer loop
+	fstp		%st(0)            ; Pop -INF constant
 	
 L1067:
 	; QUERY RESULT: Extract shortest path distance from source to destination
-	movl	-144(%ebp), %eax  ; Load source index
-	leal	(%eax,%eax,2), %edx ; Calculate 3 * source
-	movl	-140(%ebp), %eax  ; Load destination index
-	movl	(%edi,%edx,4), %ecx ; Load matrix[source] row
-	leal	(%eax,%eax,2), %eax ; Calculate 3 * destination
-	leal	(%ecx,%eax,4), %eax ; Calculate &matrix[source][destination]
-	fldt	(%eax)            ; Load shortest distance
-	fldt	LC17              ; Load -INF for comparison
-	fxch	%st(1)            ; Exchange distances
-	fucom	%st(1)            ; Compare distance with -INF
-	fnstsw	%ax              ; Store FPU status
-	fstp	%st(1)            ; Pop -INF
-	sahf                      ; Transfer to CPU flags
-	jbe	L1246             ; Jump if distance <= -INF (no path)
+	movl		-144(%ebp), %eax  ; Load source index
+	leal		(%eax,%eax,2), %edx ; Calculate 3 * source
+	movl		-140(%ebp), %eax  ; Load destination index
+	movl		(%edi,%edx,4), %ecx ; Load matrix[source] row
+	leal		(%eax,%eax,2), %eax ; Calculate 3 * destination
+	leal		(%ecx,%eax,4), %eax ; Calculate &matrix[source][destination]
+	fldt		(%eax)            ; Load shortest distance
+	fldt		LC17              ; Load -INF for comparison
+	fxch		%st(1)            ; Exchange distances
+	fucom		%st(1)            ; Compare distance with -INF
+	fnstsw		%ax               ; Store FPU status
+	fstp		%st(1)            ; Pop -INF
+	sahf                      	  ; Transfer to CPU flags
+	jbe		L1246             ; Jump if distance <= -INF (no path)
 	
 	; OUTPUT DISTANCE: Print the shortest distance
-	fstp	%st(0)            ; Pop distance (will be output by other code)
-	movl	$10, 8(%esp)      ; String length for "impossible"
-	movl	$LC18, 4(%esp)    ; Push "impossible" string
-	movl	$__ZSt4cout, (%esp) ; Push cout object
-	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "impossible"
+	fstp		%st(0)            ; Pop distance (will be output by other code)
+	movl		$10, 8(%esp)      ; String length for "impossible"
+	movl		$LC18, 4(%esp)    ; Push "impossible" string
+	movl		$__ZSt4cout, (%esp) ; Push cout object
+	call		__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "impossible"
 	
 	; OUTPUT NEWLINE: Add newline after result
-	movl	__ZSt4cout, %eax  ; Load cout object
-	movl	-12(%eax), %eax   ; Get vtable offset
-	movl	__ZSt4cout+124(%eax), %ebx ; Load ctype facet
-	testl	%ebx, %ebx        ; Check if valid
-	je	L1036             ; Jump to error if null
-	cmpb	$0, 28(%ebx)      ; Check if initialized
-	je	L1081             ; Jump to initialization if needed
-	movsbl	39(%ebx), %eax   ; Load newline character
+	movl		__ZSt4cout, %eax  ; Load cout object
+	movl		-12(%eax), %eax   ; Get vtable offset
+	movl		__ZSt4cout+124(%eax), %ebx ; Load ctype facet
+	testl		%ebx, %ebx        ; Check if valid
+	je		L1036             ; Jump to error if null
+	cmpb		$0, 28(%ebx)      ; Check if initialized
+	je		L1081             ; Jump to initialization if needed
+	movsbl		39(%ebx), %eax   ; Load newline character
 	
 L1082:
-	movl	$__ZSt4cout, %ecx ; Load cout object
-	movl	%eax, (%esp)      ; Push newline
-	call	__ZNSo3putEc      ; Print newline
-	subl	$4, %esp          ; Adjust stack
-	movl	%eax, %ecx        ; Load cout result
-	call	__ZNSo5flushEv    ; Flush output
+	movl		$__ZSt4cout, %ecx ; Load cout object
+	movl		%eax, (%esp)      ; Push newline
+	call		__ZNSo3putEc      ; Print newline
+	subl		$4, %esp          ; Adjust stack
+	movl		%eax, %ecx        ; Load cout result
+	call		__ZNSo5flushEv    ; Flush output
 	
 L1083:
 	; CLEANUP QUERY MATRICES: Free allocated memory for this query
-	cmpl	-172(%ebp), %edi  ; Compare matrix pointers
-	movl	%edi, %ebx        ; Load matrix pointer
-	movl	-172(%ebp), %esi  ; Load matrix end
-	je	L1090             ; Skip if no cleanup needed
+	cmpl		-172(%ebp), %edi  ; Compare matrix pointers
+	movl		%edi, %ebx        ; Load matrix pointer
+	movl		-172(%ebp), %esi  ; Load matrix end
+	je		L1090             ; Skip if no cleanup needed
 	
 L1179:
 	; CLEANUP MATRIX ROWS: Free each row
-	movl	(%ebx), %eax      ; Load row pointer
-	testl	%eax, %eax        ; Check if valid
-	je	L1089             ; Skip if null
-	movl	%eax, (%esp)      ; Push row pointer
-	call	__ZdlPv           ; Delete row
+	movl		(%ebx), %eax      ; Load row pointer
+	testl		%eax, %eax        ; Check if valid
+	je		L1089             ; Skip if null
+	movl		%eax, (%esp)      ; Push row pointer
+	call		__ZdlPv           ; Delete row
 	
 L1089:
-	addl	$12, %ebx         ; Move to next row
-	cmpl	%esi, %ebx        ; Check if done
-	jne	L1179             ; Continue if more rows
+	addl		$12, %ebx         ; Move to next row
+	cmpl		%esi, %ebx        ; Check if done
+	jne		L1179             ; Continue if more rows
 	
 L1090:
 	; CLEANUP MATRIX STRUCTURE: Free matrix structure
-	testl	%edi, %edi        ; Check if matrix exists
-	je	L1088             ; Skip if null
-	movl	%edi, (%esp)      ; Push matrix pointer
-	call	__ZdlPv           ; Delete matrix
+	testl		%edi, %edi        ; Check if matrix exists
+	je		L1088             ; Skip if null
+	movl		%edi, (%esp)      ; Push matrix pointer
+	call		__ZdlPv           ; Delete matrix
 	
 L1088:
 	; NEXT QUERY: Increment query counter and continue
-	addl	$1, -200(%ebp)    ; Increment query counter
-	movl	-200(%ebp), %eax  ; Load query counter
-	cmpl	%eax, -148(%ebp)  ; Compare with total queries
-	jg	L1093             ; Continue if more queries
+	addl		$1, -200(%ebp)    ; Increment query counter
+	movl		-200(%ebp), %eax  ; Load query counter
+	cmpl		%eax, -148(%ebp)  ; Compare with total queries
+	jg		L1093             ; Continue if more queries
 	
 L1092:
 	; ========================================================================
@@ -3540,105 +3540,105 @@ L1092:
 	
 	; CLEANUP GLOBAL STRUCTURES: Free all allocated memory for this test case
 	; Clean up adj_aux matrix
-	movl	-196(%ebp), %eax  ; Load adj_aux matrix
-	testl	%eax, %eax        ; Check if valid
-	je	L1095_skip_adj_aux ; Skip if null
-	movl	%eax, (%esp)      ; Push matrix pointer
-	call	__ZdlPv           ; Delete adj_aux matrix
+	movl		-196(%ebp), %eax  ; Load adj_aux matrix
+	testl		%eax, %eax        ; Check if valid
+	je		L1095_skip_adj_aux ; Skip if null
+	movl		%eax, (%esp)      ; Push matrix pointer
+	call		__ZdlPv           ; Delete adj_aux matrix
 	
 L1095_skip_adj_aux:
 	; Clean up vertex array
-	movl	-180(%ebp), %eax  ; Load vertices array
-	testl	%eax, %eax        ; Check if valid
-	je	L1095_skip_vertices ; Skip if null
-	movl	%eax, (%esp)      ; Push array pointer
-	call	__ZdlPv           ; Delete vertices array
+	movl		-180(%ebp), %eax  ; Load vertices array
+	testl		%eax, %eax        ; Check if valid
+	je		L1095_skip_vertices ; Skip if null
+	movl		%eax, (%esp)      ; Push array pointer
+	call		__ZdlPv           ; Delete vertices array
 	
 L1095_skip_vertices:
 	; Clean up airport_to_vertex_idx array
-	movl	-192(%ebp), %eax  ; Load airport_to_vertex_idx array
-	testl	%eax, %eax        ; Check if valid
-	je	L1095_skip_airport_idx ; Skip if null
-	movl	%eax, (%esp)      ; Push array pointer
-	call	__ZdlPv           ; Delete airport_to_vertex_idx array
+	movl		-192(%ebp), %eax  ; Load airport_to_vertex_idx array
+	testl		%eax, %eax        ; Check if valid
+	je		L1095_skip_airport_idx ; Skip if null
+	movl		%eax, (%esp)      ; Push array pointer
+	call		__ZdlPv           ; Delete airport_to_vertex_idx array
 	
 L1095_skip_airport_idx:
 	; Clean up airports_xyz vector
-	movl	-100(%ebp), %eax  ; Load airports_xyz.begin()
-	testl	%eax, %eax        ; Check if valid
-	je	L1095_skip_airports ; Skip if null
-	movl	%eax, (%esp)      ; Push array pointer
-	call	__ZdlPv           ; Delete airports_xyz array
+	movl		-100(%ebp), %eax  ; Load airports_xyz.begin()
+	testl		%eax, %eax        ; Check if valid
+	je		L1095_skip_airports ; Skip if null
+	movl		%eax, (%esp)      ; Push array pointer
+	call		__ZdlPv           ; Delete airports_xyz array
 	
 L1095_skip_airports:
 	; Clean up vertex_map (red-black tree)
-	leal	-120(%ebp), %ecx  ; Load vertex_map address
-	movl	-120(%ebp), %eax  ; Load root node
-	testl	%eax, %eax        ; Check if tree has nodes
-	je	L1095_skip_vertex_map ; Skip if empty
-	movl	%eax, (%esp)      ; Push root node
-	call	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E ; Delete tree
+	leal		-120(%ebp), %ecx  ; Load vertex_map address
+	movl		-120(%ebp), %eax  ; Load root node
+	testl		%eax, %eax        ; Check if tree has nodes
+	je		L1095_skip_vertex_map ; Skip if empty
+	movl		%eax, (%esp)      ; Push root node
+	call		__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E ; Delete tree
 	
 L1095_skip_vertex_map:
 	; Clean up unique_vertices_set (red-black tree)
-	leal	-84(%ebp), %ecx   ; Load unique_vertices_set address
-	movl	-84(%ebp), %eax   ; Load root node
-	testl	%eax, %eax        ; Check if tree has nodes
-	je	L1095_cleanup_done ; Skip if empty
-	movl	%eax, (%esp)      ; Push root node
-	call	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E ; Delete tree
+	leal		-84(%ebp), %ecx   ; Load unique_vertices_set address
+	movl		-84(%ebp), %eax   ; Load root node
+	testl		%eax, %eax        ; Check if tree has nodes
+	je		L1095_cleanup_done ; Skip if empty
+	movl		%eax, (%esp)      ; Push root node
+	call		__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E ; Delete tree
 	
 L1095_cleanup_done:
 	; CONTINUE MAIN LOOP: Jump back to read next test case
-	jmp	L1101             ; Jump back to main input loop (while (cin >> N >> R))
+	jmp		L1101             ; Jump back to main input loop (while (cin >> N >> R))
 	
 L1110:
 	; ERROR HANDLING: Empty vertex set - should not happen in valid input
 	; Output error message and continue to next test case
-	movl	$5, 8(%esp)       ; String length for "error"
-	movl	$LC19, 4(%esp)    ; Push "error" string (assuming it exists)
-	movl	$__ZSt4cout, (%esp) ; Push cout object
-	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "error"
-	jmp	L1092             ; Jump to cleanup
+	movl		$5, 8(%esp)       ; String length for "error"
+	movl		$LC19, 4(%esp)    ; Push "error" string (assuming it exists)
+	movl		$__ZSt4cout, (%esp) ; Push cout object
+	call		__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "error"
+	jmp		L1092             ; Jump to cleanup
 	
 L1245:
 	; ERROR HANDLING: No airports in input
 	; Output error for each query and continue
-	movl	-148(%ebp), %ebx  ; Load Q (number of queries)
-	testl	%ebx, %ebx        ; Check if Q > 0
-	jle	L1092             ; Skip if no queries
+	movl		-148(%ebp), %ebx  ; Load Q (number of queries)
+	testl		%ebx, %ebx        ; Check if Q > 0
+	jle		L1092             ; Skip if no queries
 	
 L1245_error_loop:
 	; Output "impossible" for each query when no airports
-	movl	$10, 8(%esp)      ; String length for "impossible"
-	movl	$LC18, 4(%esp)    ; Push "impossible" string
-	movl	$__ZSt4cout, (%esp) ; Push cout object
-	call	__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "impossible"
+	movl		$10, 8(%esp)      ; String length for "impossible"
+	movl		$LC18, 4(%esp)    ; Push "impossible" string
+	movl		$__ZSt4cout, (%esp) ; Push cout object
+	call		__ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_i ; Print "impossible"
 	
 	; Add newline
-	movl	$__ZSt4cout, %eax ; Load cout object
-	movl	$10, (%esp)       ; Push newline character
-	movl	%eax, %ecx        ; Load cout object
-	call	__ZNSo3putEc      ; Print newline
-	addl	$4, %esp          ; Adjust stack
+	movl		$__ZSt4cout, %eax ; Load cout object
+	movl		$10, (%esp)       ; Push newline character
+	movl		%eax, %ecx        ; Load cout object
+	call		__ZNSo3putEc      ; Print newline
+	addl		$4, %esp          ; Adjust stack
 	
-	subl	$1, %ebx          ; Decrement query counter
-	jne	L1245_error_loop  ; Continue if more queries
-	jmp	L1092             ; Jump to cleanup
+	subl		$1, %ebx          ; Decrement query counter
+	jne		L1245_error_loop  ; Continue if more queries
+	jmp		L1092             ; Jump to cleanup
 	
 L983:
 	; ERROR HANDLING: Memory allocation overflow
 	; This should call std::bad_alloc exception or terminate
-	call	__ZSt17__throw_bad_allocv ; Throw bad_alloc exception
+	call		__ZSt17__throw_bad_allocv ; Throw bad_alloc exception
 	
 L1036:
 L1053:
 L1081:
 	; ERROR HANDLING: I/O stream errors
 	; Handle various I/O error conditions
-	movl	$__ZSt4cout, %ecx ; Load cout object
-	call	__ZNSo5flushEv    ; Attempt to flush
-	jmp	L1092             ; Continue to cleanup
+	movl		$__ZSt4cout, %ecx ; Load cout object
+	call		__ZNSo5flushEv    ; Attempt to flush
+	jmp		L1092             ; Continue to cleanup
 	
 L1146:
 	; ========================================================================
@@ -3650,54 +3650,54 @@ L1146:
 	; Most cleanup should already be done per test case
 	
 	; PROGRAM EXIT: Return from main function
-	movl	$0, %eax          ; Set return value = 0 (success)
-	leal	-16(%ebp), %esp   ; Restore stack pointer
-	popl	%ecx              ; Restore parameter pointer
-	popl	%ebx              ; Restore callee-saved registers
-	popl	%esi
-	popl	%edi
-	popl	%ebp              ; Restore base pointer
-	leal	-4(%ecx), %esp    ; Restore original stack
-	ret                       ; Return from main
-	movl	-168(%ebp), %eax  ; Load matrix pointer
-	movl	%eax, (%esp)      ; Push matrix pointer
-	call	__ZdlPv           ; Delete matrix
+	movl		$0, %eax          ; Set return value = 0 (success)
+	leal		-16(%ebp), %esp   ; Restore stack pointer
+	popl		%ecx              ; Restore parameter pointer
+	popl		%ebx              ; Restore callee-saved registers
+	popl		%esi
+	popl		%edi
+	popl		%ebp              ; Restore base pointer
+	leal		-4(%ecx), %esp    ; Restore original stack
+	ret                       	  ; Return from main
+	movl		-168(%ebp), %eax  ; Load matrix pointer
+	movl		%eax, (%esp)      ; Push matrix pointer
+	call		__ZdlPv           ; Delete matrix
 	
 L1095:
-	movl	-176(%ebp), %eax  ; Load vertex mapping
-	testl	%eax, %eax        ; Check if valid
-	je	L1098             ; Skip if null
-	movl	%eax, (%esp)      ; Push mapping pointer
-	call	__ZdlPv           ; Delete mapping
+	movl		-176(%ebp), %eax  ; Load vertex mapping
+	testl		%eax, %eax        ; Check if valid
+	je		L1098             ; Skip if null
+	movl		%eax, (%esp)      ; Push mapping pointer
+	call		__ZdlPv           ; Delete mapping
 	
 L1098:
 	; CLEANUP STL CONTAINERS: Free set and map structures
-	movl	-48(%ebp), %eax   ; Load vertex map root
-	leal	-56(%ebp), %ecx   ; Load map address
-	movl	%eax, (%esp)      ; Push root pointer
-	call	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E ; Delete map tree
-	movl	-180(%ebp), %eax  ; Load vertex array
-	subl	$4, %esp          ; Adjust stack
-	testl	%eax, %eax        ; Check if valid
-	je	L1099             ; Skip if null
-	movl	%eax, (%esp)      ; Push array pointer
-	call	__ZdlPv           ; Delete array
+	movl		-48(%ebp), %eax   ; Load vertex map root
+	leal		-56(%ebp), %ecx   ; Load map address
+	movl		%eax, (%esp)      ; Push root pointer
+	call		__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE8_M_eraseEPSt13_Rb_tree_nodeIS3_E ; Delete map tree
+	movl		-180(%ebp), %eax  ; Load vertex array
+	subl		$4, %esp          ; Adjust stack
+	testl		%eax, %eax        ; Check if valid
+	je		L1099             ; Skip if null
+	movl		%eax, (%esp)      ; Push array pointer
+	call		__ZdlPv           ; Delete array
 	
 L1099:
-	movl	-80(%ebp), %eax   ; Load vertex set root
-	leal	-88(%ebp), %esi   ; Load set address
-	movl	%esi, %ecx        ; Load set address
-	movl	%eax, (%esp)      ; Push root pointer
-	call	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E ; Delete set tree
-	movl	-100(%ebp), %eax  ; Load airports array
-	subl	$4, %esp          ; Adjust stack
-	testl	%eax, %eax        ; Check if valid
-	je	L1101             ; Skip if null
-	movl	%eax, (%esp)      ; Push array pointer
-	call	__ZdlPv           ; Delete array
+	movl		-80(%ebp), %eax   ; Load vertex set root
+	leal		-88(%ebp), %esi   ; Load set address
+	movl		%esi, %ecx        ; Load set address
+	movl		%eax, (%esp)      ; Push root pointer
+	call		__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE8_M_eraseEPSt13_Rb_tree_nodeIS0_E ; Delete set tree
+	movl		-100(%ebp), %eax  ; Load airports array
+	subl		$4, %esp          ; Adjust stack
+	testl		%eax, %eax        ; Check if valid
+	je		L1101             ; Skip if null
+	movl		%eax, (%esp)      ; Push array pointer
+	call		__ZdlPv           ; Delete array
 	
 	; CONTINUE MAIN LOOP: Jump back to process next test case
-	jmp	L1101             ; Jump back to main input loop
+	jmp		L1101             ; Jump back to main input loop
 
 L1246:
 	; PATH EXISTS: Output the actual distance (not "impossible")
@@ -3739,164 +3739,164 @@ L1146:
 ; The main function implements the complete flight path algorithm
 _main:
 	; Function prologue and stack alignment
-	leal	4(%esp), %ecx     ; Load effective address of parameters
-	andl	$-16, %esp        ; Align stack to 16-byte boundary
-	pushl	-4(%ecx)          ; Save return address
-	pushl	%ebp              ; Save base pointer
-	movl	%esp, %ebp        ; Set up frame pointer
-	pushl	%edi              ; Save callee-saved registers
-	pushl	%esi
-	pushl	%ebx
-	pushl	%ecx              ; Save parameter pointer
-	subl	$232, %esp        ; Allocate local stack space
+	leal		4(%esp), %ecx     ; Load effective address of parameters
+	andl		$-16, %esp        ; Align stack to 16-byte boundary
+	pushl		-4(%ecx)          ; Save return address
+	pushl		%ebp              ; Save base pointer
+	movl		%esp, %ebp        ; Set up frame pointer
+	pushl		%edi              ; Save callee-saved registers
+	pushl		%esi
+	pushl		%ebx
+	pushl		%ecx              ; Save parameter pointer
+	subl		$232, %esp        ; Allocate local stack space
 	
 	; Initialize runtime and I/O
-	call	___main           ; MinGW runtime initialization
+	call		___main           ; MinGW runtime initialization
 	
 	; C++ EQUIVALENT: ios_base::sync_with_stdio(false);
-	movl	$0, (%esp)        ; Push false parameter
-	call	__ZNSt8ios_base15sync_with_stdioEb ; Call sync_with_stdio(false)
+	movl		$0, (%esp)        ; Push false parameter
+	call		__ZNSt8ios_base15sync_with_stdioEb ; Call sync_with_stdio(false)
 	
 	; C++ EQUIVALENT: cin.tie(NULL);
-	movl	__ZSt4cout, %eax  ; Load cout object address
-	movl	$0, __ZSt3cin+120 ; Set cin.tie(NULL)
+	movl		__ZSt4cout, %eax  ; Load cout object address
+	movl		$0, __ZSt3cin+120 ; Set cin.tie(NULL)
 	
 	; C++ EQUIVALENT: cout << fixed << setprecision(3);
-	movl	$1, -204(%ebp)    ; Initialize case_num = 1
-	movl	-12(%eax), %eax   ; Get vtable offset
-	movl	__ZSt4cout+12(%eax), %edx ; Load format flags
-	movl	$3, __ZSt4cout+4(%eax)    ; Set precision to 3
-	andl	$-261, %edx       ; Clear scientific notation flags
-	orl	$4, %edx          ; Set fixed format flag
-	movl	%edx, __ZSt4cout+12(%eax) ; Store new format flags
+	movl		$1, -204(%ebp)    ; Initialize case_num = 1
+	movl		-12(%eax), %eax   ; Get vtable offset
+	movl		__ZSt4cout+12(%eax), %edx ; Load format flags
+	movl		$3, __ZSt4cout+4(%eax)    ; Set precision to 3
+	andl		$-261, %edx       ; Clear scientific notation flags
+	orl		$4, %edx          ; Set fixed format flag
+	movl		%edx, __ZSt4cout+12(%eax) ; Store new format flags
 
 ; MAIN INPUT LOOP: while (cin >> N >> R)
 L1101:
 	; C++ EQUIVALENT: cin >> N >> R;
-	leal	-152(%ebp), %eax  ; Load address of N variable
-	movl	$__ZSt3cin, %ecx  ; Load cin object address
-	leal	-136(%ebp), %edi  ; Load address of R variable
-	movl	%eax, (%esp)      ; Push N address
-	call	__ZNSirsERi       ; Call cin >> N
-	subl	$4, %esp          ; Adjust stack
-	movl	%eax, %ecx        ; Move cin result to ECX
-	movl	%edi, (%esp)      ; Push R address
-	call	__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> R (long double)
+	leal		-152(%ebp), %eax  ; Load address of N variable
+	movl		$__ZSt3cin, %ecx  ; Load cin object address
+	leal		-136(%ebp), %edi  ; Load address of R variable
+	movl		%eax, (%esp)      ; Push N address
+	call		__ZNSirsERi       ; Call cin >> N
+	subl		$4, %esp          ; Adjust stack
+	movl		%eax, %ecx        ; Move cin result to ECX
+	movl		%edi, (%esp)      ; Push R address
+	call		__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> R (long double)
 	
 	; Check for end of input
-	movl	(%eax), %edx      ; Load cin object
-	subl	$4, %esp          ; Adjust stack
-	movl	-12(%edx), %edx   ; Get vtable offset
-	testb	$5, 20(%eax,%edx) ; Test EOF and error flags
-	jne	L1146             ; Jump to exit if EOF or error
+	movl		(%eax), %edx      ; Load cin object
+	subl		$4, %esp          ; Adjust stack
+	movl		-12(%edx), %edx   ; Get vtable offset
+	testb		$5, 20(%eax,%edx) ; Test EOF and error flags
+	jne		L1146             ; Jump to exit if EOF or error
 	
 	; C++ EQUIVALENT: vector<Point> airports_xyz(N);
-	movl	-152(%ebp), %esi  ; Load N into ESI
-	movl	$0, -100(%ebp)    ; Initialize airports_xyz.begin() = nullptr
-	movl	$0, -96(%ebp)     ; Initialize airports_xyz.end() = nullptr
-	movl	$0, -92(%ebp)     ; Initialize airports_xyz.capacity_end() = nullptr
-	testl	%esi, %esi        ; Test if N == 0
-	movl	%esi, %eax        ; Copy N to EAX
-	je	L961              ; Jump if N == 0
+	movl		-152(%ebp), %esi  ; Load N into ESI
+	movl		$0, -100(%ebp)    ; Initialize airports_xyz.begin() = nullptr
+	movl		$0, -96(%ebp)     ; Initialize airports_xyz.end() = nullptr
+	movl		$0, -92(%ebp)     ; Initialize airports_xyz.capacity_end() = nullptr
+	testl		%esi, %esi        ; Test if N == 0
+	movl		%esi, %eax        ; Copy N to EAX
+	je		L961              ; Jump if N == 0
 	
 	; Allocate memory for N Points (each Point is 36 bytes)
-	cmpl	$119304647, %esi  ; Check if N > max_size (avoid overflow)
-	ja	L983              ; Jump to exception if too large
-	leal	(%esi,%esi,8), %ebx ; Calculate N * 9
-	sall	$2, %ebx          ; Multiply by 4 to get N * 36 bytes
-	movl	%ebx, (%esp)      ; Push size as parameter
-	call	__Znwj            ; Call new operator to allocate memory
-	addl	%eax, %ebx        ; Calculate end address
-	fldz                      ; Load 0.0 for initialization
-	movl	%eax, -100(%ebp)  ; Store airports_xyz.begin()
-	movl	%ebx, -92(%ebp)   ; Store airports_xyz.capacity_end()
+	cmpl		$119304647, %esi  ; Check if N > max_size (avoid overflow)
+	ja		L983              ; Jump to exception if too large
+	leal		(%esi,%esi,8), %ebx ; Calculate N * 9
+	sall		$2, %ebx          ; Multiply by 4 to get N * 36 bytes
+	movl		%ebx, (%esp)      ; Push size as parameter
+	call		__Znwj            ; Call new operator to allocate memory
+	addl		%eax, %ebx        ; Calculate end address
+	fldz                     	  ; Load 0.0 for initialization
+	movl		%eax, -100(%ebp)  ; Store airports_xyz.begin()
+	movl		%ebx, -92(%ebp)   ; Store airports_xyz.capacity_end()
 	
 	; Initialize allocated Points with zero
 L963:
-	fstpt	(%eax)            ; Store 0.0 in Point.x
-	fldt	(%eax)            ; Reload 0.0
-	addl	$36, %eax         ; Move to next Point
-	fstpt	-24(%eax)         ; Store 0.0 in Point.y
-	fldt	-24(%eax)         ; Reload 0.0
-	fstpt	-12(%eax)         ; Store 0.0 in Point.z
-	fldt	-12(%eax)         ; Reload 0.0
-	subl	$1, %esi          ; Decrement counter
-	jne	L963              ; Continue until all Points initialized
-	fstp	%st(0)            ; Pop 0.0 from FPU stack
-	movl	-152(%ebp), %eax  ; Reload N
+	fstpt		(%eax)            ; Store 0.0 in Point.x
+	fldt		(%eax)            ; Reload 0.0
+	addl		$36, %eax         ; Move to next Point
+	fstpt		-24(%eax)         ; Store 0.0 in Point.y
+	fldt		-24(%eax)         ; Reload 0.0
+	fstpt		-12(%eax)         ; Store 0.0 in Point.z
+	fldt		-12(%eax)         ; Reload 0.0
+	subl		$1, %esi          ; Decrement counter
+	jne		L963              ; Continue until all Points initialized
+	fstp		%st(0)            ; Pop 0.0 from FPU stack
+	movl		-152(%ebp), %eax  ; Reload N
 
 L1108:
-	xorl	%edi, %edi        ; Initialize loop counter i = 0
-	testl	%eax, %eax        ; Test if N == 0
-	movl	%ebx, -96(%ebp)   ; Store airports_xyz.end()
-	leal	-88(%ebp), %esi   ; Load address of lat variable
-	jle	L1233             ; Jump if N <= 0
+	xorl		%edi, %edi        ; Initialize loop counter i = 0
+	testl		%eax, %eax        ; Test if N == 0
+	movl		%ebx, -96(%ebp)   ; Store airports_xyz.end()
+	leal		-88(%ebp), %esi   ; Load address of lat variable
+	jle		L1233             ; Jump if N <= 0
 
 ; AIRPORT INPUT LOOP: for (int i = 0; i < N; ++i)
 L1162:
 	; C++ EQUIVALENT: cin >> lon >> lat;
-	leal	-56(%ebp), %eax   ; Load address of lon variable
-	movl	$__ZSt3cin, %ecx  ; Load cin object
-	movl	%eax, (%esp)      ; Push lon address
-	call	__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> lon
-	subl	$4, %esp          ; Adjust stack
-	movl	%eax, %ecx        ; Move cin result to ECX
-	movl	%esi, (%esp)      ; Push lat address
-	call	__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> lat
+	leal		-56(%ebp), %eax   ; Load address of lon variable
+	movl		$__ZSt3cin, %ecx  ; Load cin object
+	movl		%eax, (%esp)      ; Push lon address
+	call		__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> lon
+	subl		$4, %esp          ; Adjust stack
+	movl		%eax, %ecx        ; Move cin result to ECX
+	movl		%esi, (%esp)      ; Push lat address
+	call		__ZNSi10_M_extractIeEERSiRT_ ; Call cin >> lat
 	
 	; C++ EQUIVALENT: airports_xyz[i] = lat_lon_to_xyz(lat, lon);
-	fldt	-56(%ebp)         ; Load lon value
-	subl	$4, %esp          ; Adjust stack
-	movl	-100(%ebp), %ebx  ; Load airports_xyz.begin()
-	leal	(%edi,%edi,8), %eax ; Calculate i * 9
-	addl	$1, %edi          ; Increment i
-	leal	(%ebx,%eax,4), %eax ; Calculate &airports_xyz[i]
-	movl	%eax, (%esp)      ; Push result address
-	fstpt	16(%esp)          ; Store lon as parameter
-	fldt	-88(%ebp)         ; Load lat value
-	fstpt	4(%esp)           ; Store lat as parameter
-	call	__Z14lat_lon_to_xyzee ; Call lat_lon_to_xyz(lat, lon)
+	fldt		-56(%ebp)         ; Load lon value
+	subl		$4, %esp          ; Adjust stack
+	movl		-100(%ebp), %ebx  ; Load airports_xyz.begin()
+	leal		(%edi,%edi,8), %eax ; Calculate i * 9
+	addl		$1, %edi          ; Increment i
+	leal		(%ebx,%eax,4), %eax ; Calculate &airports_xyz[i]
+	movl		%eax, (%esp)      ; Push result address
+	fstpt		16(%esp)          ; Store lon as parameter
+	fldt		-88(%ebp)         ; Load lat value
+	fstpt		4(%esp)           ; Store lat as parameter
+	call		__Z14lat_lon_to_xyzee ; Call lat_lon_to_xyz(lat, lon)
 	
 	; Continue loop
-	cmpl	%edi, -152(%ebp)  ; Compare i with N
-	jg	L1162             ; Continue if i < N
+	cmpl		%edi, -152(%ebp)  ; Compare i with N
+	jg		L1162             ; Continue if i < N
 	
 	; Prepare for vertex set creation
-	movl	%ebx, %eax        ; Load airports_xyz.begin()
-	movl	-96(%ebp), %ebx   ; Load airports_xyz.end()
+	movl		%ebx, %eax        ; Load airports_xyz.begin()
+	movl		-96(%ebp), %ebx   ; Load airports_xyz.end()
 
 L965:
 	; C++ EQUIVALENT: set<Point, Point::Compare> unique_vertices_set;
-	leal	-84(%ebp), %edi   ; Load address of set object
-	cmpl	%ebx, %eax        ; Compare begin with end
-	movl	$0, -84(%ebp)     ; Initialize set.root = nullptr
-	movl	$0, -80(%ebp)     ; Initialize set.header
-	movl	$0, -68(%ebp)     ; Initialize set.size = 0
-	leal	-88(%ebp), %esi   ; Load temporary address
-	movl	%edi, -76(%ebp)   ; Store set address
-	movl	%edi, -72(%ebp)   ; Store set address
-	movl	%eax, %edi        ; Move begin iterator to EDI
-	je	L970              ; Jump if airports_xyz is empty
+	leal		-84(%ebp), %edi   ; Load address of set object
+	cmpl		%ebx, %eax        ; Compare begin with end
+	movl		$0, -84(%ebp)     ; Initialize set.root = nullptr
+	movl		$0, -80(%ebp)     ; Initialize set.header
+	movl		$0, -68(%ebp)     ; Initialize set.size = 0
+	leal		-88(%ebp), %esi   ; Load temporary address
+	movl		%edi, -76(%ebp)   ; Store set address
+	movl		%edi, -72(%ebp)   ; Store set address
+	movl		%eax, %edi        ; Move begin iterator to EDI
+	je		L970              ; Jump if airports_xyz is empty
 
 ; VERTEX INSERTION LOOP: Insert all airport points into set
 L1161:
 	; C++ EQUIVALENT: unique_vertices_set.insert(*it);
-	movl	%edi, (%esp)      ; Push airport point address
-	movl	%esi, %ecx        ; Load set address
-	addl	$36, %edi         ; Move to next airport
-	call	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE16_M_insert_uniqueIRKS0_EESt4pairISt17_Rb_tree_iteratorIS0_EbEOT_
-	subl	$4, %esp          ; Adjust stack
-	cmpl	%edi, %ebx        ; Compare current with end
-	jne	L1161             ; Continue if not at end
+	movl		%edi, (%esp)      ; Push airport point address
+	movl		%esi, %ecx        ; Load set address
+	addl		$36, %edi         ; Move to next airport
+	call		__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE16_M_insert_uniqueIRKS0_EESt4pairISt17_Rb_tree_iteratorIS0_EbEOT_
+	subl		$4, %esp          ; Adjust stack
+	cmpl		%edi, %ebx        ; Compare current with end
+	jne		L1161             ; Continue if not at end
 
 L970:
 	; Prepare for intersection point calculation
-	movl	-152(%ebp), %ebx  ; Load N
-	movl	$0, -164(%ebp)    ; Initialize outer loop counter i = 0
-	movl	-164(%ebp), %eax  ; Load i
-	movl	$36, -168(%ebp)   ; Store sizeof(Point) = 36
-	cmpl	%ebx, %eax        ; Compare i with N
-	jge	L971              ; Jump if i >= N
+	movl		-152(%ebp), %ebx  ; Load N
+	movl		$0, -164(%ebp)    ; Initialize outer loop counter i = 0
+	movl		-164(%ebp), %eax  ; Load i
+	movl		$36, -168(%ebp)   ; Store sizeof(Point) = 36
+	cmpl		%ebx, %eax        ; Compare i with N
+	jge		L971              ; Jump if i >= N
 
 ; INTERSECTION CALCULATION LOOPS: for (int i = 0; i < N; ++i) for (int j = i + 1; j < N; ++j)
 L1234:
@@ -3907,81 +3907,81 @@ L1234:
 	;                 }
 	
 	; OUTER LOOP: for (int i = 0; i < N; ++i)
-	movl	-164(%ebp), %eax  ; Load current i
-	movl	-168(%ebp), %edi  ; Load i * sizeof(Point) offset
-	cmpl	%ebx, %eax        ; Compare i with N
-	jge	L971              ; Jump if i >= N (exit outer loop)
+	movl		-164(%ebp), %eax  ; Load current i
+	movl		-168(%ebp), %edi  ; Load i * sizeof(Point) offset
+	cmpl		%ebx, %eax        ; Compare i with N
+	jge		L971              ; Jump if i >= N (exit outer loop)
 	
 	; INNER LOOP SETUP: for (int j = i + 1; j < N; ++j)
-	addl	$1, %eax          ; j = i + 1
-	movl	%eax, -156(%ebp)  ; Store j
-	cmpl	%ebx, %eax        ; Compare j with N
-	jge	L976              ; Jump if j >= N (exit inner loop)
+	addl		$1, %eax          ; j = i + 1
+	movl		%eax, -156(%ebp)  ; Store j
+	cmpl		%ebx, %eax        ; Compare j with N
+	jge		L976              ; Jump if j >= N (exit inner loop)
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        	  ; Align for performance
 L977:
 	; CALL: get_small_circle_intersections(airports_xyz[i], airports_xyz[j], R)
 	; This computes intersection points of two R-spheres centered at airports i and j
-	movl	-100(%ebp), %eax  ; Load base address of airports_xyz array
-	movl	-164(%ebp), %edx  ; Load i
-	movl	-156(%ebp), %ecx  ; Load j
+	movl		-100(%ebp), %eax  ; Load base address of airports_xyz array
+	movl		-164(%ebp), %edx  ; Load i
+	movl		-156(%ebp), %ecx  ; Load j
 	
 	; Calculate &airports_xyz[i] = base + i * sizeof(Point)
-	leal	(%eax,%edx,4), %esi ; ESI = base + i*4
-	leal	(%esi,%edx,8), %esi ; ESI = base + i*4 + i*8 = base + i*36
+	leal		(%eax,%edx,4), %esi ; ESI = base + i*4
+	leal		(%esi,%edx,8), %esi ; ESI = base + i*4 + i*8 = base + i*36
 	
 	; Calculate &airports_xyz[j] = base + j * sizeof(Point)  
-	leal	(%eax,%ecx,4), %edi ; EDI = base + j*4
-	leal	(%edi,%ecx,8), %edi ; EDI = base + j*4 + j*8 = base + j*36
+	leal		(%eax,%ecx,4), %edi ; EDI = base + j*4
+	leal		(%edi,%ecx,8), %edi ; EDI = base + j*4 + j*8 = base + j*36
 	
 	; Prepare function call arguments
-	fldt	-136(%ebp)        ; Load long double R (fuel range parameter)
-	fstpt	12(%esp)          ; Push long double R as arg3
-	movl	%edi, 8(%esp)     ; Push &airports_xyz[j] as arg2
-	movl	%esi, 4(%esp)     ; Push &airports_xyz[i] as arg1
-	leal	-56(%ebp), %eax   ; Load address for return vector<Point>
-	movl	%eax, (%esp)      ; Push return vector address as arg0
-	call	__Z30get_small_circle_intersectionsRK5PointS1_e
+	fldt		-136(%ebp)        ; Load long double R (fuel range parameter)
+	fstpt		12(%esp)          ; Push long double R as arg3
+	movl		%edi, 8(%esp)     ; Push &airports_xyz[j] as arg2
+	movl		%esi, 4(%esp)     ; Push &airports_xyz[i] as arg1
+	leal		-56(%ebp), %eax   ; Load address for return vector<Point>
+	movl		%eax, (%esp)      ; Push return vector address as arg0
+	call		__Z30get_small_circle_intersectionsRK5PointS1_e
 	
 	; PROCESS RETURNED INTERSECTIONS: Insert each intersection point into unique_vertices_set
-	movl	-56(%ebp), %esi   ; Load vector.begin() pointer
-	movl	-52(%ebp), %edi   ; Load vector.end() pointer
-	cmpl	%edi, %esi        ; Compare begin vs end
-	je	L973              ; If empty vector, skip insertion loop
+	movl		-56(%ebp), %esi   ; Load vector.begin() pointer
+	movl		-52(%ebp), %edi   ; Load vector.end() pointer
+	cmpl		%edi, %esi        ; Compare begin vs end
+	je		L973              ; If empty vector, skip insertion loop
 	
-	.p2align 4,,10        ; Align for performance
+	.p2align 	4,,10        	  ; Align for performance
 L974:
 	; INSERT INTO SET: unique_vertices_set.insert(*it)
 	; This uses std::set<Point>::insert() to add each intersection point
-	leal	-84(%ebp), %ecx   ; Load address of unique_vertices_set
-	movl	%esi, (%esp)      ; Push current Point* as argument
-	addl	$36, %esi         ; Advance to next Point (sizeof(Point) = 36)
-	call	__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE16_M_insert_uniqueIRKS0_EESt4pairISt17_Rb_tree_iteratorIS0_EbEOT_
-	addl	$4, %esp          ; Adjust stack (calling convention)
-	cmpl	%esi, %edi        ; Check if we've processed all intersections
-	jne	L974              ; Continue if more intersections to process
+	leal		-84(%ebp), %ecx   ; Load address of unique_vertices_set
+	movl		%esi, (%esp)      ; Push current Point* as argument
+	addl		$36, %esi         ; Advance to next Point (sizeof(Point) = 36)
+	call		__ZNSt8_Rb_treeI5PointS0_St9_IdentityIS0_ENS0_7CompareESaIS0_EE16_M_insert_uniqueIRKS0_EESt4pairISt17_Rb_tree_iteratorIS0_EbEOT_
+	addl		$4, %esp          ; Adjust stack (calling convention)
+	cmpl		%esi, %edi        ; Check if we've processed all intersections
+	jne		L974              ; Continue if more intersections to process
 	
-	movl	-56(%ebp), %esi   ; Reload vector begin pointer for cleanup
+	movl		-56(%ebp), %esi   ; Reload vector begin pointer for cleanup
 L973:
 	; CLEANUP: Delete temporary vector storage
-	testl	%esi, %esi        ; Check if vector data needs cleanup
-	je	L975              ; Skip if no cleanup needed
-	movl	%esi, (%esp)      ; Push vector data pointer
-	call	__ZdlPv           ; Call delete[] to free vector memory
+	testl		%esi, %esi        ; Check if vector data needs cleanup
+	je		L975              ; Skip if no cleanup needed
+	movl		%esi, (%esp)      ; Push vector data pointer
+	call		__ZdlPv           ; Call delete[] to free vector memory
 	
 L975:
 	; INNER LOOP INCREMENT: j++
-	addl	$1, -156(%ebp)    ; Increment j
-	movl	-152(%ebp), %ebx  ; Reload N
-	movl	-156(%ebp), %eax  ; Reload j
-	cmpl	%eax, %ebx        ; Compare N with j
-	jg	L977              ; Continue inner loop if j < N
+	addl		$1, -156(%ebp)    ; Increment j
+	movl		-152(%ebp), %ebx  ; Reload N
+	movl		-156(%ebp), %eax  ; Reload j
+	cmpl		%eax, %ebx        ; Compare N with j
+	jg		L977              ; Continue inner loop if j < N
 	
 L976:
 	; OUTER LOOP INCREMENT: i++
-	addl	$1, -164(%ebp)    ; Increment i
-	addl	$36, -168(%ebp)   ; Advance outer loop offset (i * sizeof(Point))
-	jmp	L1234             ; Jump back to outer loop start
+	addl		$1, -164(%ebp)    ; Increment i
+	addl		$36, -168(%ebp)   ; Advance outer loop offset (i * sizeof(Point))
+	jmp		L1234             ; Jump back to outer loop start
 	
 L971:
 	; ========================================================================
@@ -3990,116 +3990,116 @@ L971:
 	
 	; STEP 1: Convert set<Point> to vector<Point> for indexed access
 	; C++ EQUIVALENT: vector<Point> vertices(unique_vertices_set.begin(), unique_vertices_set.end());
-	leal	-84(%ebp), %esi   ; Load unique_vertices_set address
-	movl	-68(%ebp), %ebx   ; Load set.size()
-	testl	%ebx, %ebx        ; Check if set is empty
-	je	L1110             ; If empty set, skip graph building
+	leal		-84(%ebp), %esi   ; Load unique_vertices_set address
+	movl		-68(%ebp), %ebx   ; Load set.size()
+	testl		%ebx, %ebx        ; Check if set is empty
+	je		L1110             ; If empty set, skip graph building
 	
 	; ALLOCATE VERTEX ARRAY: Create array to store all vertices
-	cmpl	$119304647, %ebx  ; Check for overflow (max vertices)
-	ja	L983              ; Jump to error handler if too many vertices
-	leal	(%ebx,%ebx,8), %eax ; Calculate size = vertices * 9 
-	sall	$2, %eax          ; Multiply by 4 to get vertices * 36 bytes (sizeof(Point))
-	movl	%eax, (%esp)      ; Push size argument
-	call	__Znwj            ; Allocate memory: new Point[vertex_count]
-	movl	%eax, -180(%ebp)  ; Store vertex array pointer
-	movl	%ebx, -184(%ebp)  ; Store vertex count (V)
+	cmpl		$119304647, %ebx  ; Check for overflow (max vertices)
+	ja		L983              ; Jump to error handler if too many vertices
+	leal		(%ebx,%ebx,8), %eax ; Calculate size = vertices * 9 
+	sall		$2, %eax          ; Multiply by 4 to get vertices * 36 bytes (sizeof(Point))
+	movl		%eax, (%esp)      ; Push size argument
+	call		__Znwj            ; Allocate memory: new Point[vertex_count]
+	movl		%eax, -180(%ebp)  ; Store vertex array pointer
+	movl		%ebx, -184(%ebp)  ; Store vertex count (V)
 	
 	; COPY VERTICES: Copy each Point from set to array
-	movl	-76(%ebp), %edi   ; Load set.begin() iterator
-	movl	%eax, %esi        ; Copy vertex array pointer for iteration
-	xorl	%ecx, %ecx        ; Clear vertex index counter
+	movl		-76(%ebp), %edi   ; Load set.begin() iterator
+	movl		%eax, %esi        ; Copy vertex array pointer for iteration
+	xorl		%ecx, %ecx        ; Clear vertex index counter
 	
 L981:
 	; Copy Point data from set node to array
-	movl	16(%edi), %eax    ; Load Point.x from set node
-	movl	20(%edi), %edx    ; Load Point.y from set node
-	movl	%eax, (%esi)      ; Store Point.x in array
-	movl	%edx, 4(%esi)     ; Store Point.y in array
-	movl	24(%edi), %eax    ; Load Point.z from set node
-	movl	%eax, 8(%esi)     ; Store Point.z in array
+	movl		16(%edi), %eax    ; Load Point.x from set node
+	movl		20(%edi), %edx    ; Load Point.y from set node
+	movl		%eax, (%esi)      ; Store Point.x in array
+	movl		%edx, 4(%esi)     ; Store Point.y in array
+	movl		24(%edi), %eax    ; Load Point.z from set node
+	movl		%eax, 8(%esi)     ; Store Point.z in array
 	
 	; Copy remaining Point data (extended precision coordinates)
-	movl	28(%edi), %eax    ; Continue copying all Point members
-	movl	32(%edi), %edx    ; ...
-	movl	%eax, 12(%esi)    ; ...
-	movl	%edx, 16(%esi)    ; ...
-	movl	36(%edi), %eax    ; ...
-	movl	40(%edi), %edx    ; ...
-	movl	%eax, 20(%esi)    ; ...
-	movl	%edx, 24(%esi)    ; ...
-	movl	44(%edi), %eax    ; ...
-	movl	48(%edi), %edx    ; ...
-	movl	%eax, 28(%esi)    ; ...
-	movl	%edx, 32(%esi)    ; Store last Point member
+	movl		28(%edi), %eax    ; Continue copying all Point members
+	movl		32(%edi), %edx    ; ...
+	movl		%eax, 12(%esi)    ; ...
+	movl		%edx, 16(%esi)    ; ...
+	movl		36(%edi), %eax    ; ...
+	movl		40(%edi), %edx    ; ...
+	movl		%eax, 20(%esi)    ; ...
+	movl		%edx, 24(%esi)    ; ...
+	movl		44(%edi), %eax    ; ...
+	movl		48(%edi), %edx    ; ...
+	movl		%eax, 28(%esi)    ; ...
+	movl		%edx, 32(%esi)    ; Store last Point member
 	
 	; Advance to next vertex
-	addl	$36, %esi         ; Move to next Point in array
-	addl	$1, %ecx          ; Increment vertex counter
-	movl	%edi, (%esp)      ; Push current iterator
-	call	__ZSt18_Rb_tree_incrementPKSt18_Rb_tree_node_base ; Advance set iterator
-	movl	%eax, %edi        ; Update iterator
-	cmpl	%ecx, %ebx        ; Check if copied all vertices
-	jne	L981              ; Continue if more vertices to copy
+	addl		$36, %esi         ; Move to next Point in array
+	addl		$1, %ecx          ; Increment vertex counter
+	movl		%edi, (%esp)      ; Push current iterator
+	call		__ZSt18_Rb_tree_incrementPKSt18_Rb_tree_node_base ; Advance set iterator
+	movl		%eax, %edi        ; Update iterator
+	cmpl		%ecx, %ebx        ; Check if copied all vertices
+	jne		L981              ; Continue if more vertices to copy
 	
 	; STEP 2: Create vertex-to-index mapping
 	; C++ EQUIVALENT: map<Point, int, Point::Compare> vertex_map;
 	;                 for (int i = 0; i < vertices.size(); ++i) vertex_map[vertices[i]] = i;
-	leal	-120(%ebp), %esi  ; Load address for vertex_map
-	movl	$0, -120(%ebp)    ; Initialize vertex_map.root = nullptr
-	movl	$0, -116(%ebp)    ; Initialize vertex_map.header
-	movl	$0, -104(%ebp)    ; Initialize vertex_map.size = 0
-	movl	%esi, -112(%ebp)  ; Store vertex_map address
-	movl	%esi, -108(%ebp)  ; Store vertex_map address (backup)
+	leal		-120(%ebp), %esi  ; Load address for vertex_map
+	movl		$0, -120(%ebp)    ; Initialize vertex_map.root = nullptr
+	movl		$0, -116(%ebp)    ; Initialize vertex_map.header
+	movl		$0, -104(%ebp)    ; Initialize vertex_map.size = 0
+	movl		%esi, -112(%ebp)  ; Store vertex_map address
+	movl		%esi, -108(%ebp)  ; Store vertex_map address (backup)
 	
 	; Fill vertex map with index mappings
-	movl	-180(%ebp), %edi  ; Load vertex array
-	xorl	%ecx, %ecx        ; Clear index counter
+	movl		-180(%ebp), %edi  ; Load vertex array
+	xorl		%ecx, %ecx        ; Clear index counter
 	
 L982:
 	; Insert vertex -> index mapping
-	movl	%ecx, -188(%ebp)  ; Store current index
-	movl	%edi, (%esp)      ; Push vertex address as key
-	movl	%esi, %ecx        ; Load vertex_map address
-	call	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE16_M_insert_uniqueIRKS3_EESt4pairISt17_Rb_tree_iteratorIS3_EbEOT_
+	movl		%ecx, -188(%ebp)  ; Store current index
+	movl		%edi, (%esp)      ; Push vertex address as key
+	movl		%esi, %ecx        ; Load vertex_map address
+	call		__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE16_M_insert_uniqueIRKS3_EESt4pairISt17_Rb_tree_iteratorIS3_EbEOT_
 	; Set the mapped value to current index
-	movl	-188(%ebp), %edx  ; Reload current index
-	movl	%edx, 40(%eax)    ; Store index in map value
-	addl	$36, %edi         ; Move to next vertex
-	addl	$1, %ecx          ; Increment index
-	cmpl	%ecx, %ebx        ; Check if processed all vertices
-	jne	L982              ; Continue if more vertices
+	movl		-188(%ebp), %edx  ; Reload current index
+	movl		%edx, 40(%eax)    ; Store index in map value
+	addl		$36, %edi         ; Move to next vertex
+	addl		$1, %ecx          ; Increment index
+	cmpl		%ecx, %ebx        ; Check if processed all vertices
+	jne		L982              ; Continue if more vertices
 	
 	; STEP 3: Create airport-to-vertex index mapping
 	; C++ EQUIVALENT: vector<int> airport_to_vertex_idx(N);
 	;                 for (int i = 0; i < N; ++i) airport_to_vertex_idx[i] = vertex_map[airports_xyz[i]];
-	movl	-152(%ebp), %eax  ; Load N (airport count)
-	testl	%eax, %eax        ; Check if N > 0
-	je	L984              ; Skip if no airports
-	sall	$2, %eax          ; Calculate N * sizeof(int)
-	movl	%eax, (%esp)      ; Push size
-	call	__Znwj            ; Allocate array: new int[N]
-	movl	%eax, -192(%ebp)  ; Store airport_to_vertex_idx array
+	movl		-152(%ebp), %eax  ; Load N (airport count)
+	testl		%eax, %eax        ; Check if N > 0
+	je		L984              ; Skip if no airports
+	sall		$2, %eax          ; Calculate N * sizeof(int)
+	movl		%eax, (%esp)      ; Push size
+	call		__Znwj            ; Allocate array: new int[N]
+	movl		%eax, -192(%ebp)  ; Store airport_to_vertex_idx array
 	
 	; Fill airport-to-vertex mapping
-	movl	-100(%ebp), %edi  ; Load airports_xyz array
-	xorl	%ecx, %ecx        ; Clear airport index
+	movl		-100(%ebp), %edi  ; Load airports_xyz array
+	xorl		%ecx, %ecx        ; Clear airport index
 	
 L983_airport_loop:
 	; Find vertex index for current airport
-	movl	%edi, (%esp)      ; Push airport Point as key
-	leal	-120(%ebp), %edx  ; Load vertex_map address
-	movl	%edx, %ecx        ; Load vertex_map address
-	call	__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE4findERKS0_
+	movl		%edi, (%esp)      ; Push airport Point as key
+	leal		-120(%ebp), %edx  ; Load vertex_map address
+	movl		%edx, %ecx        ; Load vertex_map address
+	call		__ZNSt8_Rb_treeI5PointSt4pairIKS0_iESt10_Select1stIS3_ENS0_7CompareESaIS3_EE4findERKS0_
 	; Extract index from map result
-	movl	40(%eax), %edx    ; Load vertex index from map
-	movl	-192(%ebp), %esi  ; Load airport_to_vertex_idx array
-	movl	%ecx, %eax        ; Copy airport index
-	movl	%edx, (%esi,%eax,4) ; Store: airport_to_vertex_idx[i] = vertex_index
-	addl	$36, %edi         ; Move to next airport
-	addl	$1, %ecx          ; Increment airport index
-	cmpl	%ecx, -152(%ebp)  ; Check if processed all airports
-	jne	L983_airport_loop ; Continue if more airports
+	movl		40(%eax), %edx    ; Load vertex index from map
+	movl		-192(%ebp), %esi  ; Load airport_to_vertex_idx array
+	movl		%ecx, %eax        ; Copy airport index
+	movl		%edx, (%esi,%eax,4) ; Store: airport_to_vertex_idx[i] = vertex_index
+	addl		$36, %edi         ; Move to next airport
+	addl		$1, %ecx          ; Increment airport index
+	cmpl		%ecx, -152(%ebp)  ; Check if processed all airports
+	jne		L983_airport_loop ; Continue if more airports
 	
 L984:
 	; ========================================================================
@@ -4107,56 +4107,56 @@ L984:
 	; ========================================================================
 	; C++ EQUIVALENT: int V = vertices.size();
 	;                 vector<vector<long double>> adj_aux(V, vector<long double>(V, INF));
-	movl	-184(%ebp), %ebx  ; Load V (vertex count)
-	testl	%ebx, %ebx        ; Check if V > 0
-	je	L1110             ; Skip if no vertices
+	movl		-184(%ebp), %ebx  ; Load V (vertex count)
+	testl		%ebx, %ebx        ; Check if V > 0
+	je		L1110             ; Skip if no vertices
 	
 	; ALLOCATE ADJACENCY MATRIX: Create V x V matrix for distances
-	cmpl	$46340, %ebx      ; Check for overflow (sqrt of max int / 12)
-	ja	L983              ; Jump to error handler if too large
-	movl	%ebx, %eax        ; Copy V
-	imull	%ebx, %eax        ; Calculate V * V
-	leal	(%eax,%eax,2), %eax ; Calculate V * V * 3 (for long double)
-	sall	$2, %eax          ; Calculate V * V * 12 (sizeof(long double))
-	movl	%eax, (%esp)      ; Push size argument
-	call	__Znwj            ; Allocate memory: new long double[V*V]
-	movl	%eax, -196(%ebp)  ; Store adj_aux matrix pointer
+	cmpl		$46340, %ebx      ; Check for overflow (sqrt of max int / 12)
+	ja		L983              ; Jump to error handler if too large
+	movl		%ebx, %eax        ; Copy V
+	imull		%ebx, %eax        ; Calculate V * V
+	leal		(%eax,%eax,2), %eax ; Calculate V * V * 3 (for long double)
+	sall		$2, %eax          ; Calculate V * V * 12 (sizeof(long double))
+	movl		%eax, (%esp)      ; Push size argument
+	call		__Znwj            ; Allocate memory: new long double[V*V]
+	movl		%eax, -196(%ebp)  ; Store adj_aux matrix pointer
 	
 	; INITIALIZE MATRIX: Set all distances to INF and diagonal to 0
-	fldt	LC7               ; Load INF constant
-	movl	%ebx, %ecx        ; Copy V for loop counter
-	movl	%eax, %edi        ; Copy matrix pointer
+	fldt		LC7               ; Load INF constant
+	movl		%ebx, %ecx        ; Copy V for loop counter
+	movl		%eax, %edi        ; Copy matrix pointer
 	
 L985_init_matrix:
 	; Initialize row with INF
-	movl	%ebx, %edx        ; Inner loop counter
+	movl		%ebx, %edx        ; Inner loop counter
 L986_init_row:
-	fstpt	(%edi)            ; Store INF
-	fldt	(%edi)            ; Reload for next iteration
-	addl	$12, %edi         ; Move to next matrix element
-	subl	$1, %edx          ; Decrement inner counter
-	jne	L986_init_row     ; Continue inner loop
-	subl	$1, %ecx          ; Decrement outer counter
-	jne	L985_init_matrix  ; Continue outer loop
-	fstp	%st(0)            ; Pop INF from FPU stack
+	fstpt		(%edi)            ; Store INF
+	fldt		(%edi)            ; Reload for next iteration
+	addl		$12, %edi         ; Move to next matrix element
+	subl		$1, %edx          ; Decrement inner counter
+	jne		L986_init_row     ; Continue inner loop
+	subl		$1, %ecx          ; Decrement outer counter
+	jne		L985_init_matrix  ; Continue outer loop
+	fstp		%st(0)            ; Pop INF from FPU stack
 	
 	; Set diagonal elements to 0: adj_aux[i][i] = 0
-	movl	-196(%ebp), %edi  ; Load matrix pointer
-	xorl	%ecx, %ecx        ; Clear i counter
-	fldz                      ; Load 0.0
+	movl		-196(%ebp), %edi  ; Load matrix pointer
+	xorl		%ecx, %ecx        ; Clear i counter
+	fldz                      	  ; Load 0.0
 	
 L987_set_diagonal:
 	; Calculate offset for adj_aux[i][i] = base + (i * V + i) * 12
-	movl	%ecx, %eax        ; Copy i
-	imull	%ebx, %eax        ; Calculate i * V
-	addl	%ecx, %eax        ; Calculate i * V + i
-	leal	(%eax,%eax,2), %eax ; Calculate (i * V + i) * 3
-	fstpt	(%edi,%eax,4)     ; Store 0.0 at adj_aux[i][i]
-	fldt	(%edi,%eax,4)     ; Reload for next iteration
-	addl	$1, %ecx          ; Increment i
-	cmpl	%ecx, %ebx        ; Check if i < V
-	jne	L987_set_diagonal ; Continue diagonal loop
-	fstp	%st(0)            ; Pop 0.0 from FPU stack
+	movl		%ecx, %eax        ; Copy i
+	imull		%ebx, %eax        ; Calculate i * V
+	addl		%ecx, %eax        ; Calculate i * V + i
+	leal		(%eax,%eax,2), %eax ; Calculate (i * V + i) * 3
+	fstpt		(%edi,%eax,4)     ; Store 0.0 at adj_aux[i][i]
+	fldt		(%edi,%eax,4)     ; Reload for next iteration
+	addl		$1, %ecx          ; Increment i
+	cmpl		%ecx, %ebx        ; Check if i < V
+	jne		L987_set_diagonal ; Continue diagonal loop
+	fstp		%st(0)            ; Pop 0.0 from FPU stack
 	
 	; BUILD ADJACENCY MATRIX: Check arc safety between all vertex pairs
 	; C++ EQUIVALENT: for (int i = 0; i < V; ++i) {
@@ -4166,74 +4166,74 @@ L987_set_diagonal:
 	;                     if (safe) { adj_aux[i][j] = adj_aux[j][i] = d_ij; }
 	;                   }
 	;                 }
-	xorl	%ecx, %ecx        ; Clear i counter
+	xorl		%ecx, %ecx        ; Clear i counter
 	
 L988_outer_loop:
 	; OUTER LOOP: for (int i = 0; i < V; ++i)
-	movl	%ecx, %eax        ; Copy i
-	addl	$1, %eax          ; j = i + 1
-	cmpl	%eax, %ebx        ; Check if j < V
-	jle	L992_next_i       ; Skip if j >= V
+	movl		%ecx, %eax        ; Copy i
+	addl		$1, %eax          ; j = i + 1
+	cmpl		%eax, %ebx        ; Check if j < V
+	jle		L992_next_i       ; Skip if j >= V
 	
 L989_inner_loop:
 	; INNER LOOP: for (int j = i + 1; j < V; ++j)
 	; Calculate vertices[i] and vertices[j] addresses
-	movl	-180(%ebp), %esi  ; Load vertices array
-	leal	(%esi,%ecx,4), %edi ; Calculate base + i*4
-	leal	(%edi,%ecx,8), %edi ; Calculate vertices[i] = base + i*36
-	leal	(%esi,%eax,4), %edx ; Calculate base + j*4
-	leal	(%edx,%eax,8), %edx ; Calculate vertices[j] = base + j*36
+	movl		-180(%ebp), %esi  ; Load vertices array
+	leal		(%esi,%ecx,4), %edi ; Calculate base + i*4
+	leal		(%edi,%ecx,8), %edi ; Calculate vertices[i] = base + i*36
+	leal		(%esi,%eax,4), %edx ; Calculate base + j*4
+	leal		(%edx,%eax,8), %edx ; Calculate vertices[j] = base + j*36
 	
 	; Call dist_xyz(vertices[i], vertices[j])
-	movl	%edx, 4(%esp)     ; Push vertices[j]
-	movl	%edi, (%esp)      ; Push vertices[i]
-	call	__Z8dist_xyzRK5PointS1_ ; Call dist_xyz
-	fstpt	-200(%ebp)        ; Store distance d_ij
+	movl		%edx, 4(%esp)     ; Push vertices[j]
+	movl		%edi, (%esp)      ; Push vertices[i]
+	call		__Z8dist_xyzRK5PointS1_ ; Call dist_xyz
+	fstpt		-200(%ebp)        ; Store distance d_ij
 	
 	; Call is_arc_safe(vertices[i], vertices[j], airports_xyz, R)
-	fldt	-136(%ebp)        ; Load R
-	fstpt	12(%esp)          ; Push R
-	movl	-100(%ebp), %esi  ; Load airports_xyz
-	movl	%esi, 8(%esp)     ; Push airports_xyz
-	movl	%edx, 4(%esp)     ; Push vertices[j]
-	movl	%edi, (%esp)      ; Push vertices[i]
-	call	__Z11is_arc_safeRK5PointS1_St6vectorIS_SaIS_EEe ; Call is_arc_safe
-	addl	$16, %esp         ; Clean up stack
+	fldt		-136(%ebp)        ; Load R
+	fstpt		12(%esp)          ; Push R
+	movl		-100(%ebp), %esi  ; Load airports_xyz
+	movl		%esi, 8(%esp)     ; Push airports_xyz
+	movl		%edx, 4(%esp)     ; Push vertices[j]
+	movl		%edi, (%esp)      ; Push vertices[i]
+	call		__Z11is_arc_safeRK5PointS1_St6vectorIS_SaIS_EEe ; Call is_arc_safe
+	addl		$16, %esp         ; Clean up stack
 	
 	; Check if arc is safe
-	testb	%al, %al          ; Test return value
-	je	L991_next_j       ; Skip if not safe
+	testb		%al, %al          ; Test return value
+	je		L991_next_j       ; Skip if not safe
 	
 	; ARC IS SAFE: Set adj_aux[i][j] = adj_aux[j][i] = d_ij
-	movl	-196(%ebp), %edi  ; Load matrix pointer
+	movl		-196(%ebp), %edi  ; Load matrix pointer
 	
 	; Calculate offset for adj_aux[i][j] = (i * V + j) * 12
-	movl	%ecx, %esi        ; Copy i
-	imull	%ebx, %esi        ; Calculate i * V
-	addl	%eax, %esi        ; Calculate i * V + j
-	leal	(%esi,%esi,2), %esi ; Calculate (i * V + j) * 3
-	fldt	-200(%ebp)        ; Load d_ij
-	fstpt	(%edi,%esi,4)     ; Store d_ij at adj_aux[i][j]
+	movl		%ecx, %esi        ; Copy i
+	imull		%ebx, %esi        ; Calculate i * V
+	addl		%eax, %esi        ; Calculate i * V + j
+	leal		(%esi,%esi,2), %esi ; Calculate (i * V + j) * 3
+	fldt		-200(%ebp)        ; Load d_ij
+	fstpt		(%edi,%esi,4)     ; Store d_ij at adj_aux[i][j]
 	
 	; Calculate offset for adj_aux[j][i] = (j * V + i) * 12
-	movl	%eax, %esi        ; Copy j
-	imull	%ebx, %esi        ; Calculate j * V
-	addl	%ecx, %esi        ; Calculate j * V + i
-	leal	(%esi,%esi,2), %esi ; Calculate (j * V + i) * 3
-	fldt	-200(%ebp)        ; Load d_ij
-	fstpt	(%edi,%esi,4)     ; Store d_ij at adj_aux[j][i]
+	movl		%eax, %esi        ; Copy j
+	imull		%ebx, %esi        ; Calculate j * V
+	addl		%ecx, %esi        ; Calculate j * V + i
+	leal		(%esi,%esi,2), %esi ; Calculate (j * V + i) * 3
+	fldt		-200(%ebp)        ; Load d_ij
+	fstpt		(%edi,%esi,4)     ; Store d_ij at adj_aux[j][i]
 	
 L991_next_j:
 	; INNER LOOP INCREMENT: j++
-	addl	$1, %eax          ; Increment j
-	cmpl	%eax, %ebx        ; Check if j < V
-	jg	L989_inner_loop   ; Continue if j < V
+	addl		$1, %eax          ; Increment j
+	cmpl		%eax, %ebx        ; Check if j < V
+	jg		L989_inner_loop   ; Continue if j < V
 	
 L992_next_i:
 	; OUTER LOOP INCREMENT: i++
-	addl	$1, %ecx          ; Increment i
-	cmpl	%ecx, %ebx        ; Check if i < V
-	jne	L988_outer_loop   ; Continue if i < V
+	addl		$1, %ecx          ; Increment i
+	cmpl		%ecx, %ebx        ; Check if i < V
+	jne		L988_outer_loop   ; Continue if i < V
 	
 	; ========================================================================
 	; STEP 5: Floyd-Warshall on auxiliary graph
@@ -4247,193 +4247,193 @@ L992_next_i:
 	;                     }
 	;                   }
 	;                 }
-	xorl	%ecx, %ecx        ; Clear k counter
-	fldt	LC7               ; Load INF for comparisons
+	xorl		%ecx, %ecx        ; Clear k counter
+	fldt		LC7               ; Load INF for comparisons
 	
 L993_floyd_k:
 	; FLOYD-WARSHALL OUTER LOOP: for (k = 0; k < V; k++)
-	xorl	%esi, %esi        ; Clear i counter
+	xorl		%esi, %esi        ; Clear i counter
 	
 L994_floyd_i:
 	; FLOYD-WARSHALL MIDDLE LOOP: for (i = 0; i < V; i++)
-	xorl	%edi, %edi        ; Clear j counter
+	xorl		%edi, %edi        ; Clear j counter
 	
 L995_floyd_j:
 	; FLOYD-WARSHALL INNER LOOP: for (j = 0; j < V; j++)
-	movl	-196(%ebp), %edx  ; Load matrix pointer
+	movl		-196(%ebp), %edx  ; Load matrix pointer
 	
 	; Calculate &adj_aux[i][k]
-	movl	%esi, %eax        ; Copy i
-	imull	%ebx, %eax        ; Calculate i * V
-	addl	%ecx, %eax        ; Calculate i * V + k
-	leal	(%eax,%eax,2), %eax ; Calculate (i * V + k) * 3
-	fldt	(%edx,%eax,4)     ; Load adj_aux[i][k]
+	movl		%esi, %eax        ; Copy i
+	imull		%ebx, %eax        ; Calculate i * V
+	addl		%ecx, %eax        ; Calculate i * V + k
+	leal		(%eax,%eax,2), %eax ; Calculate (i * V + k) * 3
+	fldt		(%edx,%eax,4)     ; Load adj_aux[i][k]
 	
 	; Check if adj_aux[i][k] != INF
-	fucom	%st(1)            ; Compare with INF
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jae	L997_skip_update  ; Skip if adj_aux[i][k] >= INF
+	fucom		%st(1)            ; Compare with INF
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	jae		L997_skip_update  ; Skip if adj_aux[i][k] >= INF
 	
 	; Calculate &adj_aux[k][j]
-	movl	%ecx, %eax        ; Copy k
-	imull	%ebx, %eax        ; Calculate k * V
-	addl	%edi, %eax        ; Calculate k * V + j
-	leal	(%eax,%eax,2), %eax ; Calculate (k * V + j) * 3
-	fldt	(%edx,%eax,4)     ; Load adj_aux[k][j]
+	movl		%ecx, %eax        ; Copy k
+	imull		%ebx, %eax        ; Calculate k * V
+	addl		%edi, %eax        ; Calculate k * V + j
+	leal		(%eax,%eax,2), %eax ; Calculate (k * V + j) * 3
+	fldt		(%edx,%eax,4)     ; Load adj_aux[k][j]
 	
 	; Check if adj_aux[k][j] != INF
-	fucom	%st(2)            ; Compare with INF
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jae	L998_skip_update2 ; Skip if adj_aux[k][j] >= INF
+	fucom		%st(2)            ; Compare with INF
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	jae		L998_skip_update2 ; Skip if adj_aux[k][j] >= INF
 	
 	; Calculate adj_aux[i][k] + adj_aux[k][j]
-	faddp	%st, %st(1)       ; Add: adj_aux[i][k] + adj_aux[k][j]
+	faddp		%st, %st(1)       ; Add: adj_aux[i][k] + adj_aux[k][j]
 	
 	; Calculate &adj_aux[i][j]
-	movl	%esi, %eax        ; Copy i
-	imull	%ebx, %eax        ; Calculate i * V
-	addl	%edi, %eax        ; Calculate i * V + j
-	leal	(%eax,%eax,2), %eax ; Calculate (i * V + j) * 3
-	fldt	(%edx,%eax,4)     ; Load adj_aux[i][j]
+	movl		%esi, %eax        ; Copy i
+	imull		%ebx, %eax        ; Calculate i * V
+	addl		%edi, %eax        ; Calculate i * V + j
+	leal		(%eax,%eax,2), %eax ; Calculate (i * V + j) * 3
+	fldt		(%edx,%eax,4)     ; Load adj_aux[i][j]
 	
 	; Compare and update: adj_aux[i][j] = min(adj_aux[i][j], adj_aux[i][k] + adj_aux[k][j])
-	fucom	%st(1)            ; Compare old vs new distance
-	fnstsw	%ax               ; Store FPU status
-	sahf                      ; Transfer to CPU flags
-	jbe	L999_keep_old     ; Keep old if old <= new
+	fucom		%st(1)            ; Compare old vs new distance
+	fnstsw		%ax               ; Store FPU status
+	sahf                      	  ; Transfer to CPU flags
+	jbe		L999_keep_old     ; Keep old if old <= new
 	
 	; Update with new shorter distance
-	fstp	%st(0)            ; Pop old distance
-	fstpt	(%edx,%eax,4)     ; Store new distance
-	jmp	L996_next_j       ; Jump to next iteration
+	fstp		%st(0)            ; Pop old distance
+	fstpt		(%edx,%eax,4)     ; Store new distance
+	jmp		L996_next_j       ; Jump to next iteration
 	
 L999_keep_old:
-	fstp	%st(1)            ; Pop new distance, keep old
-	fstp	%st(0)            ; Pop old distance
-	jmp	L996_next_j       ; Jump to next iteration
+	fstp		%st(1)            ; Pop new distance, keep old
+	fstp		%st(0)            ; Pop old distance
+	jmp		L996_next_j       ; Jump to next iteration
 	
 L998_skip_update2:
-	fstp	%st(0)            ; Pop adj_aux[k][j]
+	fstp		%st(0)            ; Pop adj_aux[k][j]
 L997_skip_update:
-	fstp	%st(0)            ; Pop adj_aux[i][k]
+	fstp		%st(0)            ; Pop adj_aux[i][k]
 	
 L996_next_j:
 	; FLOYD-WARSHALL INNER LOOP INCREMENT: j++
-	addl	$1, %edi          ; Increment j
-	cmpl	%edi, %ebx        ; Check if j < V
-	jne	L995_floyd_j      ; Continue if j < V
+	addl		$1, %edi          ; Increment j
+	cmpl		%edi, %ebx        ; Check if j < V
+	jne		L995_floyd_j      ; Continue if j < V
 	
 	; FLOYD-WARSHALL MIDDLE LOOP INCREMENT: i++
-	addl	$1, %esi          ; Increment i
-	cmpl	%esi, %ebx        ; Check if i < V
-	jne	L994_floyd_i      ; Continue if i < V
+	addl		$1, %esi          ; Increment i
+	cmpl		%esi, %ebx        ; Check if i < V
+	jne		L994_floyd_i      ; Continue if i < V
 	
 	; FLOYD-WARSHALL OUTER LOOP INCREMENT: k++
-	addl	$1, %ecx          ; Increment k
-	cmpl	%ecx, %ebx        ; Check if k < V
-	jne	L993_floyd_k      ; Continue if k < V
+	addl		$1, %ecx          ; Increment k
+	cmpl		%ecx, %ebx        ; Check if k < V
+	jne		L993_floyd_k      ; Continue if k < V
 	
-	fstp	%st(0)            ; Pop INF from FPU stack
+	fstp		%st(0)            ; Pop INF from FPU stack
 	
 	; PROCEED TO QUERY PROCESSING
-	jmp	L1033             ; Jump to query processing section
+	jmp		L1033             ; Jump to query processing section
 	; INITIALIZE MATRIX TO INFINITY: Set all distances to infinity initially
-	movl	-176(%ebp), %edi  ; Load matrix pointer
-	movl	$0, (%edi,%eax,4) ; Initialize matrix[i][j] = INF (represented as 0 for now)
-	addl	$1, %eax          ; Increment counter
-	cmpl	%ebx, %eax        ; Check if all elements initialized
-	jne	L984              ; Continue if not done
+	movl		-176(%ebp), %edi  ; Load matrix pointer
+	movl		$0, (%edi,%eax,4) ; Initialize matrix[i][j] = INF (represented as 0 for now)
+	addl		$1, %eax          ; Increment counter
+	cmpl		%ebx, %eax        ; Check if all elements initialized
+	jne		L984              ; Continue if not done
 	
 L982:
 	; GRAPH EDGE CONSTRUCTION: Build edges between vertices within fuel range
 	; This implements nested loops to check all vertex pairs for connectivity
-	movl	-180(%ebp), %eax  ; Load vertex array pointer
-	movl	%esi, %ebx        ; Load vertex array end
-	xorl	%edi, %edi        ; Clear outer loop counter
-	subl	%eax, %ebx        ; Calculate array size
-	movl	%eax, %esi        ; Copy array pointer
-	sarl	$2, %ebx          ; Convert to element count
-	imull	$954437177, %ebx, %ebx ; Calculate actual vertex count
-	testl	%ebx, %ebx        ; Check if any vertices
-	je	L1235             ; Skip if no vertices
+	movl		-180(%ebp), %eax  ; Load vertex array pointer
+	movl		%esi, %ebx        ; Load vertex array end
+	xorl		%edi, %edi        ; Clear outer loop counter
+	subl		%eax, %ebx        ; Calculate array size
+	movl		%eax, %esi        ; Copy array pointer
+	sarl		$2, %ebx          ; Convert to element count
+	imull		$954437177, %ebx, %ebx ; Calculate actual vertex count
+	testl		%ebx, %ebx        ; Check if any vertices
+	je		L1235             ; Skip if no vertices
 	
 L1160:
 	; ADJACENCY MATRIX CONSTRUCTION: Check connectivity between vertex pairs
 	; For each pair of vertices, determine if they can be connected within fuel range
-	movl	-48(%ebp), %edx   ; Load current vertex data
-	testl	%edx, %edx        ; Check if vertex exists
-	je	L1113             ; Skip if null vertex
+	movl		-48(%ebp), %edx   ; Load current vertex data
+	testl		%edx, %edx        ; Check if vertex exists
+	je		L1113             ; Skip if null vertex
 	
 	; DISTANCE CALCULATION: Compute great circle distance between vertices
-	fldt	(%esi)            ; Load vertex coordinate
-	leal	-52(%ebp), %ecx   ; Load result address
-	fldt	LC5               ; Load constant (probably pi or conversion factor)
-	jmp	L992              ; Jump to distance calculation
+	fldt		(%esi)            ; Load vertex coordinate
+	leal		-52(%ebp), %ecx   ; Load result address
+	fldt		LC5               ; Load constant (probably pi or conversion factor)
+	jmp		L992              ; Jump to distance calculation
 	
 L1237:
 	; CONTINUE ADJACENCY MATRIX FILLING
-	movl	%edx, %ecx        ; Move vertex pointer
-	movl	8(%edx), %edx     ; Load next vertex
-	testl	%edx, %edx        ; Check if valid
-	je	L1247             ; Skip if null
+	movl		%edx, %ecx        ; Move vertex pointer
+	movl		8(%edx), %edx     ; Load next vertex
+	testl		%edx, %edx        ; Check if valid
+	je		L1247             ; Skip if null
 	
 L992:
 	; FLOATING POINT DISTANCE COMPARISON: Check if distance <= fuel_range
-	fldt	16(%edx)          ; Load vertex coordinate
-	fld	%st(0)            ; Duplicate on FPU stack
-	fsub	%st(3), %st       ; Subtract coordinates (distance calculation)
-	fabs                   ; Take absolute value
-	fucomp	%st(2)           ; Compare with fuel range
-	fnstsw	%ax             ; Store FPU status word
+	fldt		16(%edx)          ; Load vertex coordinate
+	fld		%st(0)            ; Duplicate on FPU stack
+	fsub		%st(3), %st       ; Subtract coordinates (distance calculation)
+	fabs                   		  ; Take absolute value
+	fucomp		%st(2)            ; Compare with fuel range
+	fnstsw		%ax               ; Store FPU status word
 
 L1146: ; Exit point
 	; Function epilogue
-	addl	$232, %esp        ; Deallocate local stack space
-	popl	%ecx              ; Restore registers
-	popl	%ebx
-	popl	%esi
-	popl	%edi
-	popl	%ebp
-	leal	-4(%ecx), %esp    ; Restore stack pointer
-	ret                       ; Return from main
+	addl		$232, %esp        ; Deallocate local stack space
+	popl		%ecx              ; Restore registers
+	popl		%ebx
+	popl		%esi
+	popl		%edi
+	popl		%ebp
+	leal		-4(%ecx), %esp    ; Restore stack pointer
+	ret                       	  ; Return from main
 
 ; Error handling and edge case implementations
 L961:
 	; HANDLE EMPTY AIRPORT LIST: When N = 0
 	; C++ EQUIVALENT: if (N == 0) continue;
-	movl	$0, -100(%ebp)    ; Set airports_xyz.begin() = nullptr
-	movl	$0, -96(%ebp)     ; Set airports_xyz.end() = nullptr
-	movl	$0, -92(%ebp)     ; Set airports_xyz.capacity_end() = nullptr
-	jmp	L965              ; Jump to vertex set initialization
+	movl		$0, -100(%ebp)    ; Set airports_xyz.begin() = nullptr
+	movl		$0, -96(%ebp)     ; Set airports_xyz.end() = nullptr
+	movl		$0, -92(%ebp)     ; Set airports_xyz.capacity_end() = nullptr
+	jmp		L965              ; Jump to vertex set initialization
 
 L970:
 	; HANDLE SET OPERATIONS: Initialize auxiliary vertex set
 	; C++ EQUIVALENT: set<Point> auxiliary_vertices;
-	leal	-84(%ebp), %edi   ; Load set object address
-	movl	$0, -84(%ebp)     ; Initialize set.root = nullptr
-	movl	$0, -80(%ebp)     ; Initialize set.size = 0
-	movl	$0, -76(%ebp)     ; Initialize set.begin() = nullptr
-	movl	$0, -72(%ebp)     ; Initialize set.end() = nullptr
-	movl	$0, -68(%ebp)     ; Initialize set.compare object
-	jmp	L971              ; Continue to intersection calculations
+	leal		-84(%ebp), %edi   ; Load set object address
+	movl		$0, -84(%ebp)     ; Initialize set.root = nullptr
+	movl		$0, -80(%ebp)     ; Initialize set.size = 0
+	movl		$0, -76(%ebp)     ; Initialize set.begin() = nullptr
+	movl		$0, -72(%ebp)     ; Initialize set.end() = nullptr
+	movl		$0, -68(%ebp)     ; Initialize set.compare object
+	jmp		L971              ; Continue to intersection calculations
 
 L983:
 	; HANDLE MEMORY ALLOCATION ERRORS: Throw std::bad_alloc
 	; C++ EQUIVALENT: throw std::bad_alloc();
-	call	__cxa_allocate_exception ; Allocate exception object
-	movl	$__ZTISt9bad_alloc, 4(%esp) ; Push bad_alloc type_info
-	movl	$__ZNSt9bad_allocC1Ev, 8(%esp) ; Push constructor
-	movl	$__ZNSt9bad_allocD1Ev, 12(%esp) ; Push destructor
-	call	__cxa_throw          ; Throw the exception
+	call		__cxa_allocate_exception ; Allocate exception object
+	movl		$__ZTISt9bad_alloc, 4(%esp) ; Push bad_alloc type_info
+	movl		$__ZNSt9bad_allocC1Ev, 8(%esp) ; Push constructor
+	movl		$__ZNSt9bad_allocD1Ev, 12(%esp) ; Push destructor
+	call		__cxa_throw          ; Throw the exception
 	
 L1233:
 	; HANDLE LOOP TERMINATION: When airport input loop completes
 	; C++ EQUIVALENT: End of for (int i = 0; i < N; ++i) loop
-	movl	-100(%ebp), %eax  ; Load airports_xyz.begin()
-	movl	-96(%ebp), %ebx   ; Load airports_xyz.end()
-	jmp	L965              ; Jump to vertex set creation
+	movl		-100(%ebp), %eax  ; Load airports_xyz.begin()
+	movl		-96(%ebp), %ebx   ; Load airports_xyz.end()
+	jmp		L965              ; Jump to vertex set creation
 
 ;===============================================================================
 ; SECTION 13: CONSTANT DATA DESCRIPTIONS
@@ -4455,54 +4455,54 @@ L1233:
 
 ; The constants section contains floating-point literals used throughout the program:
 
-	.align 4
-LC2:    ; 180.0 (for degree to radian conversion)
-	.long	1127481344
+	.align 		4
+LC2:    ; 180.0 	(for degree to radian conversion)
+	.long		1127481344
 	
-	.align 4
-LC3:    ; 6370.0 (Earth radius in kilometers)
-	.long	1170673664
+	.align 		4
+LC3:    ; 6370.0 	(Earth radius in kilometers)
+	.long		1170673664
 	
-	.align 16
-LC5:    ; 1e-9 (EPS constant for floating-point comparisons)
-	.long	917808535
-	.long	-1989124287
-	.long	16353
+	.align 		16
+LC5:    ; 1e-9 		(EPS constant for floating-point comparisons)
+	.long		917808535
+	.long		-1989124287
+	.long		16353
 
-	.align 4
-LC8:    ; 0.5 (half constant used in angle calculations)
-	.long	1056964608
+	.align 		4
+LC8:    ; 0.5 		(half constant used in angle calculations)
+	.long		1056964608
 	
-	.align 16
-LC9:    ; -1.0 (for clamping dot products to valid range)
-	.long	633437445
-	.long	-2147483646
-	.long	16383
+	.align 		16
+LC9:    ; -1.0 		(for clamping dot products to valid range)
+	.long		633437445
+	.long		-2147483646
+	.long		16383
 	
-	.align 16
-LC10:   ; 1.0 (for clamping dot products to valid range)
-	.long	633437445
-	.long	-2147483646
-	.long	49151
+	.align 		16
+LC10:   ; 1.0 		(for clamping dot products to valid range)
+	.long		633437445
+	.long		-2147483646
+	.long		49151
 	
-	.align 16
-LC12:   ; PI (3.14159265358979323846L)
-	.long	-1266874890
-	.long	-5
-	.long	16382
+	.align 		16
+LC12:   ; PI 		(3.14159265358979323846L)
+	.long		-1266874890
+	.long		-5
+	.long		16382
 	
-	.align 4
+	.align 		4
 LC13:   ; Infinity constant (for distance initialization)
-	.long	2139095040
+	.long		2139095040
 	
-	.align 16
+	.align 		16
 LC17:   ; Very small negative value (for numerical stability)
-	.long	-1
-	.long	-1
-	.long	32766
+	.long		-1
+	.long		-1
+	.long		32766
 
 ; Global iostream initialization object
-.lcomm __ZStL8__ioinit,1,1
+.lcomm 			__ZStL8__ioinit,1,1
 
 ;===============================================================================
 ; EXTERNAL FUNCTION REFERENCES
