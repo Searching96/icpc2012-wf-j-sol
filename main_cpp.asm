@@ -220,7 +220,7 @@ __Z14lat_lon_to_xyzee:
 	; Now FPU stack has: st(0) = lat_rad, st(1) = lon_rad
 	fxch		%st(1)            ; Exchange: st(0) = lon_rad, st(1) = lat_rad
 	fstpt		16(%esp)          ; Store lon_rad in local variable
-	fld		%st(0)            ; Duplicate lat_rad: st(0) = st(1) = lat_rad
+	fld			%st(0)            ; Duplicate lat_rad: st(0) = st(1) = lat_rad
 	fstpt		(%esp)            ; Store lat_rad for cosl function call
 	fstpt		80(%esp)          ; Store another copy of lat_rad
 	
