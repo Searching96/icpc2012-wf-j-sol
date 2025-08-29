@@ -28,7 +28,7 @@
 ; This is a standard library function for character conversion
 __ZNKSt5ctypeIcE8do_widenEc:
 	movzbl		4(%esp), %eax    ; Load character parameter and zero-extend to 32-bit
-	ret		$4               ; Return with stack cleanup (4 bytes)
+	ret			$4               ; Return with stack cleanup (4 bytes)
 
 	.text
 	.p2align 	4,,15
@@ -38,7 +38,7 @@ __ZNKSt5ctypeIcE8do_widenEc:
 ; This handles the destruction of the global iostream initialization object
 ___tcf_0:
 	movl		$__ZStL8__ioinit, %ecx    ; Load address of global ios_base::Init object
-	jmp		__ZNSt8ios_base4InitD1Ev   ; Jump to destructor
+	jmp			__ZNSt8ios_base4InitD1Ev   ; Jump to destructor
 
 ;===============================================================================
 ; SECTION 2: POINT STRUCTURE OPERATORS
@@ -74,7 +74,7 @@ __ZplRK5PointS1_:
 	fstpt		24(%eax)          ; Store result.z
 	ret
 
-	.p2align 4,,15
+	.p2align 	4,,15
 	.globl		__ZmiRK5PointS1_
 	.def		__ZmiRK5PointS1_;	.scl	2;	.type	32;	.endef
 
@@ -104,7 +104,7 @@ __ZmiRK5PointS1_:
 	fstpt		24(%eax)          ; Store result.z
 	ret
 
-	.p2align 4,,15
+	.p2align 	4,,15
 	.globl		__ZmlRK5Pointe
 	.def		__ZmlRK5Pointe;	.scl	2;	.type	32;	.endef
 
@@ -131,7 +131,7 @@ __ZmlRK5Pointe:
 	fstpt		24(%eax)          ; Store result.z
 	ret
 
-	.p2align 4,,15
+	.p2align 	4,,15
 	.globl		__ZmleRK5Point
 	.def		__ZmleRK5Point;	.scl	2;	.type	32;	.endef
 
@@ -158,7 +158,7 @@ __ZmleRK5Point:
 	fstpt		24(%eax)          ; Store result.z
 	ret
 
-	.p2align 4,,15
+	.p2align 	4,,15
 	.globl		__ZdvRK5Pointe
 	.def		__ZdvRK5Pointe;	.scl	2;	.type	32;	.endef
 
